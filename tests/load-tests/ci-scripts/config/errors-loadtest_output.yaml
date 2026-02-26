@@ -815,3 +815,10 @@
   regexp: 'FAIL\(80\): Repo forking failed: error getting project [^ ]+: GET https://gitlab\.cee\.redhat\.com/api/v4/projects/[^ ]+: 500 .*'
   test_dir:
   - run-stone-prod-p02-2026_02_21T11_50_36_990000000_00_00
+- caused_by: gitlab.com
+  id: pipeline_failed_to_get_remote_pipeline_definition_from_gitlab_com_because_403_error
+  note: ''
+  reason: Pipeline failed to get remote Pipeline definition from gitlab.com because 403 error
+  regexp: 'FAIL\(71\): Build Pipeline Run failed run: PipelineRun .* Reason:CouldntGetPipeline Message:.*resolver failed to get Pipeline : error requesting remote resource:.*git clone error:.*fatal: unable to access ''https://gitlab\.com/[^'']+/'': The requested URL returned error: 403'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_25T17_56_19_759000000_00_00
