@@ -822,3 +822,17 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun .* Reason:CouldntGetPipeline Message:.*resolver failed to get Pipeline : error requesting remote resource:.*git clone error:.*fatal: unable to access ''https://gitlab\.com/[^'']+/'': The requested URL returned error: 403'
   test_dir:
   - run-kfluxfedorap01-2026_02_25T17_56_19_759000000_00_00
+- caused_by: cluster
+  id: build_pipeline_run_failed_starting_because_cluster_context_deadline_exceeded
+  note: ''
+  reason: Build Pipeline Run failed starting because cluster context deadline exceeded
+  regexp: 'Build Pipeline Run failed starting: context deadline exceeded'
+  test_dir:
+  - run-stone-stg-rh01-2026_02_26T15_57_12_684000000_00_00
+- caused_by: github.com
+  id: repo_forking_failed_because_github_com_i_o_timeout
+  note: ''
+  reason: Repo forking failed because github.com i/o timeout
+  regexp: 'Repo forking failed: error checking repository .*: Get "https://api\.github\.com/.*": dial tcp .*: i/o timeout'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_26T13_56_19_561000000_00_00
