@@ -168,9 +168,12 @@
 {%- endmacro %}
 
 {% macro monitor_pod_container(namespace, pod, container, step=15, pod_suffix_regex='-[0-9a-f]+-.*') -%}
-# Gather monitoring data about the pod's container
+# Gather monitoring data about the pod's container (CPU + working set memory)
 - name: measurements.{{ pod }}.container[{{ container }}].memory
-  monitoring_query: sum(container_memory_usage_bytes{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container='{{container}}'})
+  monitoring_query: sum(container_memory_working_set_bytes{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container='{{ container }}'})
+  monitoring_step: {{ step }}
+- name: measurements.{{ pod }}.container[{{ container }}].cpu
+  monitoring_query: sum(irate(container_cpu_usage_seconds_total{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container='{{ container }}'}[5m]))
   monitoring_step: {{ step }}
 {%- endmacro %}
 

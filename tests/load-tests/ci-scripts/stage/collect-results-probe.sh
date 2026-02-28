@@ -42,6 +42,29 @@ mv "${ARTIFACT_DIR}/output.svg" "${ARTIFACT_DIR}/show-pipelines.svg" || true
 echo "[$(date --utc -Ins)] Computing duration of PRs, TRs and steps"
 ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIFACT_DIR}" --dump-json "${ARTIFACT_DIR}/get-taskruns-durations.json" &>"${ARTIFACT_DIR}/get-taskruns-durations.log"
 
+echo "[$(date --utc -Ins)] Parsing POD and step names from collected-data"
+ci-scripts/utility_scripts/get-pod-step-names.py \
+    --data-dir "${ARTIFACT_DIR}" \
+    --dump-json "${ARTIFACT_DIR}/pod-step-names.json" \
+    --dump-log "${ARTIFACT_DIR}/pod-step-names.log" || true
+echo "[$(date --utc -Ins)] POD/step names dumped to pod-step-names.json and pod-step-names.log"
+if [[ -s "${ARTIFACT_DIR}/pod-step-names.log" ]]; then
+    cat "${ARTIFACT_DIR}/pod-step-names.log"
+fi
+
+echo "[$(date --utc -Ins)] Backing up cluster_read_config.yaml to cluster_read_config.yaml_orig"
+cp -f ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_orig"
+
+echo "[$(date --utc -Ins)] Appending dynamic monitor_pod_container entries and saving as cluster_read_config.yaml_modified"
+if [[ -s "${ARTIFACT_DIR}/pod-step-names.json" ]]; then
+    python3 ci-scripts/utility_scripts/append-pod-step-monitoring.py \
+        --pod-step-json "${ARTIFACT_DIR}/pod-step-names.json" \
+        --yaml-file "${ARTIFACT_DIR}/cluster_read_config.yaml_orig" \
+        --output "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
+else
+    cp -f "${ARTIFACT_DIR}/cluster_read_config.yaml_orig" "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
+fi
+
 echo "[$(date --utc -Ins)] Creating main status data file"
 STATUS_DATA_FILE="${ARTIFACT_DIR}/load-test.json"
 status_data.py \
@@ -57,7 +80,7 @@ mrawdir="${ARTIFACT_DIR}/monitoring-raw-data-dir/"
 mkdir -p "$mrawdir"
 status_data.py \
     --status-data-file "${STATUS_DATA_FILE}" \
-    --additional ci-scripts/stage/cluster_read_config.yaml \
+    --additional "${ARTIFACT_DIR}/cluster_read_config.yaml_modified" \
     --monitoring-start "$mstarted" \
     --monitoring-end "$mended" \
     --prometheus-host "$mhost" \
