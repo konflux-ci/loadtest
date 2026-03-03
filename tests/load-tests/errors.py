@@ -16,9 +16,7 @@ import yaml
 
 # Constants for config file paths relative to this script
 CONFIG_DIR = Path("ci-scripts/config")
-ERRORS_CONFIG = CONFIG_DIR / "errors-loadtest_output.yaml"
-CONTAINER_LOGS_CONFIG = CONFIG_DIR / "errors-container_logs.yaml"
-TR_CONDITIONS_CONFIG = CONFIG_DIR / "errors-tr_conditions.yaml"
+ERRORS_CONFIG = CONFIG_DIR / "errors.yaml"
 
 
 class ErrorMatcher:
@@ -27,12 +25,12 @@ class ErrorMatcher:
     them against provided message strings.
     """
 
-    def __init__(self, config_path: Path):
+    def __init__(self, config_path: Path, rule_type: str | None = None):
         """Initializes the matcher with patterns from the given config file."""
         self.patterns: list[tuple[str, Pattern, str]] = []
-        self._load_config(config_path)
+        self._load_config(config_path, rule_type)
 
-    def _load_config(self, relative_path: Path) -> None:
+    def _load_config(self, relative_path: Path, rule_type: str | None) -> None:
         """Loads and compiles regex patterns from a YAML configuration file."""
         base_path = Path(__file__).resolve().parent
         full_path = base_path / relative_path
@@ -41,6 +39,8 @@ class ErrorMatcher:
             with open(full_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or []
                 for entry in data:
+                    if rule_type and entry.get("type") != rule_type:
+                        continue
                     reason = entry.get("reason", "UNKNOWN")
                     regexp = re.compile(entry["regexp"])
                     caused_by = entry.get("caused_by", "UNKNOWN")
@@ -76,8 +76,8 @@ class Analyzer:
     def __init__(self, dump_dir: Path):
         """Initializes the analyzer with a target data dump directory."""
         self.dump_dir = dump_dir
-        self.plr_matcher = ErrorMatcher(CONTAINER_LOGS_CONFIG)
-        self.tr_matcher = ErrorMatcher(TR_CONDITIONS_CONFIG)
+        self.plr_matcher = ErrorMatcher(ERRORS_CONFIG, "logs")
+        self.tr_matcher = ErrorMatcher(ERRORS_CONFIG, "condition")
 
     def load_json(self, path: Path) -> dict[str, Any]:
         """Loads a JSON file and returns its content as a dictionary."""
@@ -304,7 +304,7 @@ def process_csv_mode(
     Processes errors identified in a CSV input file, potentially triggering
     deeper investigations into the dump directory.
     """
-    matcher = ErrorMatcher(ERRORS_CONFIG)
+    matcher = ErrorMatcher(ERRORS_CONFIG, "loadtest")
     analyzer = Analyzer(dump_dir)
     stats = StatsProcessor()
 
