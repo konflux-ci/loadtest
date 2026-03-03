@@ -14,6 +14,11 @@ from typing import Any, Generator, Pattern
 import yaml
 
 
+try:
+    from yaml import CSafeLoader as Loader
+except ImportError:
+    from yaml import SafeLoader as Loader
+
 # Constants for config file paths relative to this script
 CONFIG_DIR = Path("ci-scripts/config")
 ERRORS_CONFIG = CONFIG_DIR / "errors.yaml"
@@ -72,7 +77,7 @@ class Analyzer:
 
         raw_config_data = []
         with open(full_path, "r", encoding="utf-8") as f:
-            raw_config_data = yaml.safe_load(f) or []
+            raw_config_data = yaml.load(f, Loader=Loader) or []
 
         self.plr_matcher = ErrorMatcher(raw_config_data, "logs")
         self.tr_matcher = ErrorMatcher(raw_config_data, "condition")
