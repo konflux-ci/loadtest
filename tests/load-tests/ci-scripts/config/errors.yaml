@@ -662,11 +662,19 @@
   test_dir: []
   type: loadtest
 - caused_by: registry.access.redhat.com
+  id: failed_reading_signatures_from_registry_access_redhat_com_due_to_500
+  note: ''
+  reason: Failed reading signatures from registry.access.redhat.com due to 500
+  regexp: 'internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: copying system image from manifest list: reading signatures: reading signature from https://access.redhat.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
+  test_dir: []
+  type: logs
+- caused_by: access.redhat.com
   id: failed_reading_signatures_from_access_redhat_com_due_to_500
   note: ''
   reason: Failed reading signatures from access.redhat.com due to 500
-  regexp: 'internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: copying system image from manifest list: reading signatures: reading signature from https://access.redhat.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
-  test_dir: []
+  regexp: 'ERROR:command execution failure.*level=fatal.*msg=.Source image rejected: reading signature from https://access.redhat.com/[^ ]+: status 500 .Internal Server Error.'
+  test_dir:
+  - run-stone-stage-p01-2026_02_27T17_48_18_860000000_00_00
   type: logs
 - caused_by: test
   id: failed_to_add_imagepullsecrets_to_build_sa
@@ -1238,7 +1246,7 @@
   type: loadtest
 - caused_by: task
   id: pipeline_failed
-  note: ''
+  note: This is special error that means we need to dive into task runs and pod logs to locate main issue
   reason: Pipeline failed
   regexp: 'Build Pipeline Run failed run:.*Message:Tasks Completed: [0-9]+ \(Failed: [1-9]+,'
   test_dir:
@@ -1393,6 +1401,13 @@
   regexp: '\"message\": \".* exited with code 2: Error\"'
   test_dir: []
   type: condition
+- caused_by: SKIP
+  id: missing_tekton_result_file_skip
+  note: This is special one, caused by other failed step
+  reason: SKIP
+  regexp: 'jq: error: Could not open file /tekton/results/[^ ]+: No such file or directory'
+  test_dir: []
+  type: logs
 - caused_by: cluster
   id: pod_stuck_in_incorrect_status
   note: ''
@@ -1756,9 +1771,10 @@
   id: repo_templating_cleanup_timeout_listing_deleting
   note: ''
   reason: Repo templating cleanup failed to list PipelineRuns due to context deadline exceeded
-  regexp: 'Repo-templating workflow component cleanup failed: error deleting on-push merged PipelineRun in namespace [^ ]+: unable to list PipelineRuns for component [^ ]+ in namespace [^ ]+: context deadline exceeded'
+  regexp: 'Repo-templating workflow component cleanup failed: error deleting on-pu[^ ]+ (merged|default) PipelineRun in namespace [^ ]+: unable to list PipelineRuns for component [^ ]+ in namespace [^ ]+: context deadline exceeded'
   test_dir:
   - run-kflux-rhel-p01-2026_01_29T11_09_54_632000000_00_00
+  - run-stone-stg-rh01-2026_03_03T09_09_20_769000000_00_00
   type: loadtest
 - caused_by: github.com
   id: repo_templating_failed_because_api_github_com_refused_the_connection
@@ -1993,7 +2009,7 @@
   id: skip
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
-  regexp: '"message": ?\"..step-collect-data.. exited with code 4(: Error)?\"'
+  regexp: '"message": ?\"..step-collect-data.. exited with code [0-9]+(: Error)?\"'
   test_dir: []
   type: condition
 - caused_by: SKIP
@@ -2227,7 +2243,7 @@
   test_dir:
   - run-stone-prod-p02-2026_02_14T19_01_17_266000000_00_00
   type: logs
-- caused_by: pipelines-controller
+- caused_by: cluster
   id: pipelinerun_timeout
   note: ''
   reason: PipelineRun timeout
@@ -2259,3 +2275,19 @@
   test_dir:
   - run-kfluxfedorap01-2026_03_02T20_56_16_954000000_00_00
   type: loadtest
+- caused_by: github.com
+  id: github_pr_merge_failed_502_server_error
+  note: ''
+  reason: 'GitHub PR Merge Failed: 502 Server Error'
+  regexp: 'Repo-templating workflow component cleanup failed: merging 1 failed: error when merging pull request number 1 for the repo .*: PUT https://api\.github\.com/repos/.*/pulls/[0-9]+/merge: 502 Server Error'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_26T18_56_21_062000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: step_failed_because_the_container_could_not_be_created
+  note: ''
+  reason: Step failed because the container could not be created
+  regexp: '"message": "the step ..[^ ]+.. in TaskRun ..[^ ]+.. failed to start. The pod errored with the message: ..context deadline exceeded...", "reason": "PodCreationFailed"'
+  test_dir:
+  - run-stone-stage-p01-2026_02_27T01_48_20_154000000_00_00
+  type: condition
