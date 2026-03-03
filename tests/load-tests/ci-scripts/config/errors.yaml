@@ -2235,3 +2235,27 @@
   test_dir:
   - run-kflux-rhel-p01-2026_03_02T04_03_31_856000000_00_00
   type: loadtest
+- caused_by: registry.access.redhat.com
+  id: red_hat_registry_signature_read_failure
+  note: ''
+  reason: Red Hat Registry Signature Read Failure
+  regexp: 'reading signature from https://access.redhat.com/webassets/docker/content/sigstore/.*: received unexpected HTTP status: 500 Internal Server Error.*mock-hermetic-repo.*CalledProcessError.*podman.*pull.*registry.access.redhat.com'
+  test_dir:
+  - run-kflux-rhel-p01-2026_02_28T14_39_18_167000000_00_00
+  type: logs
+- caused_by: github.com
+  id: github_pr_not_mergeable
+  note: ''
+  reason: GitHub PR not mergeable
+  regexp: 'PUT https://api.github.com/repos/.*/pulls/.*/merge: 405 Pull Request is not mergeable'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_28T17_56_18_451000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: github_pr_not_found
+  note: ''
+  reason: GitHub PR not found
+  regexp: 'GET https://api.github.com/repos/.*/pulls/.*: 404 Not Found'
+  test_dir:
+  - run-kfluxfedorap01-2026_03_02T20_56_16_954000000_00_00
+  type: loadtest
