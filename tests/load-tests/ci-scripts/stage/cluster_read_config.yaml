@@ -148,7 +148,7 @@
   monitoring_query: sum(pod:container_cpu_usage:sum{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}'})
   monitoring_step: {{ step }}
 - name: measurements.{{ pod }}.memory
-  monitoring_query: sum(container_memory_usage_bytes{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container!='POD', container!=''})
+  monitoring_query: sum(container_memory_working_set_bytes{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container!='POD', container!=''})
   monitoring_step: {{ step }}
 - name: measurements.{{ pod }}.network_throughput
   monitoring_query: sum( rate(container_network_transmit_bytes_total{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}'}[{{ step * 4 }}s]) + rate(container_network_receive_bytes_total{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}'}[{{ step * 4 }}s]) )

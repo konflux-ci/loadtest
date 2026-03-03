@@ -42,27 +42,31 @@ mv "${ARTIFACT_DIR}/output.svg" "${ARTIFACT_DIR}/show-pipelines.svg" || true
 echo "[$(date --utc -Ins)] Computing duration of PRs, TRs and steps"
 ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIFACT_DIR}" --dump-json "${ARTIFACT_DIR}/get-taskruns-durations.json" &>"${ARTIFACT_DIR}/get-taskruns-durations.log"
 
-echo "[$(date --utc -Ins)] Parsing POD and step names from collected-data"
-ci-scripts/utility_scripts/get-pod-step-names.py \
-    --data-dir "${ARTIFACT_DIR}" \
-    --dump-json "${ARTIFACT_DIR}/pod-step-names.json" \
-    --dump-log "${ARTIFACT_DIR}/pod-step-names.log" || true
-echo "[$(date --utc -Ins)] POD/step names dumped to pod-step-names.json and pod-step-names.log"
-if [[ -s "${ARTIFACT_DIR}/pod-step-names.log" ]]; then
-    cat "${ARTIFACT_DIR}/pod-step-names.log"
+echo "[$(date --utc -Ins)] Parsing POD and step names from collected-taskrun JSON"
+CD="${ARTIFACT_DIR}/collected-data"
+if [[ -d "$CD" ]]; then
+  find "$CD" -name 'collected-taskrun-*.json' -exec jq -r '
+    .metadata.namespace as $ns | .status.podName as $pod |
+    (.status.steps // [])[]? | [$ns, $pod, .name] | @tsv
+  ' {} \; 2>/dev/null | sort -u -t$'\t' | jq -R -s '
+    split("\n") | map(select(length>0) | split("\t")) |
+    group_by(.[0] + "\t" + .[1]) |
+    map({"namespace": .[0][0], "pod_id": .[0][1], "steps": map(.[2])}) |
+    sort_by(.namespace + .pod_id) |
+    {pods: .}
+  ' > "${ARTIFACT_DIR}/get-pod-step-names.json" 2>/dev/null || true
+fi
+if [[ ! -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]]; then
+  echo '{"pods":[]}' > "${ARTIFACT_DIR}/get-pod-step-names.json"
 fi
 
-echo "[$(date --utc -Ins)] Backing up cluster_read_config.yaml to cluster_read_config.yaml_orig"
-cp -f ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_orig"
-
 echo "[$(date --utc -Ins)] Appending dynamic monitor_pod_container entries and saving as cluster_read_config.yaml_modified"
-if [[ -s "${ARTIFACT_DIR}/pod-step-names.json" ]]; then
+if [[ -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]] && jq -e '.pods | length > 0' "${ARTIFACT_DIR}/get-pod-step-names.json" >/dev/null 2>&1; then
     python3 ci-scripts/utility_scripts/append-pod-step-monitoring.py \
-        --pod-step-json "${ARTIFACT_DIR}/pod-step-names.json" \
-        --yaml-file "${ARTIFACT_DIR}/cluster_read_config.yaml_orig" \
-        --output "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
+        --pod-step-json "${ARTIFACT_DIR}/get-pod-step-names.json" \
+        --output "${ARTIFACT_DIR}/cluster_read_config.yaml_modified" || true
 else
-    cp -f "${ARTIFACT_DIR}/cluster_read_config.yaml_orig" "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
+    cp -f ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
 fi
 
 echo "[$(date --utc -Ins)] Creating main status data file"

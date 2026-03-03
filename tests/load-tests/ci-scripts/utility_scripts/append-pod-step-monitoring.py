@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Append monitor_pod_container() Jinja lines to cluster_read_config.yaml
-from pod-step-names.json. One line per (namespace, pod_id, step).
+from get-pod-step-names.json. One line per (namespace, pod_id, step).
 """
 
 import argparse
@@ -11,45 +11,38 @@ import os
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pod-step-json", required=True, help="pod-step-names.json path")
-    ap.add_argument("--yaml-file", required=True, help="cluster_read_config.yaml to append to")
+    ap.add_argument("--pod-step-json", required=True, help="get-pod-step-names.json path")
     ap.add_argument("--step-default", type=int, default=15)
     ap.add_argument("--pod-suffix-regex", default="", help="e.g. '' or '-[0-9a-f]+-.*'")
-    ap.add_argument("--output", default=None, help="Write modified YAML here (default: overwrite --yaml-file)")
+    ap.add_argument("--output", required=True, help="Write modified YAML here")
     args = ap.parse_args()
 
     with open(args.pod_step_json) as f:
         data = json.load(f)
+
+    input_yaml = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "stage", "cluster_read_config.yaml")
+    )
 
     lines = []
     for entry in data.get("pods", []):
         ns = entry["namespace"]
         pod_id = entry["pod_id"]
         for step in entry["steps"]:
-            # Escape single quotes in names for Jinja
-            ns_s = ns.replace("'", "''")
-            pod_s = pod_id.replace("'", "''")
-            step_s = step.replace("'", "''")
-            suf = args.pod_suffix_regex.replace("'", "''")
             lines.append(
                 "{{ monitor_pod_container('%s', '%s', '%s', %s, '%s') }}"
-                % (ns_s, pod_s, step_s, args.step_default, suf)
+                % (ns, pod_id, step, args.step_default, args.pod_suffix_regex)
             )
 
-    with open(args.yaml_file) as f:
+    with open(input_yaml) as f:
         content = f.read()
 
     suffix = "\n# Dynamic POD/step monitoring (from parsed collected-data)\n"
     suffix += "\n".join(lines)
     suffix += "\n"
 
-    if content.endswith("\n"):
-        new_content = content + suffix.lstrip("\n")
-    else:
-        new_content = content + suffix
-
-    out_path = args.output or args.yaml_file
-    with open(out_path, "w") as f:
+    new_content = content + suffix
+    with open(args.output, "w") as f:
         f.write(new_content)
 
     return 0
