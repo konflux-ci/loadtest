@@ -2220,3 +2220,19 @@
   test_dir:
   - run-stone-prod-p02-2026_02_14T19_01_17_266000000_00_00
   type: logs
+- caused_by: github.com
+  id: release_pipeline_failed_collecting_data_from_github_because_of_intermittent_api_error
+  note: ''
+  reason: Release pipeline failed collecting data from github because of intermittent API error
+  regexp: 'curl -s https://api.github.com/repos/.*/commits/.* parse error: Invalid numeric literal at line 1, column 10'
+  test_dir:
+  - run-kflux-prd-rh02-2026_02_26T09_11_19_678000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: pipelinerun_timeout
+  note: ''
+  reason: PipelineRun timeout
+  regexp: Reason:PipelineRunTimeout Message:PipelineRun .* failed to finish within
+  test_dir:
+  - run-kflux-rhel-p01-2026_03_02T04_03_31_856000000_00_00
+  type: loadtest
