@@ -1752,18 +1752,11 @@
   - run-kflux-ocp-p01-2026_01_12T05_15_19_169000000_00_00
   - run-stone-prod-p02-2026_01_13T14_54_37_317000000_00_00
   type: loadtest
-- caused_by: cluster
-  id: repo_templating_cleanup_failed_to_list_pipelineruns_due_to_context_deadline_exceeded
-  note: ''
-  reason: Repo templating cleanup failed to list PipelineRuns due to context deadline exceeded
-  regexp: 'Repo-templating workflow component cleanup failed: .* unable to list PipelineRuns .* context deadline exceeded'
-  test_dir: []
-  type: loadtest
 - caused_by: pipelines-controller
   id: repo_templating_cleanup_timeout_listing_deleting
   note: ''
-  reason: Repo templating cleanup timeout (listing/deleting)
-  regexp: 'Repo-templating workflow component cleanup failed: error deleting on-push merged PipelineRun.*: unable to list PipelineRuns.*: context deadline exceeded'
+  reason: Repo templating cleanup failed to list PipelineRuns due to context deadline exceeded
+  regexp: 'Repo-templating workflow component cleanup failed: error deleting on-push merged PipelineRun in namespace [^ ]+: unable to list PipelineRuns for component [^ ]+ in namespace [^ ]+: context deadline exceeded'
   test_dir:
   - run-kflux-rhel-p01-2026_01_29T11_09_54_632000000_00_00
   type: loadtest
