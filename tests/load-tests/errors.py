@@ -25,30 +25,20 @@ class ErrorMatcher:
     them against provided message strings.
     """
 
-    def __init__(self, config_path: Path, rule_type: str | None = None):
+    def __init__(self, raw_config_data: dict[str, Any], rule_type: str | None = None):
         """Initializes the matcher with patterns from the given config file."""
         self.patterns: list[tuple[str, Pattern, str]] = []
-        self._load_config(config_path, rule_type)
+        self._load_config(raw_config_data, rule_type)
 
-    def _load_config(self, relative_path: Path, rule_type: str | None) -> None:
+    def _load_config(self, raw_config_data: dict[str, Any], rule_type: str | None) -> None:
         """Loads and compiles regex patterns from a YAML configuration file."""
-        base_path = Path(__file__).resolve().parent
-        full_path = base_path / relative_path
-
-        try:
-            with open(full_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or []
-                for entry in data:
-                    if rule_type and entry.get("type") != rule_type:
-                        continue
-                    reason = entry.get("reason", "UNKNOWN")
-                    regexp = re.compile(entry["regexp"])
-                    caused_by = entry.get("caused_by", "UNKNOWN")
-                    self.patterns.append((reason, regexp, caused_by))
-        except FileNotFoundError:
-            logging.warning(f"Config file not found: {full_path}")
-        except yaml.YAMLError as e:
-            logging.error(f"Error parsing YAML {full_path}: {e}")
+        for entry in raw_config_data:
+            if rule_type and entry.get("type") != rule_type:
+                continue
+            reason = entry.get("reason", "UNKNOWN")
+            regexp = re.compile(entry["regexp"])
+            caused_by = entry.get("caused_by", "UNKNOWN")
+            self.patterns.append((reason, regexp, caused_by))
 
     def match(self, message: str) -> tuple[str, str]:
         """
@@ -76,8 +66,17 @@ class Analyzer:
     def __init__(self, dump_dir: Path):
         """Initializes the analyzer with a target data dump directory."""
         self.dump_dir = dump_dir
-        self.plr_matcher = ErrorMatcher(ERRORS_CONFIG, "logs")
-        self.tr_matcher = ErrorMatcher(ERRORS_CONFIG, "condition")
+
+        base_path = Path(__file__).resolve().parent
+        full_path = base_path / ERRORS_CONFIG
+
+        raw_config_data = []
+        with open(full_path, "r", encoding="utf-8") as f:
+            raw_config_data = yaml.safe_load(f) or []
+
+        self.plr_matcher = ErrorMatcher(raw_config_data, "logs")
+        self.tr_matcher = ErrorMatcher(raw_config_data, "condition")
+        self.loadtest_matcher = ErrorMatcher(raw_config_data, "loadtest")
 
     def load_json(self, path: Path) -> dict[str, Any]:
         """Loads a JSON file and returns its content as a dictionary."""
@@ -304,7 +303,6 @@ def process_csv_mode(
     Processes errors identified in a CSV input file, potentially triggering
     deeper investigations into the dump directory.
     """
-    matcher = ErrorMatcher(ERRORS_CONFIG, "loadtest")
     analyzer = Analyzer(dump_dir)
     stats = StatsProcessor()
 
@@ -318,7 +316,7 @@ def process_csv_mode(
                 code = int(row[1]) if len(row) > 1 else 0
                 message = row[2] if len(row) > 2 else ""
 
-                reason, caused_by = matcher.match(message)
+                reason, caused_by = analyzer.loadtest_matcher.match(message)
                 current_causes = [caused_by]
 
                 if reason == "Pipeline failed":
@@ -358,48 +356,7 @@ def process_csv_mode(
     stats.dump(output_file)
 
 
-def process_dir_mode(dump_dir: Path):
-    """
-    Processes all failed PipelineRuns found in a dump directory to build
-    an error summary.
-    """
-    output_file = dump_dir / "errors-output.json"
-    analyzer = Analyzer(dump_dir)
-    stats = StatsProcessor()
 
-    reasons = []
-
-    for plr in analyzer.find_all_failed_plrs():
-        ns = plr.get("metadata", {}).get("namespace")
-        if not ns:
-            continue
-
-        for tr_name in analyzer.get_task_runs(plr):
-            is_valid, tr_msg, tr_file = analyzer.check_task_run(ns, tr_name)
-
-            if is_valid:
-                try:
-                    for pod, container in analyzer.get_failed_containers(
-                        ns, tr_name
-                    ):
-                        log = analyzer.read_container_log(ns, pod, container)
-                        reason, caused_by = analyzer.plr_matcher.match(log)
-                        if reason != "SKIP":
-                            reasons.append((reason, caused_by))
-                except FileNotFoundError as e:
-                    print(f"Failed to locate required files: {e}")
-
-            print(f"Checking errors in condition message of {tr_file}")
-            reason, caused_by = analyzer.tr_matcher.match(tr_msg)
-            if reason != "SKIP":
-                reasons.append((reason, caused_by))
-
-    reasons.sort()
-
-    for r, caused_by in reasons:
-        stats.add(r, r, caused_by)
-
-    stats.dump(output_file)
 
 
 def main():
@@ -410,8 +367,6 @@ def main():
         process_csv_mode(
             Path(args[0]), Path(args[1]), Path(args[2]), Path(args[3])
         )
-    elif len(args) == 1:
-        process_dir_mode(Path(args[0]))
     else:
         sys.exit(1)
 
