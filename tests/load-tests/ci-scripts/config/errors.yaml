@@ -1405,7 +1405,7 @@
   id: missing_tekton_result_file_skip
   note: This is special one, caused by other failed step
   reason: SKIP
-  regexp: 'jq: error: Could not open file /tekton/results/[^ ]+: No such file or directory'
+  regexp: 'jq: error: Could not open file /tekton/[^ ]+: No such file or directory'
   test_dir: []
   type: logs
 - caused_by: cluster
@@ -1849,7 +1849,7 @@
   id: repo_templating_workflow_component_cleanup_failed_because_github_pr_merge_405_base_branch_was_modified
   note: ''
   reason: Repo-templating workflow component cleanup failed because GitHub PR merge 405 Base branch was modified
-  regexp: 'FAIL\(68\): Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^ ]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 405 Base branch was modified\.'
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^ ]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 405 Base branch was modified\.'
   test_dir:
   - run-stone-prd-rh01-2026_02_19T23_58_56_361000000_00_00
   type: loadtest
@@ -1857,9 +1857,17 @@
   id: repo_templating_workflow_component_cleanup_failed_because_gitlab_returned_500_error_on_post_receive_hook_during_pac_update
   note: ''
   reason: Repo-templating workflow component cleanup failed because GitLab returned 500 error on post_receive hook during PaC update
-  regexp: 'FAIL\(68\): Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [^ ]+: failed to update/create file: PUT https://gitlab\.cee\.redhat\.com/api/v4/projects/[^ ]+/repository/files/[^ ]+: 400 .message: .* Internal API error \(500\)\.'
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [^ ]+: failed to update/create file: PUT https://gitlab\.cee\.redhat\.com/api/v4/projects/[^ ]+/repository/files/[^ ]+: 400 .message: .* Internal API error \(500\)\.'
   test_dir:
   - run-stone-prod-p01-2026_02_21T13_42_18_772000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_workflow_component_cleanup_failed_because_github_returned_502_error_when_templating_file
+  note: ''
+  reason: Repo-templating workflow component cleanup failed because GitLab returned 502 error when templating file
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api.github.com/[^ ]+: 502 Server Error'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_03T18_45_24_066000000_00_00
   type: loadtest
 - caused_by: quay.io
   id: rpm_build_artifact_upload_to_quay_failed_with_unexpected_success_message
@@ -1936,6 +1944,14 @@
   test_dir: []
   type: logs
 - caused_by: task
+  id: rpm_verifier_image_pull_quay_manifest_mismatch
+  note: ''
+  reason: Tool rpm_verifier image pull failed because manifest from Quay does not match provided digest
+  regexp: 'rpm_verifier --image-url quay.io/.* level=fatal msg=.Error retrieving manifest for image: Manifest does not match provided manifest digest'
+  test_dir:
+  - run-stone-prod-p01-2026_02_27T18_17_22_156000000_00_00
+  type: logs
+- caused_by: task
   id: script_opm_failed_because_catalog_is_missing
   note: ''
   reason: Script opm failed because catalog is missing
@@ -1992,42 +2008,42 @@
   test_dir: []
   type: logs
 - caused_by: SKIP
-  id: skip
+  id: skip_0
   note: This is a special 'wildcard' error, let's keep it on top and do not change 'SKIP' reason as it is used in the code
   reason: SKIP
   regexp: Skipping step because a previous step failed
   test_dir: []
   type: logs
 - caused_by: SKIP
-  id: skip
+  id: skip_1
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
   regexp: '"message": ?\"..[a-zA-Z0-9-]+.. exited with code 1(: Error)?\"'
   test_dir: []
   type: condition
 - caused_by: SKIP
-  id: skip
+  id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
   regexp: '"message": ?\"..step-collect-data.. exited with code [0-9]+(: Error)?\"'
   test_dir: []
   type: condition
 - caused_by: SKIP
-  id: skip_0
+  id: skip_3
   note: Empty log file, skip it
   reason: SKIP
   regexp: ^ *$
   test_dir: []
   type: logs
 - caused_by: SKIP
-  id: skip_0
+  id: skip_4
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
   regexp: '\"message\": \"All Steps have completed executing\"'
   test_dir: []
   type: condition
 - caused_by: SKIP
-  id: skip_1
+  id: skip_5
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
   regexp: '\"message\": \".* exited with code 255.*\"'
@@ -2278,10 +2294,11 @@
 - caused_by: github.com
   id: github_pr_merge_failed_502_server_error
   note: ''
-  reason: 'GitHub PR Merge Failed: 502 Server Error'
-  regexp: 'Repo-templating workflow component cleanup failed: merging 1 failed: error when merging pull request number 1 for the repo .*: PUT https://api\.github\.com/repos/.*/pulls/[0-9]+/merge: 502 Server Error'
+  reason: Repo-templating workflow failed to merge a pull request due to a GitHub API 502 server error.
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo .*: PUT https://api.github.com/repos/.*/pulls/[0-9]+/merge: 502 Server Error'
   test_dir:
   - run-kfluxfedorap01-2026_02_26T18_56_21_062000000_00_00
+  - run-stone-prd-rh01-2026_02_27T00_44_19_961000000_00_00
   type: loadtest
 - caused_by: pipelines-controller
   id: step_failed_because_the_container_could_not_be_created
@@ -2291,3 +2308,11 @@
   test_dir:
   - run-stone-stage-p01-2026_02_27T01_48_20_154000000_00_00
   type: condition
+- caused_by: github.com
+  id: repo_templating_workflow_failed_to_update_a_file_on_github_due_to_a_409_conflict_error
+  note: ''
+  reason: Repo-templating workflow failed to update a file on GitHub due to a 409 conflict error.
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file \.tekton/[^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api\.github\.com/repos/[^/]+/[^/]+/contents/\.tekton/[^ ]+: 409 is at [a-f0-9]+ but expected [a-f0-9]+'
+  test_dir:
+  - run-stone-prd-rh01-2026_02_27T04_44_19_051000000_00_00
+  type: loadtest
