@@ -177,6 +177,17 @@
   monitoring_step: {{ step }}
 {%- endmacro %}
 
+{# Per-task, per-step metrics: use task name (stable across runs) and step- prefix for Tekton step containers #}
+{% macro monitor_task_step(namespace, pod, task_name, step_name, step=15, pod_suffix_regex='-[0-9a-f]+-.*') -%}
+# Task step (container name in cluster is step-<step_name>)
+- name: measurements.tasks[{{ task_name }}].step[{{ step_name }}].memory
+  monitoring_query: sum(container_memory_working_set_bytes{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container='step-{{ step_name }}'})
+  monitoring_step: {{ step }}
+- name: measurements.tasks[{{ task_name }}].step[{{ step_name }}].cpu
+  monitoring_query: sum(irate(container_cpu_usage_seconds_total{namespace='{{ namespace }}', pod=~'{{ pod }}{{ pod_suffix_regex }}', container='step-{{ step_name }}'}[5m]))
+  monitoring_step: {{ step }}
+{%- endmacro %}
+
 {{ monitor_pod('openshift-pipelines', 'tekton-pipelines-controller', 15) }}
 {{ monitor_pod('tekton-results', 'tekton-results-watcher', 1, '-.*') }}
 {{ monitor_pod('openshift-etcd', 'etcd', 15, pod_suffix_regex='-ip-.+') }}

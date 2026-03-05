@@ -42,16 +42,16 @@ mv "${ARTIFACT_DIR}/output.svg" "${ARTIFACT_DIR}/show-pipelines.svg" || true
 echo "[$(date --utc -Ins)] Computing duration of PRs, TRs and steps"
 ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIFACT_DIR}" --dump-json "${ARTIFACT_DIR}/get-taskruns-durations.json" &>"${ARTIFACT_DIR}/get-taskruns-durations.log"
 
-echo "[$(date --utc -Ins)] Parsing POD and step names from collected-taskrun JSON"
+echo "[$(date --utc -Ins)] Parsing POD, task and step names from collected-taskrun JSON"
 CD="${ARTIFACT_DIR}/collected-data"
 if [[ -d "$CD" ]]; then
   find "$CD" -name 'collected-taskrun-*.json' -exec jq -r '
-    .metadata.namespace as $ns | .status.podName as $pod |
-    (.status.steps // [])[]? | [$ns, $pod, .name] | @tsv
+    .metadata.namespace as $ns | .status.podName as $pod | .metadata.name as $task |
+    (.status.steps // [])[]? | [$ns, $pod, $task, .name] | @tsv
   ' {} \; 2>/dev/null | sort -u -t$'\t' | jq -R -s '
     split("\n") | map(select(length>0) | split("\t")) |
     group_by(.[0] + "\t" + .[1]) |
-    map({"namespace": .[0][0], "pod_id": .[0][1], "steps": map(.[2])}) |
+    map({"namespace": .[0][0], "pod_id": .[0][1], "task_name": .[0][2], "steps": map(.[3])}) |
     sort_by(.namespace + .pod_id) |
     {pods: .}
   ' > "${ARTIFACT_DIR}/get-pod-step-names.json" 2>/dev/null || true
@@ -60,7 +60,7 @@ if [[ ! -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]]; then
   echo '{"pods":[]}' > "${ARTIFACT_DIR}/get-pod-step-names.json"
 fi
 
-echo "[$(date --utc -Ins)] Appending dynamic monitor_pod_container entries and saving as cluster_read_config.yaml_modified"
+echo "[$(date --utc -Ins)] Appending dynamic monitor_task_step entries and saving as cluster_read_config.yaml_modified"
 if [[ -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]] && jq -e '.pods | length > 0' "${ARTIFACT_DIR}/get-pod-step-names.json" >/dev/null 2>&1; then
     python3 ci-scripts/utility_scripts/append-pod-step-monitoring.py \
         --pod-step-json "${ARTIFACT_DIR}/get-pod-step-names.json" \

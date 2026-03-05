@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 """
-Append monitor_pod_container() Jinja lines to cluster_read_config.yaml
-from get-pod-step-names.json. One line per (namespace, pod_id, step).
+Append monitor_task_step() Jinja lines to cluster_read_config.yaml
+from get-pod-step-names.json. One line per (namespace, pod_id, task_name, step).
+Metrics are stored under task name (stable across runs); Prometheus query uses step-<step> for container.
 """
 
 import argparse
 import json
 import os
+import re
+
+
+def sanitize_task_name(name):
+    """Sanitize task name for use in metric path (replace / and . with -)."""
+    if not name:
+        return name
+    return re.sub(r"[/.]", "-", name)
 
 
 def main():
@@ -28,16 +37,17 @@ def main():
     for entry in data.get("pods", []):
         ns = entry["namespace"]
         pod_id = entry["pod_id"]
+        task_name = sanitize_task_name(entry.get("task_name", pod_id))
         for step in entry["steps"]:
             lines.append(
-                "{{ monitor_pod_container('%s', '%s', '%s', %s, '%s') }}"
-                % (ns, pod_id, step, args.step_default, args.pod_suffix_regex)
+                "{{ monitor_task_step('%s', '%s', '%s', '%s', %s, '%s') }}"
+                % (ns, pod_id, task_name, step, args.step_default, args.pod_suffix_regex)
             )
 
     with open(input_yaml) as f:
         content = f.read()
 
-    suffix = "\n# Dynamic POD/step monitoring (from parsed collected-data)\n"
+    suffix = "\n# Dynamic task/step monitoring (from parsed collected-data; stored under task name)\n"
     suffix += "\n".join(lines)
     suffix += "\n"
 
