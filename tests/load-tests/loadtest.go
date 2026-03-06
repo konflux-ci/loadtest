@@ -149,6 +149,16 @@ func main() {
 // Single user journey
 func perUserThread(perUserCtx *types.PerUserContext) {
 	defer perUserCtx.PerUserWG.Done()
+	defer func() {
+		_, err := logging.Measure(
+			perUserCtx,
+			journey.HandlePerUserCollection,
+			perUserCtx,
+		)
+		if err != nil {
+			logging.Logger.Error("Per user thread failed: %v", err)
+		}
+	}()
 
 	time.Sleep(perUserCtx.StartupPause)
 

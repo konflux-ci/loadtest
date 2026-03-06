@@ -1,6 +1,7 @@
 package journey
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,8 +14,8 @@ import (
 	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 
 	k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
 
 func getDirName(baseDir, namespace, iteration string) string {
 	return filepath.Join(baseDir, "collected-data", namespace, iteration) + "/"
@@ -210,7 +211,7 @@ func collectReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appN
 				return fmt.Errorf("failed to dump Release Plan JSON: %v", err)
 			}
 
-			err = writeToFile(dirPath, "collected-releaseplan-" + releasePlanName + ".json", releasePlanJSON)
+			err = writeToFile(dirPath, "collected-releaseplan-"+releasePlanName+".json", releasePlanJSON)
 			if err != nil {
 				return fmt.Errorf("failed to write Release Plan: %v", err)
 			}
@@ -232,7 +233,7 @@ func collectReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appN
 				return fmt.Errorf("failed to dump Release Plan Admission JSON: %v", err)
 			}
 
-			err = writeToFile(dirPath, "collected-releaseplanadmission-" + releasePlanAdmissionName + ".json", releasePlanAdmissionJSON)
+			err = writeToFile(dirPath, "collected-releaseplanadmission-"+releasePlanAdmissionName+".json", releasePlanAdmissionJSON)
 			if err != nil {
 				return fmt.Errorf("failed to write Release Plan Admission: %v", err)
 			}
@@ -254,7 +255,7 @@ func collectReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appN
 				return fmt.Errorf("failed to dump Snapshot JSON: %v", err)
 			}
 
-			err = writeToFile(dirPath, "collected-snapshot-" + snapName + ".json", snapJSON)
+			err = writeToFile(dirPath, "collected-snapshot-"+snapName+".json", snapJSON)
 			if err != nil {
 				return fmt.Errorf("failed to write Snapshot: %v", err)
 			}
@@ -276,7 +277,7 @@ func collectReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appN
 				return fmt.Errorf("failed to dump Release JSON: %v", err)
 			}
 
-			err = writeToFile(dirPath, "collected-release-" + relName + ".json", relJSON)
+			err = writeToFile(dirPath, "collected-release-"+relName+".json", relJSON)
 			if err != nil {
 				return fmt.Errorf("failed to write Release: %v", err)
 			}
@@ -347,6 +348,48 @@ func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 	err = collectReleaseRelatedJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.SnapshotName, ctx.ParentContext.ReleasePlanName, ctx.ParentContext.ReleasePlanAdmissionName, ctx.ReleaseName)
 	if err != nil {
 		return logging.Logger.Fail(104, "Failed to collect release related JSONs: %v", err)
+	}
+
+	return nil
+}
+
+func collectEvents(f *framework.Framework, dirPath, namespace string) error {
+	eventsList, err := f.AsKubeAdmin.CommonController.KubeInterface().CoreV1().Events(namespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list events in namespace %s: %v", namespace, err)
+	}
+
+	eventsJSON, err := json.Marshal(eventsList)
+	if err != nil {
+		return fmt.Errorf("failed to dump events JSON: %v", err)
+	}
+
+	err = writeToFile(dirPath, "collected-events.json", eventsJSON)
+	if err != nil {
+		return fmt.Errorf("failed to write events: %v", err)
+	}
+
+	return nil
+}
+
+func HandlePerUserCollection(ctx *types.PerUserContext) error {
+	if ctx.Namespace == "" {
+		logging.Logger.Debug("Namespace not populated, so skipping per-user collections")
+		return nil
+	}
+
+	var err error
+
+	journeyCounterStr := fmt.Sprintf("%d", ctx.JourneyRepeatsCounter)
+	dirPath := getDirName(ctx.Opts.OutputDir, ctx.Namespace, journeyCounterStr)
+	err = createDir(dirPath)
+	if err != nil {
+		return logging.Logger.Fail(108, "Failed to create dir: %v", err)
+	}
+
+	err = collectEvents(ctx.Framework, dirPath, ctx.Namespace)
+	if err != nil {
+		return logging.Logger.Fail(109, "Failed to collect events: %v", err)
 	}
 
 	return nil
