@@ -64,12 +64,28 @@
   test_dir: []
   type: logs
 - caused_by: test
+  id: build_container_failed_because_dockerfile_was_not_found
+  note: https://issues.redhat.com/browse/KONFLUX-12423
+  reason: Build container failed because Dockerfile was not found
+  regexp: Prepare Dockerfile Cannot find Dockerfile Dockerfile
+  test_dir:
+  - run-stone-prod-p02-2026_03_05T04_29_27_804000000_00_00
+  type: logs
+- caused_by: test
   id: build_failed_because_ssh_secret_provisioning_failed
   note: ''
   reason: Build failed because SSH secret provisioning failed
   regexp: provision task failed to create a secret
   test_dir:
   - run-kflux-rhel-p01-2026_01_25T07_59_56_310000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_failed_fetching_image_because_quay_io_returned_unexpected_end_of_json_input_during_authentication
+  note: ''
+  reason: Build failed fetching image because quay.io returned unexpected end of JSON input during authentication
+  regexp: 'decoding bearer token .*quay\.io.*: unexpected end of JSON input'
+  test_dir:
+  - run-kflux-prd-rh02-2026_03_05T19_22_08_456000000_00_00
   type: logs
 - caused_by: cluster
   id: build_failed_for_unspecified_reasons
@@ -661,13 +677,6 @@
   regexp: 'Integration test scenario failed creation: Unable to create the Integration Test Scenario .*: Internal error occurred: failed calling webhook .*dintegrationtestscenario.kb.io.*: failed to call webhook: Post .*https://integration-service-webhook-service.integration-service.svc:443/mutate-appstudio-redhat-com-v1beta2-integrationtestscenario.*: no endpoints available for service .*integration-service-webhook-service'
   test_dir: []
   type: loadtest
-- caused_by: registry.access.redhat.com
-  id: failed_reading_signatures_from_registry_access_redhat_com_due_to_500
-  note: ''
-  reason: Failed reading signatures from registry.access.redhat.com due to 500
-  regexp: 'internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: copying system image from manifest list: reading signatures: reading signature from https://access.redhat.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
-  test_dir: []
-  type: logs
 - caused_by: access.redhat.com
   id: failed_reading_signatures_from_access_redhat_com_due_to_500
   note: ''
@@ -675,6 +684,13 @@
   regexp: 'ERROR:command execution failure.*level=fatal.*msg=.Source image rejected: reading signature from https://access.redhat.com/[^ ]+: status 500 .Internal Server Error.'
   test_dir:
   - run-stone-stage-p01-2026_02_27T17_48_18_860000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: failed_reading_signatures_from_registry_access_redhat_com_due_to_500
+  note: ''
+  reason: Failed reading signatures from registry.access.redhat.com due to 500
+  regexp: 'internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: copying system image from manifest list: reading signatures: reading signature from https://access.redhat.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
+  test_dir: []
   type: logs
 - caused_by: test
   id: failed_to_add_imagepullsecrets_to_build_sa
@@ -905,6 +921,14 @@
   - run-stone-prd-rh01-2026_01_14T05_03_44_722000000_00_00
   type: logs
 - caused_by: MPC
+  id: failed_to_setup_mpc_vm_because_of_missing_home_directory_and_permission_denied
+  note: ''
+  reason: Failed to setup MPC VM because of missing home directory and permission denied
+  regexp: 'Could not chdir to home directory.*No such file or directory.*mkdir: cannot create directory.*Permission denied'
+  test_dir:
+  - run-stone-stage-p01-2026_03_06T06_48_19_973000000_00_00
+  type: logs
+- caused_by: MPC
   id: failed_to_setup_vm_because_connection_closed_by_remote_host
   note: ''
   reason: Failed to setup VM because connection closed by remote host
@@ -1029,6 +1053,31 @@
   regexp: 'Repo forking failed: error checking repository .* GET https://api.github.com/repos/.*: 503 No server is currently available'
   test_dir:
   - run-kflux-prd-rh03-2026_02_10T15_58_41_209000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: github_pr_merge_failed_502_server_error
+  note: ''
+  reason: Repo-templating workflow failed to merge a pull request due to a GitHub API 502 server error.
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo .*: PUT https://api.github.com/repos/.*/pulls/[0-9]+/merge: 502 Server Error'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_26T18_56_21_062000000_00_00
+  - run-stone-prd-rh01-2026_02_27T00_44_19_961000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: github_pr_not_found
+  note: ''
+  reason: GitHub PR not found
+  regexp: 'GET https://api.github.com/repos/.*/pulls/.*: 404 Not Found'
+  test_dir:
+  - run-kfluxfedorap01-2026_03_02T20_56_16_954000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: github_pr_not_mergeable
+  note: ''
+  reason: GitHub PR not mergeable
+  regexp: 'PUT https://api.github.com/repos/.*/pulls/.*/merge: 405 Pull Request is not mergeable'
+  test_dir:
+  - run-kfluxfedorap01-2026_02_28T17_56_18_451000000_00_00
   type: loadtest
 - caused_by: github.com
   id: github_repo_forking_failed_due_to_502_server_error
@@ -1175,6 +1224,13 @@
   regexp: Missing expected TaskRun file
   test_dir: []
   type: condition
+- caused_by: SKIP
+  id: missing_tekton_result_file_skip
+  note: This is special one, caused by other failed step
+  reason: SKIP
+  regexp: 'jq: error: Could not open file /tekton/[^ ]+: No such file or directory'
+  test_dir: []
+  type: logs
 - caused_by: task
   id: mobster_failed_because_invalid_digest_format
   note: ''
@@ -1285,6 +1341,14 @@
   - run-stone-prd-rh02-2026_01_05T18_33_24_765000000_00_00
   type: loadtest
 - caused_by: gitlab.com
+  id: pipeline_resolver_failed_to_clone_git_repository_because_gitlab_com_returned_503
+  note: ''
+  reason: Pipeline resolver failed to clone git repository because gitlab.com returned 503
+  regexp: 'resolver failed to get Pipeline.*error resolving repository: git clone error.*The requested URL returned error: 503'
+  test_dir:
+  - run-kfluxfedorap01-2026_03_06T03_56_18_968000000_00_00
+  type: loadtest
+- caused_by: gitlab.com
   id: pipeline_task_retrieval_failed_due_to_git_clone_disconnect
   note: Git clone failed due to unexpected disconnect during fetch-pack
   reason: Pipeline Task retrieval failed due to git clone disconnect
@@ -1323,6 +1387,14 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun .* failed: .* Reason:CouldntGetTask Message:Pipeline .* can''t be Run; it contains Tasks that don''t exist: Couldn''t retrieve Task .*: error requesting remote resource: error updating resource request .* with data: etcdserver: request timed out'
   test_dir:
   - run-stone-stg-rh01-2026_01_12T05_39_19_860000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: pipelinerun_timeout
+  note: ''
+  reason: PipelineRun timeout
+  regexp: Reason:PipelineRunTimeout Message:PipelineRun .* failed to finish within
+  test_dir:
+  - run-kflux-rhel-p01-2026_03_02T04_03_31_856000000_00_00
   type: loadtest
 - caused_by: dynatrace-operator
   id: pod_creation_failed_because_dynatrace_operator_sidecar_injection_failed
@@ -1377,6 +1449,14 @@
   regexp: '.message.: .failed to create task run pod [^ ]+: translating TaskSpec to Pod: serviceaccounts [^ ]+ not found. Maybe missing or invalid Task [^ ]+., .reason.: .PodCreationFailed.'
   test_dir: []
   type: condition
+- caused_by: cluster
+  id: pod_creation_failed_due_to_createcontainerconfigerror
+  note: ''
+  reason: Pod creation failed due to CreateContainerConfigError
+  regexp: 'message.: .Failed to create pod due to config error., .reason.: .CreateContainerConfigError.'
+  test_dir:
+  - run-kflux-prd-rh02-2026_03_04T10_11_22_364000000_00_00
+  type: condition
 - caused_by: pipelines-controller
   id: pod_creation_failed_due_to_manifest_digest_mismatch
   note: ''
@@ -1401,13 +1481,6 @@
   regexp: '\"message\": \".* exited with code 2: Error\"'
   test_dir: []
   type: condition
-- caused_by: SKIP
-  id: missing_tekton_result_file_skip
-  note: This is special one, caused by other failed step
-  reason: SKIP
-  regexp: 'jq: error: Could not open file /tekton/[^ ]+: No such file or directory'
-  test_dir: []
-  type: logs
 - caused_by: cluster
   id: pod_stuck_in_incorrect_status
   note: ''
@@ -1520,6 +1593,14 @@
   regexp: 'received unexpected HTTP status: 504 Gateway Timeout'
   test_dir:
   - run-stone-prod-p01-2026_02_06T16_17_19_265000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: red_hat_registry_signature_read_failure
+  note: ''
+  reason: Red Hat Registry Signature Read Failure
+  regexp: 'reading signature from https://access.redhat.com/webassets/docker/content/sigstore/.*: received unexpected HTTP status: 500 Internal Server Error.*mock-hermetic-repo.*CalledProcessError.*podman.*pull.*registry.access.redhat.com'
+  test_dir:
+  - run-kflux-rhel-p01-2026_02_28T14_39_18_167000000_00_00
   type: logs
 - caused_by: release-controller
   id: release_creation_failed_due_to_context_deadline_exceeded
@@ -1853,6 +1934,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_02_19T23_58_56_361000000_00_00
   type: loadtest
+- caused_by: github.com
+  id: repo_templating_workflow_component_cleanup_failed_because_github_returned_502_error_when_templating_file
+  note: ''
+  reason: Repo-templating workflow component cleanup failed because GitLab returned 502 error when templating file
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api.github.com/[^ ]+: 502 Server Error'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_03T18_45_24_066000000_00_00
+  type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: repo_templating_workflow_component_cleanup_failed_because_gitlab_returned_500_error_on_post_receive_hook_during_pac_update
   note: ''
@@ -1862,12 +1951,12 @@
   - run-stone-prod-p01-2026_02_21T13_42_18_772000000_00_00
   type: loadtest
 - caused_by: github.com
-  id: repo_templating_workflow_component_cleanup_failed_because_github_returned_502_error_when_templating_file
+  id: repo_templating_workflow_failed_to_update_a_file_on_github_due_to_a_409_conflict_error
   note: ''
-  reason: Repo-templating workflow component cleanup failed because GitLab returned 502 error when templating file
-  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api.github.com/[^ ]+: 502 Server Error'
+  reason: Repo-templating workflow failed to update a file on GitHub due to a 409 conflict error.
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file \.tekton/[^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api\.github\.com/repos/[^/]+/[^/]+/contents/\.tekton/[^ ]+: 409 is at [a-f0-9]+ but expected [a-f0-9]+'
   test_dir:
-  - run-kflux-prd-rh03-2026_03_03T18_45_24_066000000_00_00
+  - run-stone-prd-rh01-2026_02_27T04_44_19_051000000_00_00
   type: loadtest
 - caused_by: quay.io
   id: rpm_build_artifact_upload_to_quay_failed_with_unexpected_success_message
@@ -1909,6 +1998,14 @@
   - run-stone-stage-p01-2026_01_05T15_50_40_547000000_00_00
   type: logs
 - caused_by: task
+  id: rpm_verifier_image_pull_quay_manifest_mismatch
+  note: ''
+  reason: Tool rpm_verifier image pull failed because manifest from Quay does not match provided digest
+  regexp: 'rpm_verifier --image-url quay.io/.* level=fatal msg=.Error retrieving manifest for image: Manifest does not match provided manifest digest'
+  test_dir:
+  - run-stone-prod-p01-2026_02_27T18_17_22_156000000_00_00
+  type: logs
+- caused_by: task
   id: script_gather_rpms_py_failed_because_of_too_many_values_to_unpack
   note: ''
   reason: Script gather-rpms.py failed because of too many values to unpack
@@ -1942,14 +2039,6 @@
   reason: Script mock-hermetic-repo failed because pull from registry.access.redhat.com failed
   regexp: 'Error: internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: determining manifest MIME type for docker://registry.access.redhat.com/[^ ]+: Manifest does not match provided manifest digest [^ ]+.*/usr/bin/mock-hermetic-repo.*subprocess.CalledProcessError.*Command ...podman....pull.* returned non-zero exit status 125'
   test_dir: []
-  type: logs
-- caused_by: task
-  id: rpm_verifier_image_pull_quay_manifest_mismatch
-  note: ''
-  reason: Tool rpm_verifier image pull failed because manifest from Quay does not match provided digest
-  regexp: 'rpm_verifier --image-url quay.io/.* level=fatal msg=.Error retrieving manifest for image: Manifest does not match provided manifest digest'
-  test_dir:
-  - run-stone-prod-p01-2026_02_27T18_17_22_156000000_00_00
   type: logs
 - caused_by: task
   id: script_opm_failed_because_catalog_is_missing
@@ -2008,6 +2097,13 @@
   test_dir: []
   type: logs
 - caused_by: SKIP
+  id: skip
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect events: failed to list events in namespace [^:]+: events is forbidden: User .[^.]+.. cannot list resource .events. in API group .. in the namespace .[^.]+..'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
   id: skip_0
   note: This is a special 'wildcard' error, let's keep it on top and do not change 'SKIP' reason as it is used in the code
   reason: SKIP
@@ -2065,6 +2161,14 @@
   test_dir:
   - run-kflux-ocp-p01-2026_02_13T04_50_26_662000000_00_00
   type: logs
+- caused_by: pipelines-controller
+  id: step_failed_because_the_container_could_not_be_created
+  note: ''
+  reason: Step failed because the container could not be created
+  regexp: '"message": "the step ..[^ ]+.. in TaskRun ..[^ ]+.. failed to start. The pod errored with the message: ..context deadline exceeded...", "reason": "PodCreationFailed"'
+  test_dir:
+  - run-stone-stage-p01-2026_02_27T01_48_20_154000000_00_00
+  type: condition
 - caused_by: aws
   id: taskrun_failed_because_aws_ec2_insufficientinstancecapacity
   note: AWS capacity issue for specific instance types
@@ -2259,60 +2363,3 @@
   test_dir:
   - run-stone-prod-p02-2026_02_14T19_01_17_266000000_00_00
   type: logs
-- caused_by: cluster
-  id: pipelinerun_timeout
-  note: ''
-  reason: PipelineRun timeout
-  regexp: Reason:PipelineRunTimeout Message:PipelineRun .* failed to finish within
-  test_dir:
-  - run-kflux-rhel-p01-2026_03_02T04_03_31_856000000_00_00
-  type: loadtest
-- caused_by: registry.access.redhat.com
-  id: red_hat_registry_signature_read_failure
-  note: ''
-  reason: Red Hat Registry Signature Read Failure
-  regexp: 'reading signature from https://access.redhat.com/webassets/docker/content/sigstore/.*: received unexpected HTTP status: 500 Internal Server Error.*mock-hermetic-repo.*CalledProcessError.*podman.*pull.*registry.access.redhat.com'
-  test_dir:
-  - run-kflux-rhel-p01-2026_02_28T14_39_18_167000000_00_00
-  type: logs
-- caused_by: github.com
-  id: github_pr_not_mergeable
-  note: ''
-  reason: GitHub PR not mergeable
-  regexp: 'PUT https://api.github.com/repos/.*/pulls/.*/merge: 405 Pull Request is not mergeable'
-  test_dir:
-  - run-kfluxfedorap01-2026_02_28T17_56_18_451000000_00_00
-  type: loadtest
-- caused_by: github.com
-  id: github_pr_not_found
-  note: ''
-  reason: GitHub PR not found
-  regexp: 'GET https://api.github.com/repos/.*/pulls/.*: 404 Not Found'
-  test_dir:
-  - run-kfluxfedorap01-2026_03_02T20_56_16_954000000_00_00
-  type: loadtest
-- caused_by: github.com
-  id: github_pr_merge_failed_502_server_error
-  note: ''
-  reason: Repo-templating workflow failed to merge a pull request due to a GitHub API 502 server error.
-  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo .*: PUT https://api.github.com/repos/.*/pulls/[0-9]+/merge: 502 Server Error'
-  test_dir:
-  - run-kfluxfedorap01-2026_02_26T18_56_21_062000000_00_00
-  - run-stone-prd-rh01-2026_02_27T00_44_19_961000000_00_00
-  type: loadtest
-- caused_by: pipelines-controller
-  id: step_failed_because_the_container_could_not_be_created
-  note: ''
-  reason: Step failed because the container could not be created
-  regexp: '"message": "the step ..[^ ]+.. in TaskRun ..[^ ]+.. failed to start. The pod errored with the message: ..context deadline exceeded...", "reason": "PodCreationFailed"'
-  test_dir:
-  - run-stone-stage-p01-2026_02_27T01_48_20_154000000_00_00
-  type: condition
-- caused_by: github.com
-  id: repo_templating_workflow_failed_to_update_a_file_on_github_due_to_a_409_conflict_error
-  note: ''
-  reason: Repo-templating workflow failed to update a file on GitHub due to a 409 conflict error.
-  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file \.tekton/[^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api\.github\.com/repos/[^/]+/[^/]+/contents/\.tekton/[^ ]+: 409 is at [a-f0-9]+ but expected [a-f0-9]+'
-  test_dir:
-  - run-stone-prd-rh01-2026_02_27T04_44_19_051000000_00_00
-  type: loadtest
