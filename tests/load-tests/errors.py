@@ -320,6 +320,10 @@ def process_csv_mode(
                 message = row[2] if len(row) > 2 else ""
 
                 reason, caused_by = analyzer.loadtest_matcher.match(message)
+
+                if reason == "SKIP":
+                    continue
+
                 current_causes = [caused_by]
 
                 if reason == "Pipeline failed":
