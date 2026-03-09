@@ -8,14 +8,6 @@ Metrics are stored under task name (stable across runs); Prometheus query uses s
 import argparse
 import json
 import os
-import re
-
-
-def sanitize_task_name(name):
-    """Sanitize task name for use in metric path (replace / and . with -)."""
-    if not name:
-        return name
-    return re.sub(r"[/.]", "-", name)
 
 
 def main():
@@ -37,7 +29,7 @@ def main():
     for entry in data.get("pods", []):
         ns = entry["namespace"]
         pod_id = entry["pod_id"]
-        task_name = sanitize_task_name(entry.get("task_name", pod_id))
+        task_name = entry.get("task_name", pod_id)
         for step in entry["steps"]:
             lines.append(
                 "{{ monitor_task_step('%s', '%s', '%s', '%s', %s, '%s') }}"

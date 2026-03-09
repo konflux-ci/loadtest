@@ -177,7 +177,7 @@
   monitoring_step: {{ step }}
 {%- endmacro %}
 
-{# Per-task, per-step metrics: use task name (stable across runs) and step- prefix for Tekton step containers #}
+{# Per task, per step metrics: use task name (stable across runs) and step- prefix for Tekton step containers #}
 {% macro monitor_task_step(namespace, pod, task_name, step_name, step=15, pod_suffix_regex='-[0-9a-f]+-.*') -%}
 # Task step (container name in cluster is step-<step_name>)
 - name: measurements.tasks[{{ task_name }}].step[{{ step_name }}].memory
