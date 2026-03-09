@@ -20,8 +20,7 @@ except ImportError:
     from yaml import SafeLoader as Loader
 
 # Constants for config file paths relative to this script
-CONFIG_DIR = Path("ci-scripts/config")
-ERRORS_CONFIG = CONFIG_DIR / "errors.yaml"
+ERRORS_CONFIG = Path("ci-scripts/config/errors.yaml")
 
 
 class ErrorMatcher:
@@ -72,8 +71,7 @@ class Analyzer:
         """Initializes the analyzer with a target data dump directory."""
         self.dump_dir = dump_dir
 
-        base_path = Path(__file__).resolve().parent
-        full_path = base_path / ERRORS_CONFIG
+        full_path = Path(ERRORS_CONFIG)
 
         raw_config_data = []
         with open(full_path, "r", encoding="utf-8") as f:
