@@ -11,7 +11,6 @@ import argparse
 import html
 import json
 import os
-import re
 import sys
 
 
@@ -30,46 +29,6 @@ def get_measurement_value(data):
     return str(data)
 
 
-def collect_from_flat(measurements):
-    """Collect task/step/metric from flat keys like 'measurements.tasks[task].step[step].memory'."""
-    out = {}
-    pattern = re.compile(
-        r"^(?:measurements\.)?tasks\[([^\]]+)\]\.step\[([^\]]+)\]\.(memory|cpu)$"
-    )
-    for key, val in (measurements or {}).items():
-        m = pattern.match(key)
-        if m:
-            task, step, kind = m.groups()
-            out.setdefault((task, step), {})[kind] = get_measurement_value(val)
-    return out
-
-
-def collect_from_tasks_bracket_keys(measurements):
-    """Collect from keys like 'tasks[taskname]' with value { 'step[stepname]': { memory: {...}, cpu: {...} } }."""
-    out = {}
-    pattern = re.compile(r"^tasks\[([^\]]+)\]$")
-    for key, step_dict in (measurements or {}).items():
-        if not isinstance(key, str):
-            continue
-        m = pattern.match(key)
-        if not m or not isinstance(step_dict, dict):
-            continue
-        task_name = m.group(1)
-        for step_key, metric_dict in step_dict.items():
-            if not isinstance(metric_dict, dict):
-                continue
-            step_name = (
-                step_key[5:-1]
-                if step_key.startswith("step[") and step_key.endswith("]")
-                else step_key
-            )
-            out[(task_name, step_name)] = {
-                "memory": get_measurement_value(metric_dict.get("memory")),
-                "cpu": get_measurement_value(metric_dict.get("cpu")),
-            }
-    return out
-
-
 def collect_from_nested(measurements):
     """Collect from nested structure: measurements.tasks[task][step_key].memory/.cpu."""
     out = {}
@@ -79,14 +38,9 @@ def collect_from_nested(measurements):
     for task_name, step_dict in tasks.items():
         if not isinstance(step_dict, dict):
             continue
-        for step_key, metric_dict in step_dict.items():
+        for step_name, metric_dict in step_dict.items():
             if not isinstance(metric_dict, dict):
                 continue
-            step_name = (
-                step_key[5:-1]
-                if step_key.startswith("step[") and step_key.endswith("]")
-                else step_key
-            )
             out[(task_name, step_name)] = {
                 "memory": get_measurement_value(metric_dict.get("memory")),
                 "cpu": get_measurement_value(metric_dict.get("cpu")),
@@ -131,8 +85,6 @@ def main():
     for m in (measurements_root, measurements_results):
         if not isinstance(m, dict):
             continue
-        collected.update(collect_from_flat(m))
-        collected.update(collect_from_tasks_bracket_keys(m))
         collected.update(collect_from_nested(m))
 
     expected = []
@@ -141,9 +93,11 @@ def main():
             with open(pod_step_path) as f:
                 pod_data = json.load(f)
             for entry in pod_data.get("pods", []):
-                task_name = entry.get("task_name") or entry.get("pod_id", "")
+                pod_id = entry.get("pod_id", "")
+                raw_task_name = entry.get("task_name") or pod_id
+                task_name = raw_task_name.replace(".", "_").replace("/", "_")
                 for step in entry.get("steps", []):
-                    expected.append((task_name, step))
+                    expected.append((task_name, step.replace(".", "_")))
         except Exception:
             pass
 
