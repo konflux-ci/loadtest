@@ -47,33 +47,25 @@ def collect_from_flat(measurements):
 def collect_from_tasks_bracket_keys(measurements):
     """Collect from keys like 'tasks[taskname]' with value { 'step[stepname]': { memory: {...}, cpu: {...} } }."""
     out = {}
-    task_prefix = "tasks["
-    task_suffix = "]"
+    pattern = re.compile(r"^tasks\[([^\]]+)\]$")
     for key, step_dict in (measurements or {}).items():
-        if (
-            not isinstance(key, str)
-            or not key.startswith(task_prefix)
-            or task_suffix not in key
-        ):
+        if not isinstance(key, str):
             continue
-        task_name = key[len(task_prefix) : key.index(task_suffix)]
-        if not isinstance(step_dict, dict):
+        m = pattern.match(key)
+        if not m or not isinstance(step_dict, dict):
             continue
+        task_name = m.group(1)
         for step_key, metric_dict in step_dict.items():
             if not isinstance(metric_dict, dict):
                 continue
-            step_name = step_key
-            if step_key.startswith("step[") and step_key.endswith("]"):
-                step_name = step_key[5:-1]
-            mem = metric_dict.get("memory")
-            cpu = metric_dict.get("cpu")
+            step_name = (
+                step_key[5:-1]
+                if step_key.startswith("step[") and step_key.endswith("]")
+                else step_key
+            )
             out[(task_name, step_name)] = {
-                "memory": get_measurement_value(mem)
-                if mem is not None
-                else "Prometheus didn't return data",
-                "cpu": get_measurement_value(cpu)
-                if cpu is not None
-                else "Prometheus didn't return data",
+                "memory": get_measurement_value(metric_dict.get("memory")),
+                "cpu": get_measurement_value(metric_dict.get("cpu")),
             }
     return out
 
@@ -90,18 +82,14 @@ def collect_from_nested(measurements):
         for step_key, metric_dict in step_dict.items():
             if not isinstance(metric_dict, dict):
                 continue
-            step_name = step_key
-            if step_key.startswith("step[") and step_key.endswith("]"):
-                step_name = step_key[5:-1]
-            mem = metric_dict.get("memory")
-            cpu = metric_dict.get("cpu")
+            step_name = (
+                step_key[5:-1]
+                if step_key.startswith("step[") and step_key.endswith("]")
+                else step_key
+            )
             out[(task_name, step_name)] = {
-                "memory": get_measurement_value(mem)
-                if mem is not None
-                else "Prometheus didn't return data",
-                "cpu": get_measurement_value(cpu)
-                if cpu is not None
-                else "Prometheus didn't return data",
+                "memory": get_measurement_value(metric_dict.get("memory")),
+                "cpu": get_measurement_value(metric_dict.get("cpu")),
             }
     return out
 
@@ -159,21 +147,30 @@ def main():
         except Exception:
             pass
 
-    if expected:
-        rows = []
-        seen = set()
-        for task, step in expected:
-            key = (task, step)
-            seen.add(key)
-            row = collected.get(key, {})
-            rows.append(
-                (
-                    task,
-                    step,
-                    row.get("memory", "Prometheus didn't return data"),
-                    row.get("cpu", "Prometheus didn't return data"),
-                )
+    # Prepare rows using the expected list if available, or just the collected data
+    keys_to_process = expected if expected else sorted(collected.keys())
+
+    seen = set()
+    rows = []
+    for key in keys_to_process:
+        if isinstance(key, tuple):
+            task, step = key
+        else:
+            task, step = key, ""
+
+        seen.add((task, step))
+        row = collected.get((task, step), {})
+        rows.append(
+            (
+                task,
+                step,
+                row.get("memory", "Prometheus didn't return data"),
+                row.get("cpu", "Prometheus didn't return data"),
             )
+        )
+
+    # Add any remaining collected keys not in expected
+    if expected:
         for key in sorted(collected):
             if key not in seen:
                 task, step = key
@@ -186,17 +183,6 @@ def main():
                         row.get("cpu", "Prometheus didn't return data"),
                     )
                 )
-    else:
-        rows = []
-        for (task, step), row in sorted(collected.items()):
-            rows.append(
-                (
-                    task,
-                    step,
-                    row.get("memory", "Prometheus didn't return data"),
-                    row.get("cpu", "Prometheus didn't return data"),
-                )
-            )
 
     if not rows:
         rows = [
