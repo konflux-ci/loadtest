@@ -45,15 +45,16 @@ ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIF
 echo "[$(date --utc -Ins)] Parsing POD, task and step names from collected-taskrun JSON"
 CD="${ARTIFACT_DIR}/collected-data"
 if [[ -d "$CD" ]]; then
-  find "$CD" -name 'collected-taskrun-*.json' -exec jq -r '
-    .metadata.namespace as $ns | .status.podName as $pod | (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + .metadata.labels."tekton.dev/task") as $task |
-    (.status.steps // [])[]? | [$ns, $pod, $task, .name] | @tsv
-  ' {} \; 2>/dev/null | sort -u -t$'\t' | jq -R -s '
-    split("\n") | map(select(length>0) | split("\t")) |
-    group_by(.[0] + "\t" + .[1]) |
-    map({"namespace": .[0][0], "pod_id": .[0][1], "task_name": .[0][2], "steps": map(.[3])}) |
-    sort_by(.namespace + .pod_id) |
-    {pods: .}
+  find "$CD" -name 'collected-taskrun-*.json' -exec jq -c '
+    select(.status.podName != null) |
+    {
+      namespace: .metadata.namespace,
+      pod_id: .status.podName,
+      task_name: (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + .metadata.labels."tekton.dev/task"),
+      steps: [.status.steps[]?.name]
+    } | select(.steps | length > 0)
+  ' {} + 2>/dev/null | jq -s '
+    unique_by(.namespace + .pod_id) | sort_by(.namespace, .pod_id) | {pods: .}
   ' > "${ARTIFACT_DIR}/get-pod-step-names.json" 2>/dev/null || true
 fi
 if [[ ! -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]]; then
