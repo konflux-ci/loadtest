@@ -79,13 +79,7 @@ def main():
         data = json.load(f)
 
     measurements_root = data.get("measurements") or {}
-    measurements_results = (data.get("results") or {}).get("measurements") or {}
-
-    collected = {}
-    for m in (measurements_root, measurements_results):
-        if not isinstance(m, dict):
-            continue
-        collected.update(collect_from_nested(m))
+    collected = collect_from_nested(measurements_root)
 
     expected = []
     if os.path.isfile(pod_step_path):
