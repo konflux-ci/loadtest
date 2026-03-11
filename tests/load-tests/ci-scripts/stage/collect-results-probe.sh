@@ -46,7 +46,7 @@ echo "[$(date --utc -Ins)] Parsing POD, task and step names from collected-taskr
 CD="${ARTIFACT_DIR}/collected-data"
 if [[ -d "$CD" ]]; then
   find "$CD" -name 'collected-taskrun-*.json' -exec jq -r '
-    .metadata.namespace as $ns | .status.podName as $pod | .metadata.name as $task |
+    .metadata.namespace as $ns | .status.podName as $pod | (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + .metadata.labels."tekton.dev/task") as $task |
     (.status.steps // [])[]? | [$ns, $pod, $task, .name] | @tsv
   ' {} \; 2>/dev/null | sort -u -t$'\t' | jq -R -s '
     split("\n") | map(select(length>0) | split("\t")) |
