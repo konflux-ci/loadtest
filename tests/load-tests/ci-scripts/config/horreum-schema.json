@@ -5117,6 +5117,70 @@
       "filtering": false,
       "metrics": true,
       "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": ".measurements.stable_task_steps.build_container.build.memory.mean",
+      "extractors": [
+        {
+          "name": ".measurements.stable_task_steps.build_container.build.memory.mean",
+          "jsonpath": "$.measurements.stable_task_steps[\"build-container\"][\"build\"].memory.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": ".measurements.stable_task_steps.build_container.build.cpu.mean",
+      "extractors": [
+        {
+          "name": ".measurements.stable_task_steps.build_container.build.cpu.mean",
+          "jsonpath": "$.measurements.stable_task_steps[\"build-container\"][\"build\"].cpu.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean",
+      "extractors": [
+        {
+          "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean",
+          "jsonpath": "$.measurements.stable_task_steps[\"collect-data\"][\"create-trusted-artifact\"].memory.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean",
+      "extractors": [
+        {
+          "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean",
+          "jsonpath": "$.measurements.stable_task_steps[\"collect-data\"][\"create-trusted-artifact\"].cpu.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
     }
   ],
   "transformers": []

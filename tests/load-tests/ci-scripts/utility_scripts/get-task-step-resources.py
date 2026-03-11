@@ -5,6 +5,7 @@ For each task/step: show the metric value if present, else "Prometheus didn't re
 Reads get-pod-step-names.json for the list of (task, step) pairs; falls back to
 scanning results.measurements if that file is missing.
 Outputs get-task-step-resources.json and get-task-step-resources.html under --artifact-dir.
+Also injects measurements.stable_task_steps for Horreum (stable keys per run).
 """
 
 import argparse
@@ -27,6 +28,58 @@ def get_measurement_value(data):
             return "Prometheus didn't return data"
         return str(data)
     return str(data)
+
+
+# Known task name suffixes -> stable key for Horreum (same key every run).
+STABLE_TASK_SUFFIXES = [
+    "build-container", "build-image-index", "build-source-image",
+    "collect-data", "verify-conforma", "prefetch-dependencies",
+    "apply-tags", "push-dockerfile", "clone-repository", "init",
+    "clair-scan", "clamav-scan", "rpms-signature-scan",
+    "sast-shell-check", "sast-snyk-check", "sast-unicode-check",
+    "show-sbom", "deprecated-base-image-check", "coverity-availability-check",
+]
+STABLE_TASK_SUFFIXES_SORTED = sorted(STABLE_TASK_SUFFIXES, key=len, reverse=True)
+
+
+def stable_task_type(task_name):
+    """Map run-specific task name to a stable key (e.g. build-container) for Horreum."""
+    if not task_name:
+        return None
+    for suffix in STABLE_TASK_SUFFIXES_SORTED:
+        if task_name.endswith("-" + suffix):
+            return suffix
+    return None
+
+
+def build_stable_task_steps_from_nested(measurements):
+    """
+    Build measurements.stable_task_steps from nested measurements.tasks (task -> step -> {memory, cpu}).
+    Returns dict: stable_type -> step_name -> { "memory": {...}, "cpu": {...} } (raw dicts for Horreum).
+    First occurrence per (stable_type, step) wins.
+    """
+    out = {}
+    tasks = measurements.get("tasks") if isinstance(measurements, dict) else None
+    if not isinstance(tasks, dict):
+        return out
+    for task_name, step_dict in tasks.items():
+        if not isinstance(step_dict, dict):
+            continue
+        stable = stable_task_type(task_name)
+        if stable is None:
+            continue
+        if stable not in out:
+            out[stable] = {}
+        for step_name, metric_dict in step_dict.items():
+            if not isinstance(metric_dict, dict):
+                continue
+            if step_name in out[stable]:
+                continue
+            out[stable][step_name] = {
+                "memory": metric_dict.get("memory"),
+                "cpu": metric_dict.get("cpu"),
+            }
+    return out
 
 
 def collect_from_nested(measurements):
@@ -79,6 +132,16 @@ def main():
         data = json.load(f)
 
     measurements_root = data.get("measurements") or {}
+
+    # Inject stable_task_steps so Horreum labels can use fixed paths (e.g. build-container, collect-data).
+    stable_task_steps = build_stable_task_steps_from_nested(measurements_root)
+    if stable_task_steps:
+        if "measurements" not in data:
+            data["measurements"] = {}
+        data["measurements"]["stable_task_steps"] = stable_task_steps
+        with open(load_test_path, "w") as f:
+            json.dump(data, f, indent=2)
+
     collected = collect_from_nested(measurements_root)
 
     expected = []
@@ -119,7 +182,7 @@ def main():
 
     # Add any remaining collected keys not in expected
     if expected:
-        for key in sorted(collected):
+        for key in sorted(collected.keys()):
             if key not in seen:
                 task, step = key
                 row = collected[key]

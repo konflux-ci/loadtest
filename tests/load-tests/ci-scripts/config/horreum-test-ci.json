@@ -248,6 +248,42 @@
           }
         }
       ]
+    },
+    {
+      "testId": 254,
+      "name": ".measurements.stable_task_steps.build_container.build.memory.mean",
+      "order": 20,
+      "labels": [
+        ".measurements.stable_task_steps.build_container.build.memory.mean"
+      ],
+      "changeDetection": []
+    },
+    {
+      "testId": 254,
+      "name": ".measurements.stable_task_steps.build_container.build.cpu.mean",
+      "order": 21,
+      "labels": [
+        ".measurements.stable_task_steps.build_container.build.cpu.mean"
+      ],
+      "changeDetection": []
+    },
+    {
+      "testId": 254,
+      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean",
+      "order": 22,
+      "labels": [
+        ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean"
+      ],
+      "changeDetection": []
+    },
+    {
+      "testId": 254,
+      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean",
+      "order": 23,
+      "labels": [
+        ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean"
+      ],
+      "changeDetection": []
     }
   ],
   "missingDataRules": [
