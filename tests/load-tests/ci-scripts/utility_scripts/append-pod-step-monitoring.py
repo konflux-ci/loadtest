@@ -12,7 +12,9 @@ import os
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pod-step-json", required=True, help="get-pod-step-names.json path")
+    ap.add_argument(
+        "--pod-step-json", required=True, help="get-pod-step-names.json path"
+    )
     ap.add_argument("--step-default", type=int, default=15)
     ap.add_argument("--pod-suffix-regex", default="", help="e.g. '' or '-[0-9a-f]+-.*'")
     ap.add_argument("--output", required=True, help="Write modified YAML here")
@@ -22,7 +24,9 @@ def main():
         data = json.load(f)
 
     input_yaml = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "stage", "cluster_read_config.yaml")
+        os.path.join(
+            os.path.dirname(__file__), "..", "stage", "cluster_read_config.yaml"
+        )
     )
 
     lines = []
@@ -33,7 +37,14 @@ def main():
         for step in entry["steps"]:
             lines.append(
                 "{{ monitor_task_step('%s', '%s', '%s', '%s', %s, '%s') }}"
-                % (ns, pod_id, task_name, step, args.step_default, args.pod_suffix_regex)
+                % (
+                    ns,
+                    pod_id,
+                    task_name,
+                    step,
+                    args.step_default,
+                    args.pod_suffix_regex,
+                )
             )
 
     with open(input_yaml) as f:

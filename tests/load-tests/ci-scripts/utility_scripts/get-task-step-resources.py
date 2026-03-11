@@ -50,7 +50,11 @@ def collect_from_tasks_bracket_keys(measurements):
     task_prefix = "tasks["
     task_suffix = "]"
     for key, step_dict in (measurements or {}).items():
-        if not isinstance(key, str) or not key.startswith(task_prefix) or task_suffix not in key:
+        if (
+            not isinstance(key, str)
+            or not key.startswith(task_prefix)
+            or task_suffix not in key
+        ):
             continue
         task_name = key[len(task_prefix) : key.index(task_suffix)]
         if not isinstance(step_dict, dict):
@@ -64,8 +68,12 @@ def collect_from_tasks_bracket_keys(measurements):
             mem = metric_dict.get("memory")
             cpu = metric_dict.get("cpu")
             out[(task_name, step_name)] = {
-                "memory": get_measurement_value(mem) if mem is not None else "Prometheus didn't return data",
-                "cpu": get_measurement_value(cpu) if cpu is not None else "Prometheus didn't return data",
+                "memory": get_measurement_value(mem)
+                if mem is not None
+                else "Prometheus didn't return data",
+                "cpu": get_measurement_value(cpu)
+                if cpu is not None
+                else "Prometheus didn't return data",
             }
     return out
 
@@ -88,17 +96,33 @@ def collect_from_nested(measurements):
             mem = metric_dict.get("memory")
             cpu = metric_dict.get("cpu")
             out[(task_name, step_name)] = {
-                "memory": get_measurement_value(mem) if mem is not None else "Prometheus didn't return data",
-                "cpu": get_measurement_value(cpu) if cpu is not None else "Prometheus didn't return data",
+                "memory": get_measurement_value(mem)
+                if mem is not None
+                else "Prometheus didn't return data",
+                "cpu": get_measurement_value(cpu)
+                if cpu is not None
+                else "Prometheus didn't return data",
             }
     return out
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Build task/step Memory and CPU from load-test.json; output JSON and HTML.")
-    ap.add_argument("--load-test-json", default="load-test.json", help="Path to load-test.json")
-    ap.add_argument("--pod-step-json", default="get-pod-step-names.json", help="Path to get-pod-step-names.json (optional)")
-    ap.add_argument("--artifact-dir", required=True, help="Directory to read inputs from and write get-task-step-resources.json/html to")
+    ap = argparse.ArgumentParser(
+        description="Build task/step Memory and CPU from load-test.json; output JSON and HTML."
+    )
+    ap.add_argument(
+        "--load-test-json", default="load-test.json", help="Path to load-test.json"
+    )
+    ap.add_argument(
+        "--pod-step-json",
+        default="get-pod-step-names.json",
+        help="Path to get-pod-step-names.json (optional)",
+    )
+    ap.add_argument(
+        "--artifact-dir",
+        required=True,
+        help="Directory to read inputs from and write get-task-step-resources.json/html to",
+    )
     args = ap.parse_args()
 
     base = args.artifact_dir
@@ -142,22 +166,53 @@ def main():
             key = (task, step)
             seen.add(key)
             row = collected.get(key, {})
-            rows.append((task, step, row.get("memory", "Prometheus didn't return data"), row.get("cpu", "Prometheus didn't return data")))
+            rows.append(
+                (
+                    task,
+                    step,
+                    row.get("memory", "Prometheus didn't return data"),
+                    row.get("cpu", "Prometheus didn't return data"),
+                )
+            )
         for key in sorted(collected):
             if key not in seen:
                 task, step = key
                 row = collected[key]
-                rows.append((task, step, row.get("memory", "Prometheus didn't return data"), row.get("cpu", "Prometheus didn't return data")))
+                rows.append(
+                    (
+                        task,
+                        step,
+                        row.get("memory", "Prometheus didn't return data"),
+                        row.get("cpu", "Prometheus didn't return data"),
+                    )
+                )
     else:
         rows = []
         for (task, step), row in sorted(collected.items()):
-            rows.append((task, step, row.get("memory", "Prometheus didn't return data"), row.get("cpu", "Prometheus didn't return data")))
+            rows.append(
+                (
+                    task,
+                    step,
+                    row.get("memory", "Prometheus didn't return data"),
+                    row.get("cpu", "Prometheus didn't return data"),
+                )
+            )
 
     if not rows:
-        rows = [("(no task/step metrics found)", "", "Prometheus didn't return data", "Prometheus didn't return data")]
+        rows = [
+            (
+                "(no task/step metrics found)",
+                "",
+                "Prometheus didn't return data",
+                "Prometheus didn't return data",
+            )
+        ]
 
     # Build list of dicts for JSON
-    table = [{"task": task, "step": step, "memory": mem, "cpu": cpu} for task, step, mem, cpu in rows]
+    table = [
+        {"task": task, "step": step, "memory": mem, "cpu": cpu}
+        for task, step, mem, cpu in rows
+    ]
 
     json_path = os.path.join(base, "get-task-step-resources.json")
     with open(json_path, "w") as f:
@@ -176,7 +231,7 @@ def main():
         rowspan = j - i
         # First row of this task: include Task cell with rowspan
         html_row_parts.append(
-            f"    <tr><td rowspan=\"{rowspan}\">{html.escape(task)}</td>"
+            f'    <tr><td rowspan="{rowspan}">{html.escape(task)}</td>'
             f"<td>{html.escape(step)}</td><td>{html.escape(mem)}</td><td>{html.escape(cpu)}</td></tr>\n"
         )
         # Remaining rows for this task: no Task cell
