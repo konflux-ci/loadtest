@@ -2363,3 +2363,91 @@
   test_dir:
   - run-stone-prod-p02-2026_02_14T19_01_17_266000000_00_00
   type: logs
+- caused_by: cluster
+  id: pod_rejected_because_cluster_node_had_condition_diskpressure
+  note: ''
+  reason: Pod rejected because cluster node had condition DiskPressure
+  regexp: '.message.: .Pod was rejected: The node had condition: .DiskPressure...'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_07T06_17_19_254000000_00_00
+  type: condition
+- caused_by: quay.io
+  id: rpms_signature_scan_failed_because_quay_io_returned_500_internal_server_error
+  note: ''
+  reason: rpms-signature-scan failed because quay.io returned 500 Internal Server Error
+  regexp: 'error: unable to access the source layer sha256:[0-9a-f]+: received unexpected HTTP status: 500 Internal Server Error'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_07T07_01_18_064000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_step_failed_because_quay_io_returned_504_gateway_time_out
+  note: ''
+  reason: build step failed because quay.io returned 504 Gateway Time-out
+  regexp: 'reading blob sha256:[0-9a-f]+: fetching blob: received unexpected HTTP status: 504 Gateway Time-out'
+  test_dir:
+  - run-kflux-ocp-p01-2026_03_08T16_50_20_369000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_step_failed_because_quay_io_returned_unexpected_end_of_json_input
+  note: ''
+  reason: build step failed because quay.io returned unexpected end of JSON input
+  regexp: 'Error: initializing source docker://quay.io/[^ ]+@sha256:[0-9a-f]+: unexpected end of JSON input'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_08T16_45_21_155000000_00_00
+  type: logs
+- caused_by: pipelines-controller
+  id: taskrun_resolution_failed_because_tekton_encountered_invalid_yaml_control_characters
+  note: ''
+  reason: TaskRun resolution failed because Tekton encountered invalid yaml control characters
+  regexp: '.message.: .invalid runtime object: yaml: control characters are not allowed.'
+  test_dir:
+  - run-stone-prod-p02-2026_03_08T13_40_19_459000000_00_00
+  type: condition
+- caused_by: gitlab.cee.redhat.com
+  id: repo_forking_failed_because_gitlab_com_fork_import_timeout
+  note: ''
+  reason: Repo forking failed because gitlab.cee.redhat.com fork import timeout
+  regexp: 'Repo forking failed: fork import for project [^ ]+ .ID: [0-9]+. did not complete within 20m0s .last import_status: .*none.*.: context deadline exceeded'
+  test_dir:
+  - run-stone-prod-p02-2026_03_08T23_56_45_629000000_00_00
+  type: loadtest
+- caused_by: images.paas.redhat.com
+  id: taskrunimagepullfailed_because_cluster_could_not_pull_rpmbuild_pipeline_environment_container
+  note: ''
+  reason: TaskRunImagePullFailed because cluster could not pull rpmbuild-pipeline-environment-container
+  regexp: '.message.: .the step .* in TaskRun .* failed to pull the image .* The pod errored with the message: .*Back-off pulling image .*images.paas.redhat.com/brew/rpmbuild-pipeline-environment-container:latest@sha256:[a-f0-9]+.*'
+  test_dir:
+  - run-kflux-rhel-p01-2026_03_09T17_59_19_774000000_00_00
+  type: condition
+- caused_by: MPC
+  id: build_step_failed_because_mpc_rsync_connection_broken_pipe
+  note: ''
+  reason: build step failed because MPC rsync connection broken pipe
+  regexp: 'Connection timed out.*Broken pipe.*rsync error: error in rsync protocol data stream.*rsync: \[generator\] write error: Broken pipe \(32\)'
+  test_dir:
+  - run-kflux-ocp-p01-2026_03_10T08_50_20_964000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: pipeline_failed_because_quay_returned_401_unauthorized_invalid_bearer_token_format
+  note: ''
+  reason: Pipeline failed because Quay returned 401 Unauthorized (Invalid bearer token format)
+  regexp: 'unexpected status code 401 Unauthorized: \{"error": "Invalid bearer token format"\}'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_10T20_01_19_563000000_00_00
+  type: logs
+- caused_by: MPC
+  id: multi_platform_build_failed_because_mpc_failed_to_parse_static_host_config_due_to_invalid_concurrency
+  note: ''
+  reason: Multi-platform build failed because MPC failed to parse static host config due to invalid concurrency
+  regexp: 'failed to read host config: failed to parse static host ''.*'': static host ''.*'': invalid concurrency ''0'': invalid value ''0'': must be greater than or equal to 1'
+  test_dir:
+  - run-stone-stage-p01-2026_03_12T08_48_19_565000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: source_image_build_rejected_because_registry_access_redhat_com_image_missing_signature
+  note: ''
+  reason: Source image build rejected because registry.access.redhat.com image missing signature
+  regexp: 'Source image rejected: A signature was required, but no signature exists'
+  test_dir:
+  - run-stone-prod-p02-2026_03_11T20_51_32_754000000_00_00
+  type: logs
