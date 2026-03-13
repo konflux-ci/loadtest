@@ -41,14 +41,32 @@ STABLE_TASK_SUFFIXES = [
 ]
 STABLE_TASK_SUFFIXES_SORTED = sorted(STABLE_TASK_SUFFIXES, key=len, reverse=True)
 
+# Tekton task short name (segment after last _) -> stable key when suffix does not match.
+TASK_ALIAS = {
+    "buildah-oci-ta": "build-container",
+    "source-build-oci-ta": "build-source-image",
+    "git-clone-oci-ta": "clone-repository",
+    "push-dockerfile-oci-ta": "push-dockerfile",
+    "prefetch-dependencies-oci-ta": "prefetch-dependencies",
+    "verify-conforma-konflux-ta": "verify-conforma",
+    "sast-shell-check-oci-ta": "sast-shell-check",
+    "sast-snyk-check-oci-ta": "sast-snyk-check",
+    "sast-unicode-check-oci-ta": "sast-unicode-check",
+}
+
 
 def stable_task_type(task_name):
     """Map run-specific task name to a stable key (e.g. build-container) for Horreum."""
     if not task_name:
         return None
     for suffix in STABLE_TASK_SUFFIXES_SORTED:
-        if task_name.endswith("-" + suffix):
+        if task_name.endswith("-" + suffix) or task_name.endswith("_" + suffix):
             return suffix
+    # Tekton names like build_buildah-oci-ta: use segment after last _.
+    if "_" in task_name:
+        short = task_name.split("_")[-1]
+        if short in TASK_ALIAS:
+            return TASK_ALIAS[short]
     return None
 
 
