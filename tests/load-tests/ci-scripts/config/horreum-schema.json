@@ -5121,10 +5121,10 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": ".measurements.stable_task_steps.build_container.build.memory.mean",
+      "name": "__measurements_stable_task_steps_build_container_build_memory_mean",
       "extractors": [
         {
-          "name": ".measurements.stable_task_steps.build_container.build.memory.mean",
+          "name": "__measurements_stable_task_steps_build_container_build_memory_mean",
           "jsonpath": "$.measurements.stable_task_steps[\"build-container\"][\"build\"].memory.mean",
           "isarray": false
         }
@@ -5137,10 +5137,10 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": ".measurements.stable_task_steps.build_container.build.cpu.mean",
+      "name": "__measurements_stable_task_steps_build_container_build_cpu_mean",
       "extractors": [
         {
-          "name": ".measurements.stable_task_steps.build_container.build.cpu.mean",
+          "name": "__measurements_stable_task_steps_build_container_build_cpu_mean",
           "jsonpath": "$.measurements.stable_task_steps[\"build-container\"][\"build\"].cpu.mean",
           "isarray": false
         }
@@ -5153,10 +5153,10 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean",
+      "name": "__measurements_stable_task_steps_collect_data_create_trusted_artifact_memory_mean",
       "extractors": [
         {
-          "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.memory.mean",
+          "name": "__measurements_stable_task_steps_collect_data_create_trusted_artifact_memory_mean",
           "jsonpath": "$.measurements.stable_task_steps[\"collect-data\"][\"create-trusted-artifact\"].memory.mean",
           "isarray": false
         }
@@ -5169,10 +5169,10 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean",
+      "name": "__measurements_stable_task_steps_collect_data_create_trusted_artifact_cpu_mean",
       "extractors": [
         {
-          "name": ".measurements.stable_task_steps.collect_data.create_trusted_artifact.cpu.mean",
+          "name": "__measurements_stable_task_steps_collect_data_create_trusted_artifact_cpu_mean",
           "jsonpath": "$.measurements.stable_task_steps[\"collect-data\"][\"create-trusted-artifact\"].cpu.mean",
           "isarray": false
         }

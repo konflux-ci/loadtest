@@ -84,6 +84,7 @@ if [[ -d "$CD" ]]; then
       namespace: .metadata.namespace,
       pod_id: .status.podName,
       task_name: (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + .metadata.labels."tekton.dev/task"),
+      pipeline_task: (.metadata.labels."tekton.dev/pipelineTask" // ""),
       steps: [.status.steps[]?.name]
     } | select(.steps | length > 0)
   ' {} + 2>/dev/null | jq -s '
