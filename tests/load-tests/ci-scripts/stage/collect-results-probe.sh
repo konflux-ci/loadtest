@@ -94,11 +94,12 @@ if [[ ! -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]]; then
   echo '{"pods":[]}' > "${ARTIFACT_DIR}/get-pod-step-names.json"
 fi
 
-echo "[$(date --utc -Ins)] Appending dynamic monitor_task_step entries and saving as cluster_read_config.yaml_modified"
-if [[ -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]] && jq -e '.pods | length > 0' "${ARTIFACT_DIR}/get-pod-step-names.json" >/dev/null 2>&1; then
+echo "[$(date --utc -Ins)] Appending dynamic task and step monitoring to cluster_read_config.yaml_modified"
+cp ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
+if [[ -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]]; then
     ci-scripts/utility_scripts/append-pod-step-monitoring.py \
         --pod-step-json "${ARTIFACT_DIR}/get-pod-step-names.json" \
-        --output "${ARTIFACT_DIR}/cluster_read_config.yaml_modified" || true
+        >>"${ARTIFACT_DIR}/cluster_read_config.yaml_modified" || true
 else
     cp -f ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
 fi
