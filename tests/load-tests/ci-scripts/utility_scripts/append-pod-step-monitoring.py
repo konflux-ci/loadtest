@@ -40,12 +40,12 @@ def main():
         task_name = entry["task_name"]
 
         print(
-            f"{{ monitor_task('{ns}', '{pod_id}', '{task_name}', {args.step_default}, '{args.pod_suffix_regex}') }}"
+            f"{{{{ monitor_task('{ns}', '{pod_id}', '{task_name}', {args.step_default}, '{args.pod_suffix_regex}') }}}}"
         )
 
         for step in entry["steps"]:
             print(
-                f"{{ monitor_task_step('{ns}', '{pod_id}', 'step-{step}', '{task_name}/{step}', {args.step_default}, '{args.pod_suffix_regex}') }}"
+                f"{{{{ monitor_task_step('{ns}', '{pod_id}', 'step-{step}', '{task_name}/{step}', {args.step_default}, '{args.pod_suffix_regex}') }}}}"
             )
 
     return 0
