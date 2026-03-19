@@ -29,14 +29,15 @@ Task/step memory and CPU labels
 -------------------------------
 
 Per-step metrics are under ``measurements.steps`` with key ``"<task_name>/<step_name>"``
-(e.g. ``$.measurements.steps["build/buildah-oci-ta/build"].memory.mean``).
+(e.g. ``$.measurements.steps."build/buildah-oci-ta/build".memory.mean``).
 Per-task (whole task) metrics are under ``measurements.tasks`` with key ``"<task_name>"``
-(e.g. ``$.measurements.tasks["build/buildah-oci-ta"].memory.mean``).
+(e.g. ``$.measurements.tasks."build/buildah-oci-ta".memory.mean`` or ``$.measurements.tasks."test/test-output".cpu.mean``).
 ``task_name`` in get-pod-step-names.json is ``<pipeline-type>/<pipelineTask>`` (e.g. ``build/build-container``),
 using ``tekton.dev/pipelineTask`` so keys are stable across runs.
 
 Label name = JSONPath with every non-alphanumeric character replaced by ``_``
-(e.g. ``__measurements_steps_build_buildah_oci_ta_build_memory_mean``).
+(consecutive replacements become multiple underscores, e.g.
+``__measurements_steps__build_buildah_oci_ta_build__memory_mean``).
 
 To regenerate labels (no extra scripts needed), use only the **latest run** per probe
 (one ``get-pod-step-names.json`` per ``ARTIFACTS/StoneSoupLoadTestProbe_*/``). Then:
@@ -78,4 +79,4 @@ Local verification
 
 - Validate schema and test JSON: ``jq empty horreum-schema.json horreum-test-ci.json``
 - List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|tasks)")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
-- Check a path in load-test.json: ``jq '.measurements.steps["build/buildah-oci-ta/build"].memory.mean' load-test.json``
+- Check a path in load-test.json: ``jq '.measurements.steps."build/buildah-oci-ta/build".memory.mean' load-test.json``

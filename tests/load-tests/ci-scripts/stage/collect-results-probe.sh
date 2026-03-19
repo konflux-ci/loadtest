@@ -83,7 +83,7 @@ if [[ -d "$CD" ]]; then
     {
       namespace: .metadata.namespace,
       pod_id: .status.podName,
-      task_name: (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + (.metadata.labels."tekton.dev/pipelineTask" // .metadata.labels."tekton.dev/task" // "unknown")),
+      task_name: (.metadata.labels."pipelines.appstudio.openshift.io/type" + "/" + .metadata.labels."tekton.dev/pipelineTask"),
       steps: [.status.steps[]?.name]
     } | select(.steps | length > 0)
   ' {} + 2>/dev/null | jq -s '
@@ -98,7 +98,7 @@ echo "[$(date --utc -Ins)] Appending dynamic monitor_task_step entries and savin
 if [[ -s "${ARTIFACT_DIR}/get-pod-step-names.json" ]] && jq -e '.pods | length > 0' "${ARTIFACT_DIR}/get-pod-step-names.json" >/dev/null 2>&1; then
     ci-scripts/utility_scripts/append-pod-step-monitoring.py \
         --pod-step-json "${ARTIFACT_DIR}/get-pod-step-names.json" \
-        --output "${ARTIFACT_DIR}/cluster_read_config.yaml_modified" || true
+        >"${ARTIFACT_DIR}/cluster_read_config.yaml_modified" || true
 else
     cp -f ci-scripts/stage/cluster_read_config.yaml "${ARTIFACT_DIR}/cluster_read_config.yaml_modified"
 fi
