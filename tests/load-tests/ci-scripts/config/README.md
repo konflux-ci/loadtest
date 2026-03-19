@@ -25,36 +25,57 @@ To add a label given it's JSONPath expression:
     label_add="$( echo "$jsonpath_add" | sed 's/[^a-zA-Z0-9]/_/g' )"
     jq '.labels += [{"access": "PUBLIC", "owner": "hybrid-cloud-experience-perfscale-team", "name": "'"$label_add"'", "extractors": [{"name": "'"$label_add"'", "jsonpath": "'"$( echo "$jsonpath_add" | sed 's/"/\\\"/g' )"'", "isarray": false}], "_function": "", "filtering": false, "metrics": true, "schemaId": 169}]' ci-scripts/config/horreum-schema.json > tmp-$$.json && mv tmp-$$.json ci-scripts/config/horreum-schema.json
 
-Task/step memory and CPU labels (stable keys)
----------------------------------------------
+Task/step memory and CPU labels
+-------------------------------
 
-Per-task, per-step memory and CPU are stored under root ``measurements`` with
-run-specific keys ``tasks[<taskname>]`` (e.g. ``tasks[ocpp01cs-app-xaean-...-build-container]``).
-Task names change every run, so Horreum cannot use a fixed JSONPath on those keys.
+Per-step metrics are under ``measurements.steps`` with key ``"<task_name>/<step_name>"``
+(e.g. ``$.measurements.steps["build/buildah-oci-ta/build"].memory.mean``).
+Per-task (whole task) metrics are under ``measurements.tasks`` with key ``"<task_name>"``
+(e.g. ``$.measurements.tasks["build/buildah-oci-ta"].memory.mean``).
+``task_name`` in get-pod-step-names.json is ``<pipeline-type>/<pipelineTask>`` (e.g. ``build/build-container``),
+using ``tekton.dev/pipelineTask`` so keys are stable across runs.
 
-To fix this, the collect-results probe runs ``get-task-step-resources.py``, which
-injects ``measurements.stable_task_steps``: a stable view that maps logical task
-types (e.g. ``build-container``, ``collect-data``) and step names to the same
-metric dicts. Stable task type is taken from the TaskRun label
-``tekton.dev/pipelineTask`` when present (see get-pod-step-names.json), otherwise
-derived from the run-specific task name by suffix/TASK_ALIAS. Horreum labels use
-paths like ``$.measurements.stable_task_steps["build-container"]["build"].memory.mean``
-so the same path works every run.
+Label name = JSONPath with every non-alphanumeric character replaced by ``_``
+(e.g. ``__measurements_steps_build_buildah_oci_ta_build_memory_mean``).
 
-Label names in this schema must follow the same convention as other labels so they
-sync to PostgreSQL and work in Grafana: from the JSONPath, replace every
-non-alphanumeric character with ``_`` (e.g. ``__measurements_stable_task_steps_build_container_build_memory_mean``).
-Add more labels with that naming and jsonpath
-``$.measurements.stable_task_steps["<task-type>"]["<step-name>"].memory.mean`` or
-``.cpu.mean``. After changing the schema, re-import it in Horreum (see import guide above).
+To regenerate labels (no extra scripts needed), use only the **latest run** per probe
+(one ``get-pod-step-names.json`` per ``ARTIFACTS/StoneSoupLoadTestProbe_*/``). Then:
+
+**1. Collect path fragments** from each latest run's ``get-pod-step-names.json`` (four metric types).
+   Run these four jq expressions on each file; concatenate and sort -u:
+
+   - Step memory mean: ``jq -r '.pods[]? | .task_name as $task | .steps[]? | ".measurements.steps.\"" + $task + "/" + . + "\".memory.mean"' FILE``
+   - Step CPU mean: ``jq -r '.pods[]? | .task_name as $task | .steps[]? | ".measurements.steps.\"" + $task + "/" + . + "\".cpu.mean"' FILE``
+   - Task memory mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.tasks.\"" + . + "\".memory.mean"' FILE``
+   - Task CPU mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.tasks.\"" + . + "\".cpu.mean"' FILE``
+
+**2. Filter** out lines with an empty key or a key containing ``//`` (invalid, e.g. old ``"managed/"`` bug).
+
+**3. For each remaining path fragment** ``P``: full JSONPath = ``$`` + ``P``; label_name = ``echo "$jsonpath" | sed 's/[^a-zA-Z0-9]/_/g'``.
+
+**4. Update the schema:** delete the four old ``stable_task_steps`` labels (see "To delete a label" above; names contain ``stable_task_steps``). Then for each (jsonpath, label_name), use the "To add a label" recipe above (set ``jsonpath_add`` and ``label_add``, run the jq ``.labels += [...]``).
+
+Example to collect unique path fragments (latest run per probe only):
+
+```bash
+ARTIFACTS_DIR=/path/to/jenkins_artifacts/ARTIFACTS
+for d in "$ARTIFACTS_DIR"/StoneSoupLoadTestProbe_*/; do
+  f="$(ls -1d "$d"/run-* 2>/dev/null | sort -r | head -1)/get-pod-step-names.json"
+  [ -f "$f" ] || continue
+  jq -r '.pods[]? | .task_name as $t | .steps[]? | ".measurements.steps.\"" + $t + "/" + . + "\".memory.mean"' "$f"
+  jq -r '.pods[]? | .task_name as $t | .steps[]? | ".measurements.steps.\"" + $t + "/" + . + "\".cpu.mean"' "$f"
+  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.tasks.\"" + . + "\".memory.mean"' "$f"
+  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.tasks.\"" + . + "\".cpu.mean"' "$f"
+done | sort -u | grep -v '\.measurements\.\(steps\|tasks\)\.""' | grep -v '//'
+```
+
+Then for each line (path fragment ``P``), set ``jsonpath_add='$'+P`` and ``label_add="$(echo "$jsonpath_add" | sed 's/[^a-zA-Z0-9]/_/g')"`` and run the add-label jq from above (once per label).
+
+After changing the schema, re-import it in Horreum (see import guide above).
 
 Local verification
 ------------------
 
-You can validate config and jsonpaths locally (full Horreum extraction still
-requires uploading a run from Jenkins or re-importing the schema in Horreum):
-
-- Validate schema and test JSON are valid: ``jq empty horreum-schema.json horreum-test-ci.json``
-- List stable task/step labels: ``jq -r '.labels[] | select(.name | startswith("__measurements_stable_task_steps")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
-- After running get-task-step-resources.py on a run artifact dir, check stable path
-  extracts: ``jq '.measurements.stable_task_steps["build-container"]["build"].memory.mean' load-test.json``
+- Validate schema and test JSON: ``jq empty horreum-schema.json horreum-test-ci.json``
+- List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|tasks)")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
+- Check a path in load-test.json: ``jq '.measurements.steps["build/buildah-oci-ta/build"].memory.mean' load-test.json``
