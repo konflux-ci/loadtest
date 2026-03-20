@@ -8481,11 +8481,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build___cpu_mean",
+      "name": "__measurements_taskruns__build_apply_tags__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build___cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/\".cpu.mean",
+          "name": "__measurements_taskruns__build_apply_tags__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/apply-tags\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8497,11 +8497,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build___memory_mean",
+      "name": "__measurements_taskruns__build_apply_tags__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build___memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/\".memory.mean",
+          "name": "__measurements_taskruns__build_apply_tags__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/apply-tags\".memory.mean",
           "isarray": false
         }
       ],
@@ -8513,11 +8513,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_apply_tags__cpu_mean",
+      "name": "__measurements_taskruns__build_build_image_index__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_apply_tags__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/apply-tags\".cpu.mean",
+          "name": "__measurements_taskruns__build_build_image_index__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/build-image-index\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8529,11 +8529,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_apply_tags__memory_mean",
+      "name": "__measurements_taskruns__build_build_image_index__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_apply_tags__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/apply-tags\".memory.mean",
+          "name": "__measurements_taskruns__build_build_image_index__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/build-image-index\".memory.mean",
           "isarray": false
         }
       ],
@@ -8545,11 +8545,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_build_image_index__cpu_mean",
+      "name": "__measurements_taskruns__build_buildah_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_build_image_index__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/build-image-index\".cpu.mean",
+          "name": "__measurements_taskruns__build_buildah_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/buildah-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8561,11 +8561,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_build_image_index__memory_mean",
+      "name": "__measurements_taskruns__build_buildah_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_build_image_index__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/build-image-index\".memory.mean",
+          "name": "__measurements_taskruns__build_buildah_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/buildah-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -8577,11 +8577,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_buildah_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_buildah_remote_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_buildah_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/buildah-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_buildah_remote_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/buildah-remote-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8593,11 +8593,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_buildah_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_buildah_remote_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_buildah_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/buildah-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_buildah_remote_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/buildah-remote-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -8609,11 +8609,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_buildah_remote_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_calculate_deps__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_buildah_remote_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/buildah-remote-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_calculate_deps__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/calculate-deps\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8625,11 +8625,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_buildah_remote_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_calculate_deps__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_buildah_remote_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/buildah-remote-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_calculate_deps__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/calculate-deps\".memory.mean",
           "isarray": false
         }
       ],
@@ -8641,11 +8641,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_calculate_deps__cpu_mean",
+      "name": "__measurements_taskruns__build_check_noarch__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_calculate_deps__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/calculate-deps\".cpu.mean",
+          "name": "__measurements_taskruns__build_check_noarch__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/check-noarch\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8657,11 +8657,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_calculate_deps__memory_mean",
+      "name": "__measurements_taskruns__build_check_noarch__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_calculate_deps__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/calculate-deps\".memory.mean",
+          "name": "__measurements_taskruns__build_check_noarch__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/check-noarch\".memory.mean",
           "isarray": false
         }
       ],
@@ -8673,11 +8673,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_check_noarch__cpu_mean",
+      "name": "__measurements_taskruns__build_clair_scan__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_check_noarch__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/check-noarch\".cpu.mean",
+          "name": "__measurements_taskruns__build_clair_scan__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/clair-scan\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8689,11 +8689,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_check_noarch__memory_mean",
+      "name": "__measurements_taskruns__build_clair_scan__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_check_noarch__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/check-noarch\".memory.mean",
+          "name": "__measurements_taskruns__build_clair_scan__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/clair-scan\".memory.mean",
           "isarray": false
         }
       ],
@@ -8705,11 +8705,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_clair_scan__cpu_mean",
+      "name": "__measurements_taskruns__build_clamav_scan__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_clair_scan__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/clair-scan\".cpu.mean",
+          "name": "__measurements_taskruns__build_clamav_scan__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/clamav-scan\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8721,11 +8721,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_clair_scan__memory_mean",
+      "name": "__measurements_taskruns__build_clamav_scan__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_clair_scan__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/clair-scan\".memory.mean",
+          "name": "__measurements_taskruns__build_clamav_scan__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/clamav-scan\".memory.mean",
           "isarray": false
         }
       ],
@@ -8737,11 +8737,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_clamav_scan__cpu_mean",
+      "name": "__measurements_taskruns__build_coverity_availability_check__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_clamav_scan__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/clamav-scan\".cpu.mean",
+          "name": "__measurements_taskruns__build_coverity_availability_check__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/coverity-availability-check\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8753,11 +8753,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_clamav_scan__memory_mean",
+      "name": "__measurements_taskruns__build_coverity_availability_check__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_clamav_scan__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/clamav-scan\".memory.mean",
+          "name": "__measurements_taskruns__build_coverity_availability_check__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/coverity-availability-check\".memory.mean",
           "isarray": false
         }
       ],
@@ -8769,11 +8769,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_coverity_availability_check__cpu_mean",
+      "name": "__measurements_taskruns__build_deprecated_image_check__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_coverity_availability_check__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/coverity-availability-check\".cpu.mean",
+          "name": "__measurements_taskruns__build_deprecated_image_check__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/deprecated-image-check\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8785,11 +8785,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_coverity_availability_check__memory_mean",
+      "name": "__measurements_taskruns__build_deprecated_image_check__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_coverity_availability_check__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/coverity-availability-check\".memory.mean",
+          "name": "__measurements_taskruns__build_deprecated_image_check__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/deprecated-image-check\".memory.mean",
           "isarray": false
         }
       ],
@@ -8801,11 +8801,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_deprecated_image_check__cpu_mean",
+      "name": "__measurements_taskruns__build_ecosystem_cert_preflight_checks__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_deprecated_image_check__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/deprecated-image-check\".cpu.mean",
+          "name": "__measurements_taskruns__build_ecosystem_cert_preflight_checks__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/ecosystem-cert-preflight-checks\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8817,11 +8817,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_deprecated_image_check__memory_mean",
+      "name": "__measurements_taskruns__build_ecosystem_cert_preflight_checks__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_deprecated_image_check__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/deprecated-image-check\".memory.mean",
+          "name": "__measurements_taskruns__build_ecosystem_cert_preflight_checks__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/ecosystem-cert-preflight-checks\".memory.mean",
           "isarray": false
         }
       ],
@@ -8833,11 +8833,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_ecosystem_cert_preflight_checks__cpu_mean",
+      "name": "__measurements_taskruns__build_get_build_target__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_ecosystem_cert_preflight_checks__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/ecosystem-cert-preflight-checks\".cpu.mean",
+          "name": "__measurements_taskruns__build_get_build_target__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/get-build-target\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8849,11 +8849,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_ecosystem_cert_preflight_checks__memory_mean",
+      "name": "__measurements_taskruns__build_get_build_target__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_ecosystem_cert_preflight_checks__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/ecosystem-cert-preflight-checks\".memory.mean",
+          "name": "__measurements_taskruns__build_get_build_target__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/get-build-target\".memory.mean",
           "isarray": false
         }
       ],
@@ -8865,11 +8865,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_get_build_target__cpu_mean",
+      "name": "__measurements_taskruns__build_git_clone_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_get_build_target__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/get-build-target\".cpu.mean",
+          "name": "__measurements_taskruns__build_git_clone_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/git-clone-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8881,11 +8881,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_get_build_target__memory_mean",
+      "name": "__measurements_taskruns__build_git_clone_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_get_build_target__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/get-build-target\".memory.mean",
+          "name": "__measurements_taskruns__build_git_clone_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/git-clone-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -8897,11 +8897,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_git_clone_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_import_to_quay__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_git_clone_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/git-clone-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_import_to_quay__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/import-to-quay\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8913,11 +8913,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_git_clone_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_import_to_quay__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_git_clone_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/git-clone-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_import_to_quay__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/import-to-quay\".memory.mean",
           "isarray": false
         }
       ],
@@ -8929,11 +8929,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_import_to_quay__cpu_mean",
+      "name": "__measurements_taskruns__build_init__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_import_to_quay__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/import-to-quay\".cpu.mean",
+          "name": "__measurements_taskruns__build_init__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/init\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8945,11 +8945,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_import_to_quay__memory_mean",
+      "name": "__measurements_taskruns__build_init__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_import_to_quay__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/import-to-quay\".memory.mean",
+          "name": "__measurements_taskruns__build_init__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/init\".memory.mean",
           "isarray": false
         }
       ],
@@ -8961,11 +8961,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_init__cpu_mean",
+      "name": "__measurements_taskruns__build_prefetch_dependencies_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_init__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/init\".cpu.mean",
+          "name": "__measurements_taskruns__build_prefetch_dependencies_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/prefetch-dependencies-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -8977,11 +8977,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_init__memory_mean",
+      "name": "__measurements_taskruns__build_prefetch_dependencies_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_init__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/init\".memory.mean",
+          "name": "__measurements_taskruns__build_prefetch_dependencies_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/prefetch-dependencies-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -8993,11 +8993,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_prefetch_dependencies_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_prepare_mock_config__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_prefetch_dependencies_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/prefetch-dependencies-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_prepare_mock_config__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/prepare-mock-config\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9009,11 +9009,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_prefetch_dependencies_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_prepare_mock_config__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_prefetch_dependencies_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/prefetch-dependencies-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_prepare_mock_config__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/prepare-mock-config\".memory.mean",
           "isarray": false
         }
       ],
@@ -9025,11 +9025,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_prepare_mock_config__cpu_mean",
+      "name": "__measurements_taskruns__build_process_sources__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_prepare_mock_config__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/prepare-mock-config\".cpu.mean",
+          "name": "__measurements_taskruns__build_process_sources__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/process-sources\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9041,11 +9041,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_prepare_mock_config__memory_mean",
+      "name": "__measurements_taskruns__build_process_sources__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_prepare_mock_config__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/prepare-mock-config\".memory.mean",
+          "name": "__measurements_taskruns__build_process_sources__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/process-sources\".memory.mean",
           "isarray": false
         }
       ],
@@ -9057,11 +9057,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_process_sources__cpu_mean",
+      "name": "__measurements_taskruns__build_push_dockerfile_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_process_sources__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/process-sources\".cpu.mean",
+          "name": "__measurements_taskruns__build_push_dockerfile_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/push-dockerfile-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9073,11 +9073,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_process_sources__memory_mean",
+      "name": "__measurements_taskruns__build_push_dockerfile_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_process_sources__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/process-sources\".memory.mean",
+          "name": "__measurements_taskruns__build_push_dockerfile_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/push-dockerfile-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9089,11 +9089,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_push_dockerfile_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_rpmbuild__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_push_dockerfile_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/push-dockerfile-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_rpmbuild__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/rpmbuild\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9105,11 +9105,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_push_dockerfile_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_rpmbuild__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_push_dockerfile_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/push-dockerfile-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_rpmbuild__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/rpmbuild\".memory.mean",
           "isarray": false
         }
       ],
@@ -9121,11 +9121,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_rpmbuild__cpu_mean",
+      "name": "__measurements_taskruns__build_rpms_signature_scan__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_rpmbuild__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/rpmbuild\".cpu.mean",
+          "name": "__measurements_taskruns__build_rpms_signature_scan__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/rpms-signature-scan\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9137,11 +9137,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_rpmbuild__memory_mean",
+      "name": "__measurements_taskruns__build_rpms_signature_scan__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_rpmbuild__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/rpmbuild\".memory.mean",
+          "name": "__measurements_taskruns__build_rpms_signature_scan__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/rpms-signature-scan\".memory.mean",
           "isarray": false
         }
       ],
@@ -9153,11 +9153,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_rpms_signature_scan__cpu_mean",
+      "name": "__measurements_taskruns__build_sast_shell_check_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_rpms_signature_scan__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/rpms-signature-scan\".cpu.mean",
+          "name": "__measurements_taskruns__build_sast_shell_check_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-shell-check-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9169,11 +9169,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_rpms_signature_scan__memory_mean",
+      "name": "__measurements_taskruns__build_sast_shell_check_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_rpms_signature_scan__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/rpms-signature-scan\".memory.mean",
+          "name": "__measurements_taskruns__build_sast_shell_check_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-shell-check-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9185,11 +9185,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_shell_check_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_sast_snyk_check_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_shell_check_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-shell-check-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_sast_snyk_check_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-snyk-check-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9201,11 +9201,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_shell_check_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_sast_snyk_check_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_shell_check_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-shell-check-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_sast_snyk_check_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-snyk-check-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9217,11 +9217,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_snyk_check_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_sast_unicode_check_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_snyk_check_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-snyk-check-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_sast_unicode_check_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-unicode-check-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9233,11 +9233,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_snyk_check_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_sast_unicode_check_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_snyk_check_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-snyk-check-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_sast_unicode_check_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/sast-unicode-check-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9249,11 +9249,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_unicode_check_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_show_sbom__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_unicode_check_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-unicode-check-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_show_sbom__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/show-sbom\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9265,11 +9265,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_sast_unicode_check_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_show_sbom__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_sast_unicode_check_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/sast-unicode-check-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_show_sbom__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/show-sbom\".memory.mean",
           "isarray": false
         }
       ],
@@ -9281,11 +9281,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_show_sbom__cpu_mean",
+      "name": "__measurements_taskruns__build_source_build_oci_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_show_sbom__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/show-sbom\".cpu.mean",
+          "name": "__measurements_taskruns__build_source_build_oci_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/source-build-oci-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9297,11 +9297,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_show_sbom__memory_mean",
+      "name": "__measurements_taskruns__build_source_build_oci_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_show_sbom__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/show-sbom\".memory.mean",
+          "name": "__measurements_taskruns__build_source_build_oci_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/source-build-oci-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9313,11 +9313,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_source_build_oci_ta__cpu_mean",
+      "name": "__measurements_taskruns__build_summary__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_source_build_oci_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/source-build-oci-ta\".cpu.mean",
+          "name": "__measurements_taskruns__build_summary__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/summary\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9329,11 +9329,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_source_build_oci_ta__memory_mean",
+      "name": "__measurements_taskruns__build_summary__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_source_build_oci_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/source-build-oci-ta\".memory.mean",
+          "name": "__measurements_taskruns__build_summary__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"build/summary\".memory.mean",
           "isarray": false
         }
       ],
@@ -9345,11 +9345,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_summary__cpu_mean",
+      "name": "__measurements_taskruns__managed_collect_data__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_summary__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"build/summary\".cpu.mean",
+          "name": "__measurements_taskruns__managed_collect_data__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"managed/collect-data\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9361,11 +9361,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__build_summary__memory_mean",
+      "name": "__measurements_taskruns__managed_collect_data__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__build_summary__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"build/summary\".memory.mean",
+          "name": "__measurements_taskruns__managed_collect_data__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"managed/collect-data\".memory.mean",
           "isarray": false
         }
       ],
@@ -9377,11 +9377,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed___cpu_mean",
+      "name": "__measurements_taskruns__managed_verify_conforma_konflux_ta__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__managed___cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/\".cpu.mean",
+          "name": "__measurements_taskruns__managed_verify_conforma_konflux_ta__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"managed/verify-conforma-konflux-ta\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9393,11 +9393,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed___memory_mean",
+      "name": "__measurements_taskruns__managed_verify_conforma_konflux_ta__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__managed___memory_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/\".memory.mean",
+          "name": "__measurements_taskruns__managed_verify_conforma_konflux_ta__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"managed/verify-conforma-konflux-ta\".memory.mean",
           "isarray": false
         }
       ],
@@ -9409,11 +9409,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed_collect_data__cpu_mean",
+      "name": "__measurements_taskruns__test_test_output__cpu_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__managed_collect_data__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/collect-data\".cpu.mean",
+          "name": "__measurements_taskruns__test_test_output__cpu_mean",
+          "jsonpath": "$.measurements.taskruns.\"test/test-output\".cpu.mean",
           "isarray": false
         }
       ],
@@ -9425,75 +9425,11 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed_collect_data__memory_mean",
+      "name": "__measurements_taskruns__test_test_output__memory_mean",
       "extractors": [
         {
-          "name": "__measurements_tasks__managed_collect_data__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/collect-data\".memory.mean",
-          "isarray": false
-        }
-      ],
-      "_function": "",
-      "filtering": false,
-      "metrics": true,
-      "schemaId": 169
-    },
-    {
-      "access": "PUBLIC",
-      "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed_verify_conforma_konflux_ta__cpu_mean",
-      "extractors": [
-        {
-          "name": "__measurements_tasks__managed_verify_conforma_konflux_ta__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/verify-conforma-konflux-ta\".cpu.mean",
-          "isarray": false
-        }
-      ],
-      "_function": "",
-      "filtering": false,
-      "metrics": true,
-      "schemaId": 169
-    },
-    {
-      "access": "PUBLIC",
-      "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__managed_verify_conforma_konflux_ta__memory_mean",
-      "extractors": [
-        {
-          "name": "__measurements_tasks__managed_verify_conforma_konflux_ta__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"managed/verify-conforma-konflux-ta\".memory.mean",
-          "isarray": false
-        }
-      ],
-      "_function": "",
-      "filtering": false,
-      "metrics": true,
-      "schemaId": 169
-    },
-    {
-      "access": "PUBLIC",
-      "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__test_test_output__cpu_mean",
-      "extractors": [
-        {
-          "name": "__measurements_tasks__test_test_output__cpu_mean",
-          "jsonpath": "$.measurements.tasks.\"test/test-output\".cpu.mean",
-          "isarray": false
-        }
-      ],
-      "_function": "",
-      "filtering": false,
-      "metrics": true,
-      "schemaId": 169
-    },
-    {
-      "access": "PUBLIC",
-      "owner": "hybrid-cloud-experience-perfscale-team",
-      "name": "__measurements_tasks__test_test_output__memory_mean",
-      "extractors": [
-        {
-          "name": "__measurements_tasks__test_test_output__memory_mean",
-          "jsonpath": "$.measurements.tasks.\"test/test-output\".memory.mean",
+          "name": "__measurements_taskruns__test_test_output__memory_mean",
+          "jsonpath": "$.measurements.taskruns.\"test/test-output\".memory.mean",
           "isarray": false
         }
       ],

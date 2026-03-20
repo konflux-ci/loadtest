@@ -30,8 +30,8 @@ Task/step memory and CPU labels
 
 Per-step metrics are under ``measurements.steps`` with key ``"<task_name>/<step_name>"``
 (e.g. ``$.measurements.steps."build/buildah-oci-ta/build".memory.mean``).
-Per-task (whole task) metrics are under ``measurements.tasks`` with key ``"<task_name>"``
-(e.g. ``$.measurements.tasks."build/buildah-oci-ta".memory.mean`` or ``$.measurements.tasks."test/test-output".cpu.mean``).
+Per-task (whole task) metrics are under ``measurements.taskruns`` with key ``"<task_name>"``
+(e.g. ``$.measurements.taskruns."build/buildah-oci-ta".memory.mean`` or ``$.measurements.taskruns."test/test-output".cpu.mean``).
 ``task_name`` in get-pod-step-names.json is ``<pipeline-type>/<pipelineTask>`` (e.g. ``build/build-container``),
 using ``tekton.dev/pipelineTask`` so keys are stable across runs.
 
@@ -47,8 +47,8 @@ To regenerate labels (no extra scripts needed), use only the **latest run** per 
 
    - Step memory mean: ``jq -r '.pods[]? | .task_name as $task | .steps[]? | ".measurements.steps.\"" + $task + "/" + . + "\".memory.mean"' FILE``
    - Step CPU mean: ``jq -r '.pods[]? | .task_name as $task | .steps[]? | ".measurements.steps.\"" + $task + "/" + . + "\".cpu.mean"' FILE``
-   - Task memory mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.tasks.\"" + . + "\".memory.mean"' FILE``
-   - Task CPU mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.tasks.\"" + . + "\".cpu.mean"' FILE``
+   - Task memory mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.taskruns.\"" + . + "\".memory.mean"' FILE``
+   - Task CPU mean: ``jq -r '.pods[]? | .task_name | select(length > 0) | ".measurements.taskruns.\"" + . + "\".cpu.mean"' FILE``
 
 **2. Filter** out lines with an empty key or a key containing ``//`` (invalid, e.g. old ``"managed/"`` bug).
 
@@ -65,9 +65,9 @@ for d in "$ARTIFACTS_DIR"/StoneSoupLoadTestProbe_*/; do
   [ -f "$f" ] || continue
   jq -r '.pods[]? | .task_name as $t | .steps[]? | ".measurements.steps.\"" + $t + "/" + . + "\".memory.mean"' "$f"
   jq -r '.pods[]? | .task_name as $t | .steps[]? | ".measurements.steps.\"" + $t + "/" + . + "\".cpu.mean"' "$f"
-  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.tasks.\"" + . + "\".memory.mean"' "$f"
-  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.tasks.\"" + . + "\".cpu.mean"' "$f"
-done | sort -u | grep -v '\.measurements\.\(steps\|tasks\)\.""' | grep -v '//'
+  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.taskruns.\"" + . + "\".memory.mean"' "$f"
+  jq -r '.pods[]? | .task_name | select(length>0) | ".measurements.taskruns.\"" + . + "\".cpu.mean"' "$f"
+done | sort -u | grep -v '\.measurements\.\(steps\|taskruns\)\.""' | grep -v '//'
 ```
 
 Then for each line (path fragment ``P``), set ``jsonpath_add='$'+P`` and ``label_add="$(echo "$jsonpath_add" | sed 's/[^a-zA-Z0-9]/_/g')"`` and run the add-label jq from above (once per label).
@@ -78,5 +78,5 @@ Local verification
 ------------------
 
 - Validate schema and test JSON: ``jq empty horreum-schema.json horreum-test-ci.json``
-- List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|tasks)")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
+- List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|taskruns)")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
 - Check a path in load-test.json: ``jq '.measurements.steps."build/buildah-oci-ta/build".memory.mean' load-test.json``
