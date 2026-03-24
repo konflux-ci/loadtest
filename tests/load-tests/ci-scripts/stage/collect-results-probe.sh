@@ -8,6 +8,8 @@ set -o pipefail
 source "$( dirname "$0" )/../utils.sh"
 
 OPTION_EXIT_ON_FAIL=false
+OPTION_EXIT_CODE_ON_FAIL=1
+OPTION_EXIT_CODE_ON_ERROR=2
 OPTION_TESTS_DIR="./tests/load-tests"
 
 while [[ $# -gt 0 ]]; do
@@ -15,14 +17,20 @@ while [[ $# -gt 0 ]]; do
     --help)
       echo "Usage: $0 [options]"
       echo "Options:"
-      echo "  --help          Show this help message and exit"
-      echo "  --exit-on-fail  Exit with an error if load test errors are detected"
-      echo "  --tests-dir     Directory containing tests (default: ./tests/load-tests)"
+      echo "  --help           Show this help message and exit"
+      echo "  --exit-on-fail   Exit with provided error code if load test errors are detected"
+      echo "  --exit-on-error  Exit with provided error code if this script errors out"
+      echo "  --tests-dir      Directory containing tests (default: ./tests/load-tests)"
       exit 0
       ;;
     --exit-on-fail)
       OPTION_EXIT_ON_FAIL=true
-      shift
+      OPTION_EXIT_CODE_ON_FAIL="$2"
+      shift 2
+      ;;
+    --exit-on-error)
+      OPTION_EXIT_CODE_ON_ERROR="$2"
+      shift 2
       ;;
     --tests-dir)
       OPTION_TESTS_DIR="$2"
@@ -38,6 +46,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+trap 'exit "$OPTION_EXIT_CODE_ON_ERROR"' ERR
 
 echo "[$(date --utc -Ins)] Collecting load test results"
 
@@ -139,13 +149,11 @@ if [[ "${OPTION_EXIT_ON_FAIL}" == "true" ]]; then
     errors=$(jq -r '.results.measurements.KPI.errors // "null"' "${ARTIFACT_DIR}/load-test.json")
     if [[ "$errors" == "null" ]]; then
         echo "[$(date --utc -Ins)] Error: .results.measurements.KPI.errors is missing in ${ARTIFACT_DIR}/load-test.json"
-        popd
-        exit 1
+        exit "$OPTION_EXIT_CODE_ON_ERROR"
     elif [[ "$errors" -gt "0" ]]; then
         echo "[$(date --utc -Ins)] Failure detected ($errors errors), exiting with error"
-        popd
-        exit 1
+        exit "$OPTION_EXIT_CODE_ON_FAIL"
     fi
 fi
 
-popd
+exit 0
