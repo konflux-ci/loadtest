@@ -2483,3 +2483,59 @@
   test_dir:
   - run-kflux-rhel-p01-2026_03_16T07_39_22_051000000_00_00
   type: logs
+- caused_by: github.com
+  id: repo_templating_mr_merging_failed_because_github_api_returned_405_merge_already_in_progress
+  note: ''
+  reason: Repo templating MR merging failed because GitHub API returned 405 Merge already in progress
+  regexp: 'FAIL\(68\): Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^:]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 405 Merge already in progress'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_19T16_07_14_555000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_files_update_failed_because_github_api_returned_409_does_not_match
+  note: ''
+  reason: Repo templating files update failed because GitHub API returned 409 does not match
+  regexp: 'FAIL\(68\): Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [^:]+: error when updating a file on github: PUT https://api\.github\.com/repos/[^ ]+: 409 [^ ]+ does not match [a-f0-9]+'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_24T08_45_20_382000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: component_creation_failed_due_to_resource_quota_evaluation_timeout
+  note: ''
+  reason: Component creation failed due to resource quota evaluation timeout
+  regexp: 'FAIL\([0-9]+\): Component failed creation: unable to create the Component [^:]+: Internal error occurred: resource quota evaluation timed out'
+  test_dir:
+  - run-stone-prod-p02-2026_03_18T07_46_40_461000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: release_plan_admission_creation_failed_due_to_resource_quota_object_modification_conflict
+  note: ''
+  reason: Release Plan Admission creation failed due to resource quota object modification conflict
+  regexp: 'FAIL\([0-9]+\): Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^:]+: Operation cannot be fulfilled on resourcequotas .konflux.: the object has been modified'
+  test_dir:
+  - run-stone-prod-p02-2026_03_22T11_59_10_256000000_00_00
+  type: loadtest
+- caused_by: quay.io
+  id: image_manifest_parsing_failed_due_to_quay_502_bad_gateway
+  note: ''
+  reason: Image manifest parsing failed due to Quay 502 Bad Gateway
+  regexp: 'reading manifest [a-f0-9]+ in quay.io/[^:]+: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-stone-prod-p02-2026_03_18T14_40_04_382000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_manifest_parsing_failed_due_to_quay_404_not_found
+  note: ''
+  reason: Image manifest parsing failed due to Quay 404 Not Found
+  regexp: 'invalid manifest\?: GET https://quay.io/v2/[^:]+: unexpected status code 404 Not Found'
+  test_dir:
+  - run-kflux-rhel-p01-2026_03_21T13_38_20_481000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_manifest_parsing_failed_due_to_unexpected_end_of_json_input
+  note: ''
+  reason: Image manifest parsing failed due to unexpected end of JSON input
+  regexp: 'invalid manifest\?: unexpected end of JSON input'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_21T18_01_22_262000000_00_00
+  type: logs
