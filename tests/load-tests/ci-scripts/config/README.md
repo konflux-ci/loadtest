@@ -14,6 +14,21 @@ To list existing label names:
 
     jq -r '.labels[] | [.name, .extractors[0].jsonpath] | @tsv' ci-scripts/config/horreum-schema.json | column --separator "	" --table
 
+To sort ``labels`` alphabetically by ``name`` (deterministic order; no semantic change — only reordering):
+
+Run from ``tests/load-tests`` (same working directory as the other examples):
+
+```bash
+python3 <<'PY'
+import json
+from pathlib import Path
+p = Path("ci-scripts/config/horreum-schema.json")
+data = json.loads(p.read_text(encoding="utf-8"))
+data["labels"] = sorted(data["labels"], key=lambda L: L["name"])
+p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+PY
+```
+
 To delete a label by it's name:
 
     label_del="__results_durations_stats_taskruns__build_calculate_deps__passed_duration_mean"
