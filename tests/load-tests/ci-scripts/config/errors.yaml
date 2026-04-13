@@ -948,8 +948,9 @@
   id: failed_to_ssh_to_remote_mpc_vm
   note: ''
   reason: Failed to ssh to remote MPC VM
-  regexp: '[^ ]+@[0-9.]+: Permission denied .publickey,gssapi-keyex,gssapi-with-mic..\s*$'
-  test_dir: []
+  regexp: '[^ ]+@[0-9.]+: Permission denied .publickey,[^)]+.'
+  test_dir:
+  - run-stone-stage-p01-2026_04_10T12_45_23_729000000_00_00
   type: logs
 - caused_by: MPC
   id: failed_to_write_container_because_no_space_left_on_device
@@ -2538,4 +2539,164 @@
   regexp: 'invalid manifest\?: unexpected end of JSON input'
   test_dir:
   - run-stone-prd-rh01-2026_03_21T18_01_22_262000000_00_00
+  type: logs
+- caused_by: MPC
+  id: multi_arch_build_failed_due_to_dns_lookup_failure_on_build_host
+  note: ''
+  reason: Multi-arch build failed due to DNS lookup failure on build host
+  regexp: 'dial tcp: lookup registry\.access\.redhat\.com .* server misbehaving'
+  test_dir:
+  - run-stone-prod-p02-2026_03_17T18_54_11_480000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_pull_failed_due_to_502_bad_gateway_on_remote_build_host
+  note: ''
+  reason: Image pull failed due to 502 Bad Gateway on remote build host
+  regexp: 'Trying to pull quay\.io/.*received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-stone-stage-p01-2026_03_19T11_48_45_206000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_pull_failed_due_to_503_service_unavailable_on_remote_build_host
+  note: ''
+  reason: Image pull failed due to 503 Service Unavailable on remote build host
+  regexp: 'Trying to pull quay\.io/.*received unexpected HTTP status: 503 Service Unavailable'
+  test_dir:
+  - run-stone-prod-p02-2026_03_22T18_43_53_646000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: ec_policy_fetch_failed_because_policy_blob_was_not_found_on_quay_io
+  note: ''
+  reason: EC policy fetch failed because policy blob was not found on Quay.io
+  regexp: 'pulling policy: failed to perform "Fetch" on source: sha256:[a-f0-9]+: not found'
+  test_dir:
+  - run-stone-prod-p01-2026_03_21T13_42_19_458000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: ec_policy_fetch_failed_due_to_content_length_mismatch_from_quay_io
+  note: ''
+  reason: EC policy fetch failed due to content length mismatch from Quay.io
+  regexp: 'pulling policy: failed to perform "Fetch" on source: GET "https://quay.io/[^"]+": mismatch Content-Length'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_21T16_45_18_280000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: ec_policy_fetch_failed_due_to_digest_mismatch_in_docker_content_digest_from_quay_io
+  note: ''
+  reason: EC policy fetch failed due to digest mismatch in Docker-Content-Digest from Quay.io
+  regexp: 'pulling policy: failed to perform "FetchReference" on source: GET "https://quay.io/[^"]+": invalid response; digest mismatch in Docker-Content-Digest: received "sha256:[a-f0-9]+" when expecting "sha256:[a-f0-9]+"'
+  test_dir:
+  - run-stone-prod-p01-2026_03_21T18_17_22_471000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: rpm_verification_failed_due_to_timeout_when_connecting_to_quay_io
+  note: ''
+  reason: RPM verification failed due to timeout when connecting to Quay.io
+  regexp: 'error: unable to read image quay.io/[^ ]+: Get "https://quay.io/v2/": net/http: request canceled while waiting for connection \(Client.Timeout exceeded while awaiting headers\)'
+  test_dir:
+  - run-stone-stage-p01-2026_03_23T09_48_24_265000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_push_failed_because_quay_io_returned_unauthorized
+  note: ''
+  reason: Image push failed because quay.io returned unauthorized
+  regexp: 'Error: pushing image .quay.io/[^ ]+. to .docker://quay.io/[^ ]+.: writing blob: initiating layer upload to /v2/[^ ]+ in quay.io: unauthorized: access to the requested resource is not authorized'
+  test_dir:
+  - run-kflux-prd-rh02-2026_03_21T13_22_59_989000000_00_00
+  type: logs
+- caused_by: cluster
+  id: tuf_root_dns_lookup_failed
+  note: ''
+  reason: TUF root DNS lookup failed
+  regexp: 'Error: Get .http://tuf.trusted-artifact-signer.svc/root.json.: dial tcp: lookup tuf.trusted-artifact-signer.svc on [0-9.]+:[0-9]+: no such host'
+  test_dir:
+  - run-stone-stg-rh01-2026_03_25T20_09_19_861000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_pipeline_run_failed_because_couldn_t_get_task_from_quay_io_due_to_unauthorized
+  note: ''
+  reason: Build Pipeline Run failed because couldn't get task from quay.io due to UNAUTHORIZED
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetTask Message:Pipeline .* can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .*: error requesting remote resource: error getting .bundleresolver. .[^.]+.: cannot retrieve the oci image: GET https://quay\.io/v2/auth\?.* UNAUTHORIZED: Access to the requested resource is not authorized'
+  test_dir:
+  - run-kflux-ocp-p01-2026_03_21T13_15_26_660000000_00_00
+  type: loadtest
+- caused_by: quay.io
+  id: sbom_upload_failed_because_quay_io_returned_401_unauthorized
+  note: ''
+  reason: SBOM upload failed because quay.io returned 401 Unauthorized
+  regexp: 'Error: PUT https://quay\.io/v2/[^ ]+: unexpected status code 401 Unauthorized: Unauthorized'
+  test_dir:
+  - run-stone-prod-p02-2026_03_21T13_40_20_458000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: package_download_failure_during_mock_build_because_all_mirrors_were_tried
+  note: ''
+  reason: Package download failure during mock build because all mirrors were tried
+  regexp: 'Cannot download .*: All mirrors were tried|Cannot download, all mirrors were already tried without success'
+  test_dir:
+  - run-stone-prod-p02-2026_03_24T13_30_48_950000000_00_00
+  type: logs
+- caused_by: github.com
+  id: repo_templating_pr_merging_failed_because_github_com_returned_stream_error
+  note: ''
+  reason: Repo templating PR merging failed because github.com returned stream error
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo .*: stream error: stream ID [0-9]+; CANCEL; received from peer'
+  test_dir:
+  - run-kflux-prd-rh03-2026_03_25T08_00_31_317000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: fulcio_signing_cert_400_bad_request
+  note: ''
+  reason: Fulcio Signing Cert 400 Bad Request
+  regexp: 'POST https://fulcio-server-[^/]+/api/v1/signingCert returned 400 Bad Request: .*There was an error processing the identity token'
+  test_dir:
+  - run-stone-stg-rh01-2026_03_26T15_09_19_251000000_00_00
+  type: logs
+- caused_by: cluster
+  id: pod_creation_failed_due_to_webhook_connection_reset_by_peer
+  note: ''
+  reason: Pod creation failed due to webhook connection reset by peer
+  regexp: 'failed to create task run pod .*: Internal error occurred: failed calling webhook .*proxy.operator.tekton.dev.*: failed to call webhook: Post .*https://tekton-operator-proxy-webhook.openshift-pipelines.svc:443/defaulting.timeout=10s.*: read tcp [0-9.]+:[0-9]+->[0-9.]+:[0-9]+: read: connection reset by peer.'
+  test_dir:
+  - run-stone-prod-p01-2026_03_26T21_17_22_682000000_00_00
+  type: condition
+- caused_by: quay.io
+  id: image_push_failed_because_quay_io_returned_413_request_entity_too_large
+  note: ''
+  reason: Image push failed because quay.io returned 413 Request Entity Too Large
+  regexp: 'Error response from registry: recognizable error message not found: PUT .https://quay.io/v2/.*: response status code 413: Request Entity Too Large'
+  test_dir:
+  - run-kflux-rhel-p01-2026_03_26T09_00_24_577000000_00_00
+  type: logs
+- caused_by: github.com
+  id: windows_image_build_failed_because_c_dockerfile_is_missing
+  note: ''
+  reason: Windows image build failed because C:/Dockerfile is missing
+  regexp: 'unable to prepare context: unable to evaluate symlinks in Dockerfile path: GetFileAttributesEx C:.Dockerfile: The system cannot find the file specified.'
+  test_dir:
+  - run-stone-stage-p01-2026_03_27T12_09_30_748000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_inspect_failed_because_quay_io_returned_manifest_unknown
+  note: ''
+  reason: Image inspect failed because quay.io returned manifest unknown
+  regexp: 'Error parsing image name .*docker://quay.io/[^:]+:[^:]+.*: reading manifest .* in quay.io/.*: manifest unknown'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_27T03_01_18_476000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: base_image_sync_failed_because_registry_access_redhat_com_returned_502_bad_gateway
+  note: ''
+  reason: Base image sync failed because registry.access.redhat.com returned 502 Bad Gateway
+  regexp: 'reading manifest .* in registry.access.redhat.com/.*: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-stone-prod-p02-2026_03_21T16_43_56_750000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: docker_file_push_failed_because_quay_io_returned_200_ok_but_oras_push_failed
+  note: ''
+  reason: Docker file push failed because quay.io returned 200 OK but oras push failed
+  regexp: 'Error response from registry: PUT .*https://quay.io/v2/.*: response status code 200: OK.*oras push failed: exit status 1'
+  test_dir:
+  - run-stone-prd-rh01-2026_03_21T19_01_18_964000000_00_00
   type: logs
