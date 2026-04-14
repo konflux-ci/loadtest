@@ -138,11 +138,6 @@ status_data.py \
     --monitoring-raw-data-dir "$mrawdir" \
     &>"${ARTIFACT_DIR}/monitoring-collection.log"
 
-echo "[$(date --utc -Ins)] Building get-task-step-resources.json and get-task-step-resources.html"
-ci-scripts/utility_scripts/get-task-step-resources.py \
-    --artifact-dir "${ARTIFACT_DIR}" \
-    || true
-
 } 2>&1 | tee "${ARTIFACT_DIR}/collect-results.log"
 
 if [[ "${OPTION_EXIT_ON_FAIL}" == "true" ]]; then
