@@ -380,7 +380,14 @@ func HandlePerUserCollection(ctx *types.PerUserContext) error {
 
 	var err error
 
-	journeyCounterStr := fmt.Sprintf("%d", ctx.JourneyRepeatsCounter)
+	// After normal for-loop exit the counter overshoots by one (post-
+	// increment runs before the condition check fails). Adjust locally
+	// so collected events land in the same directory as the last iteration.
+	journeyIndex := ctx.JourneyRepeatsCounter
+	if journeyIndex >= ctx.Opts.JourneyRepeats && ctx.Opts.JourneyRepeats > 0 {
+		journeyIndex = ctx.Opts.JourneyRepeats - 1
+	}
+	journeyCounterStr := fmt.Sprintf("%d", journeyIndex)
 	dirPath := getDirName(ctx.Opts.OutputDir, ctx.Namespace, journeyCounterStr)
 	err = createDir(dirPath)
 	if err != nil {
