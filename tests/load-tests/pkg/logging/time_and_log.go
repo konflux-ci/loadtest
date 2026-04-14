@@ -70,8 +70,12 @@ func MeasurementsStart(directory string) {
 
 // Close channels and wait to ensure any remaining records are written to CSV
 func MeasurementsStop() {
-	close(measurementsQueue)
-	close(errorsQueue)
+	if measurementsQueue != nil {
+		close(measurementsQueue)
+	}
+	if errorsQueue != nil {
+		close(errorsQueue)
+	}
 	writerWaitGroup.Wait()
 }
 
