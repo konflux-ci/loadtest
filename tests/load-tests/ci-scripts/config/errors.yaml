@@ -2700,3 +2700,11 @@
   test_dir:
   - run-stone-prd-rh01-2026_03_21T19_01_18_964000000_00_00
   type: logs
+- caused_by: quay.io
+  id: pipeline_failed_quay_io_denied_push_because_system_is_read_only
+  note: ''
+  reason: 'Pipeline failed: quay.io denied push because system is read-only'
+  regexp: 'Error response from registry: denied: System is currently read-only\. Pulls will succeed but all write operations are currently suspended'
+  test_dir:
+  - run-stone-stage-p01-2026_03_28T13_55_14_476000000_00_00
+  type: logs
