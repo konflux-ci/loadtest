@@ -21,7 +21,7 @@ tmpdir=$(mktemp -d)
 trap "rm -rf ${tmpdir}" EXIT
 
 for base_url in "${ARTIFACT_URLS[@]}"; do
-    echo "=== Processing ${base_url}"
+    echo "=== $( date --utc -Ins ) Processing ${base_url}"
 
     # Get list of run directories - extract hrefs ending with /
     curl -sS "${base_url}" \
@@ -48,7 +48,7 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         json_url="${base_url}${run_dir}load-test.json"
         local_file="${tmpdir}/load-test.json"
 
-        echo "  Processing ${run_dir}"
+        echo "  $( date --utc -Ins ) Processing ${run_dir}"
 
         http_code=$(curl -sS -o "${local_file}" -w "%{http_code}" "${json_url}")
         if [[ "${http_code}" != "200" ]]; then
@@ -57,7 +57,7 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         fi
 
         if $DRY_RUN; then
-            echo "    Would work with ${local_file}"
+            echo "    $( date --utc -Ins ) Would work with ${local_file}"
             continue
         fi
 
@@ -65,7 +65,7 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         test_job_matcher_label=".metadata.env.BUILD_ID"
 
         test_matcher=$(status_data.py --status-data-file "${local_file}" --get "${test_job_matcher}")
-        echo "    Matcher: ${test_matcher}"
+        echo "    $( date --utc -Ins ) Matcher: ${test_matcher}"
 
         status_data.py --status-data-file "${local_file}" --set "name=Konflux cluster probe" "\$schema=urn:rhtap-perf-team-load-test:1.0"
 
@@ -91,6 +91,6 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         ###    --start "@started" \
         ###    --end "@ended"
 
-        echo "    Done"
+        echo "    $( date --utc -Ins ) Done"
     done
 done
