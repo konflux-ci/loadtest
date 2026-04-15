@@ -9,7 +9,7 @@ import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
 import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-import github "github.com/google/go-github/v44/github"
+import github "github.com/google/go-github/v66/github"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 var fileList = []string{"COMPONENT-pull-request.yaml", "COMPONENT-push.yaml"}

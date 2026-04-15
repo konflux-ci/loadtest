@@ -356,7 +356,7 @@ func checkImageRepositoryCreatedBeforePR(ctx *types.PerComponentContext, mergeRe
 			return fmt.Errorf("failed to get PR %d: %v", mergeRequestNumber, err)
 		}
 		if pr.CreatedAt != nil {
-			prCreation = *pr.CreatedAt
+			prCreation = pr.CreatedAt.Time
 		}
 	}
 
