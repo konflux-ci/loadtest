@@ -6,6 +6,10 @@
 DRY_RUN=false
 HORREUM_HOST="${HORREUM_HOST:-https://horreum.corp.redhat.com}"
 HOURS_AGO="${1:-3}"
+DONE_FILE="${DONE_FILE:-$(pwd)/horreum-backfill-done.txt}"
+
+# Create the done file if it doesn't exist
+touch "${DONE_FILE}"
 
 ARTIFACTS_BASE="https://workdir-exporter-jenkins-csb-perf.apps.int.gpc.ocp-hub.prod.psi.redhat.com/workspace/ARTIFACTS"
 mapfile -t ARTIFACT_URLS < <(
@@ -47,6 +51,12 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
 
         json_url="${base_url}${run_dir}load-test.json"
         local_file="${tmpdir}/load-test.json"
+
+        # Skip if already processed
+        if grep -qFx "${json_url}" "${DONE_FILE}"; then
+            echo "  SKIP ${run_dir} (already processed)"
+            continue
+        fi
 
         echo "  $( date --utc -Ins ) Processing ${run_dir}"
 
@@ -91,6 +101,7 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         ###    --start "@started" \
         ###    --end "@ended"
 
+        echo "${json_url}" >> "${DONE_FILE}"
         echo "    $( date --utc -Ins ) Done"
     done
 done
