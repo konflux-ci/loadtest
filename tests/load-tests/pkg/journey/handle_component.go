@@ -222,7 +222,7 @@ func listPipelineRunsWithTimeout(f *framework.Framework, namespace, appName, com
 	var err error
 
 	interval := time.Second * 20
-	timeout := time.Minute * 30
+	timeout := time.Minute * 15
 
 	err = utils.WaitUntilWithInterval(func() (done bool, err error) {
 		prs, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", sha, "")
