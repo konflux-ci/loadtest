@@ -2708,3 +2708,27 @@
   test_dir:
   - run-stone-stage-p01-2026_03_28T13_55_14_476000000_00_00
   type: logs
+- caused_by: registry.access.redhat.com
+  id: base_image_sync_failed_because_registry_access_redhat_com_returned_503_service_unavailable
+  note: ''
+  reason: Base image sync failed because registry.access.redhat.com returned 503 Service Unavailable
+  regexp: 'reading manifest .* in registry.access.redhat.com/.*: received unexpected HTTP status: 503 Service Unavailable'
+  test_dir:
+  - run-kflux-rhel-p01-2026_04_16T00_56_53_967000000_00_00
+  type: logs
+- caused_by: github.com
+  id: repo_templating_failed_because_file_not_found_on_github_404
+  note: ''
+  reason: Repo-templating failed because file not found on GitHub (404)
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to get file [^ ]+ from repo [^ ]+ revision [^:]+: error when listing file contents: GET https://api\.github\.com/repos/[^ ]+: 404 Not Found'
+  test_dir:
+  - run-stone-stg-rh01-2026_04_16T05_59_22_186000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_pr_merging_failed_because_github_api_returned_404_not_found
+  note: ''
+  reason: Repo templating PR merging failed because GitHub API returned 404 Not Found
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^:]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 404 Not Found'
+  test_dir:
+  - run-stone-stg-rh01-2026_04_17T03_59_21_380000000_00_00
+  type: loadtest
