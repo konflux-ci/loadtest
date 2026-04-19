@@ -9,3 +9,10 @@ venv/
 .vscode/configurationCache.log
 .vscode/dryrun.log
 .vscode/targets.log
+
+# User secrets
+users*.json
+
+# Temp data
+OLD/
+run-*/
