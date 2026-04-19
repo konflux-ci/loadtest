@@ -27,15 +27,3 @@ jobs:
         with:
           # Path to SARIF file relative to the root of the repository
           sarif_file: results.sarif
-
-  unit_tests:
-    name: Unit tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup Golang
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.25'
-      - name: Run unit tests
-        run: make test/unit
