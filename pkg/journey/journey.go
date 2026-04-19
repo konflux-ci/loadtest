@@ -4,10 +4,10 @@ import "sync"
 import "time"
 import "math/rand"
 
-import options "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/options"
-import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-import loadtestutils "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/loadtestutils"
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+import options "github.com/konflux-ci/loadtest/pkg/options"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import loadtestutils "github.com/konflux-ci/loadtest/pkg/loadtestutils"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 // Pointers to all user journey thread contexts
 var PerUserContexts []*types.PerUserContext

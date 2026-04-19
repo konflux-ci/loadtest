@@ -4,8 +4,8 @@ import "fmt"
 import "strings"
 import "time"
 
-import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"

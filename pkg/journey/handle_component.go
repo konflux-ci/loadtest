@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-	types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+	logging "github.com/konflux-ci/loadtest/pkg/logging"
+	types "github.com/konflux-ci/loadtest/pkg/types"
 
 	constants "github.com/konflux-ci/e2e-tests/pkg/constants"
 

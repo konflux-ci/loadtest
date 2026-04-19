@@ -3,8 +3,8 @@ package journey
 import "context"
 import "fmt"
 
-import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

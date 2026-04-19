@@ -4,8 +4,8 @@ import "sync"
 import "time"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-import loadtestutils "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/loadtestutils"
-import options "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/options"
+import loadtestutils "github.com/konflux-ci/loadtest/pkg/loadtestutils"
+import options "github.com/konflux-ci/loadtest/pkg/options"
 
 // Struct to hold user journey thread data
 type PerUserContext struct {

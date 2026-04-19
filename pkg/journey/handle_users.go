@@ -4,9 +4,9 @@ import "fmt"
 import "time"
 import "strings"
 
-import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
-import loadtestutils "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/loadtestutils"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
+import loadtestutils "github.com/konflux-ci/loadtest/pkg/loadtestutils"
 
 import "github.com/konflux-ci/e2e-tests/pkg/framework"
 import "github.com/konflux-ci/e2e-tests/pkg/utils"

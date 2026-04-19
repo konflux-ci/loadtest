@@ -3,10 +3,10 @@ package main
 import "fmt"
 import "time"
 
-import journey "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/journey"
-import options "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/options"
-import logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+import journey "github.com/konflux-ci/loadtest/pkg/journey"
+import options "github.com/konflux-ci/loadtest/pkg/options"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import cobra "github.com/spf13/cobra"
 import klog "k8s.io/klog/v2"

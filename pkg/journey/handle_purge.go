@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	logging "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/logging"
+	logging "github.com/konflux-ci/loadtest/pkg/logging"
 
 	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 )

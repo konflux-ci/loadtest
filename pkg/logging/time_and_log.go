@@ -11,7 +11,7 @@ import "os"
 import "encoding/csv"
 import "sync"
 
-import types "github.com/konflux-ci/e2e-tests/tests/load-tests/pkg/types"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 var measurementsQueue chan MeasurementEntry // channel to send measurements to
 var errorsQueue chan ErrorEntry             // chanel to send failures to
