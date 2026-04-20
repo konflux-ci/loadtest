@@ -1,18 +1,14 @@
 # Konflux Load Testing Tool
 
-[![Go](https://img.shields.io/badge/Go-1.25-blue.svg)](https://golang.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+**Summary:** Load testing tool for Konflux CI/CD platform that simulates realistic user journeys (create applications → components → build pipelines → integration tests → releases) across multi-threaded concurrent users. Measures end-to-end duration and failure rates, exporting metrics to Horreum for continuous performance monitoring of production clusters.
 
-**AI-Optimized Summary:** Load testing tool for Konflux CI/CD platform that simulates realistic user journeys (create applications → components → build pipelines → integration tests → releases) across multi-threaded concurrent users. Measures end-to-end duration and failure rates, exporting metrics to Horreum for continuous performance monitoring of production clusters.
-
-> **Key Insight:** This tool runs hourly "probe" tests on 10+ production Konflux clusters, making it a critical observability tool for the platform's performance and reliability. Each test simulates a real developer workflow from application creation to release, measuring 22+ distinct stages along the way.
+**Primary use-case:** This tool runs hourly "probe" tests on 10+ production Konflux clusters, making it a critical observability tool for the platform's performance and reliability. Each test simulates a real developer workflow from application creation to release, measuring lots of distinct stages along the way.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [User Journey Model](#user-journey-model)
-- [Test Types Supported](#test-types-supported)
 - [Quick Start](#quick-start)
 - [CLI Usage](#cli-usage)
   - [Common Scenarios](#common-scenarios)
@@ -22,28 +18,25 @@
 - [CI/CD Integration](#cicd-integration)
 - [Repository Structure](#repository-structure)
 - [Configuration](#configuration)
-- [Development Guide](#development-guide)
 - [Related Projects](#related-projects)
 
 ## Overview
 
-**What is Konflux?** Konflux is a CI/CD platform built on OpenShift/Kubernetes that provides application lifecycle management, build pipelines (via Tekton), integration testing, and automated releases with enterprise contract validation.
+**What is Konflux?** Konflux is a CI/CD platform built on OpenShift/Kubernetes that provides application lifecycle management, build pipelines (via OpenShift Pipelines/Tekton), integration testing, scanning and automated releases with enterprise contract validation.
 
-**What does this tool do?** This load testing tool simulates realistic user journeys to measure Konflux's performance and scalability. It creates applications, components, and pipelines, then waits for them to complete while measuring duration and tracking errors.
+**What does this tool do?** This load testing tool simulates realistic user journeys to measure Konflux's performance and scalability. It creates applications, components, and pipelines, then waits for them to complete while measuring duration and tracking errors. It allows configuring concurrency by various means.
 
-**Primary Use Case:** Konflux performance & scale team runs this tool hourly as "probe tests" on production clusters including:
-- `stone-prd-rh01`, `stone-stg-rh01`, `stone-prod-p01/p02`
-- `kflux-prd-rh02/rh03`, `kflux-rhel-p01`, `kflux-ocp-p01`
-- `kfluxfedorap01`
+**Primary Use Case:** Konflux performance & scale team runs this tool hourly as "probe tests" with concurrency 1 on production clusters including: `stone-prd-rh01`, `stone-stg-rh01`, `stone-prod-p01/p02`, `kflux-prd-rh02/rh03`, `kflux-rhel-p01`, `kflux-ocp-p01` and `kfluxfedorap01`
 
 **Main Metrics:**
 - **KPI mean**: Total duration from application creation through release completion (sum of all workflow stage durations)
-- **KPI errors**: Binary error count per journey (0 = success, 1 = failure)
+- **KPI errors**: Number of journeys that failed (for probe runs this means 0 = success, 1 = failure because these run with concurrency 1 only)
 
-**Test Flavors:** The tool supports three types of probe builds:
-1. Single-architecture container builds
-2. Multi-architecture container builds
-3. RPM/source builds
+**Test Flavors:** The tool supports custom `.tekton` files that can configure custom types of probe builds. Currently for "probe tests" we are running these:
+1. Single-architecture container builds - on all clusters
+2. Multi-architecture container builds - on all clusters
+3. Multi-architecture RPM builds - on 4 clusters only
+4. MS Windows container builds (in development) - on one cluster only
 
 ## Architecture
 
@@ -73,7 +66,7 @@ Per-User Thread (--concurrency)
 
 **Key Files:**
 - `pkg/types/types.go` - Context type definitions
-- `pkg/journey/journey.go` - Thread setup and orchestration (lines 12-175)
+- `pkg/journey/journey.go` - Thread setup and orchestration
 
 ## User Journey Model
 
@@ -115,30 +108,15 @@ This automatically records:
 
 **Output:** Results written to `load-test-timings.csv` and `load-test-errors.csv`
 
-## Test Types Supported
-
-| Test Type | Description | Key CLI Flags |
-|-----------|-------------|---------------|
-| **Single-Arch Container** | Standard Docker/OCI container builds | `--component-repo`, `--component-repo-container-file` |
-| **Multi-Arch Container** | Multi-platform builds (ARM64, etc.) via remote host pools | `--pipeline-repo-templating`, `--pipeline-repo-templating-source` |
-| **RPM/Source Builds** | Source image builds for reproducibility, RPM packages | Custom component repo with RPM pipeline definitions |
-| **Integration Tests** | Component integration test scenarios | `--test-scenario-git-url`, `--waitintegrationtestspipelines` |
-| **Release Testing** | End-to-end release with enterprise contract validation | `--release-policy`, `--waitrelease` |
-
 ## Quick Start
-
-### Build the Tool
-
-```bash
-cd /home/jhutar/Checkouts/refactor/loadtest
-go build -o loadtest loadtest.go
-```
 
 ### Run Simplest Test
 
+TODO We need to have `users.json` and more.
+
 ```bash
 # Single user, single app, single component, wait for build only
-./loadtest \
+go run loadtest.go \
   --component-repo "https://github.com/nodeshift-starters/devfile-sample" \
   --waitpipelines \
   --log-info
@@ -150,80 +128,49 @@ This creates 1 application, 1 component, triggers the build pipeline, waits for 
 
 ### Common Scenarios
 
-#### Hourly Probe Test (Production Usage)
+#### Probe-like Test
 
-```bash
-# Simulates hourly probe: 1 user, 1 app, 1 component, full workflow
-./loadtest \
-  --component-repo "https://github.com/konflux-ci/loadtest-sample" \
+Some options for runs with 1 concurrent user, creating 1 app, with 1 component, full workflow:
+
+```
+  --concurrency 1 \
   --applications-count 1 \
   --components-count 1 \
-  --concurrency 1 \
   --waitpipelines \
   --waitintegrationtestspipelines \
   --waitrelease \
   --release-policy "tmp-onboard-policy" \
-  --purge \
-  --output-dir "./results" \
-  --log-info
 ```
 
 #### Load Test (Multiple Users/Apps/Components)
 
-```bash
-# 5 concurrent users, each creating 2 apps with 3 components = 30 total components
-./loadtest \
+Run with 5 concurrent users, each creating 2 apps with 3 components = 30 total concurrent (started with delays) builds:
+
+```
   --concurrency 5 \
   --applications-count 2 \
   --components-count 3 \
-  --component-repo "https://github.com/nodeshift-starters/devfile-sample" \
   --waitpipelines \
   --startup-delay 10s \
   --startup-jitter 5s \
-  --output-dir "./load-test-results"
-```
-
-#### Pipeline-Only Test (Skip Integration/Release)
-
-```bash
-# Test only build pipeline performance, skip integration tests and releases
-./loadtest \
-  --component-repo "https://github.com/konflux-ci/loadtest-sample" \
-  --waitpipelines \
-  --test-scenario-git-url "" \
-  --release-policy "" \
-  --log-debug
-```
-
-#### Multi-Arch Container Build Test
-
-```bash
-# Test multi-architecture builds with in-repo pipeline templating
-./loadtest \
-  --component-repo "https://github.com/konflux-ci/multi-arch-sample" \
-  --pipeline-repo-templating \
-  --pipeline-repo-templating-source "https://github.com/konflux-ci/build-templates" \
-  --waitpipelines \
-  --log-info
 ```
 
 #### Journey Repeats (Stress Test)
 
-```bash
-# Repeat the journey 10 times or for 2 hours, whichever comes first
-./loadtest \
+Repeat the journey 10 times or for 2 hours, whichever comes first:
+
+```
   --journey-repeats 10 \
   --journey-duration "2h" \
   --journey-reuse-applications \
-  --component-repo "https://github.com/nodeshift-starters/devfile-sample" \
-  --waitpipelines
 ```
 
 #### Purge-Only Mode
 
+Clean up resources from previous test without running a new test:
+
 ```bash
-# Clean up resources from previous test without running a new test
-./loadtest --purge-only --runprefix "mytest"
+go run loadtest.go --purge-only
 ```
 
 ### CLI Parameters Reference
@@ -296,15 +243,15 @@ Where metric_durations includes:
 
 **KPI errors** (failure rate metric):
 ```
-KPI_errors = COUNT(journeys_with_errors) / COUNT(total_journeys)
+KPI_errors = COUNT(journeys_with_errors)
 ```
 
 ### Measured Metrics
 
-The tool tracks 22 core metrics (from `evaluate.py:24-47`):
+The tool tracks lots of core metrics (from `evaluate.py`):
 
 **User & Repository Setup:**
-- `HandleUser` - User/namespace creation
+- `HandleUser` - User/namespace creation (if `--stage` is provided (which is the case for probe runs), these are not created, but loaded from `users.json` file, they need to exist in advance)
 - `HandleRepoForking` - Fork component repository
 
 **Application Stage:**
@@ -356,13 +303,15 @@ Timestamp,Code,Message
 
 ## Analysis Tools
 
+In Probe runs, these run automatically.
+
 ### evaluate.py - Performance Analysis
 
-**Purpose:** Compute KPI statistics and export results to Horreum (performance benchmarking system)
+**Purpose:** Compute KPI statistics based on CSV files created by loadtest and store important metrics in `load-test-timings.json` file.
 
 **Usage:**
 ```bash
-python3 evaluate.py load-test-timings.csv > results.json
+python3 evaluate.py load-test-options.json load-test-timings.csv load-test-timings.json
 ```
 
 **What it does:**
@@ -370,50 +319,58 @@ python3 evaluate.py load-test-timings.csv > results.json
 2. Groups by journey identifier (per-user, per-app, per-comp, repeat)
 3. Computes statistics: mean, median, stddev, min, max, percentiles (25th, 75th, 90th, 95th, 99th)
 4. Handles conditional metrics (skips integration/release metrics if not tested)
-5. Generates Horreum-compatible JSON output
+5. Generates JSON output
 
 **Output Format:**
 ```json
 {
   "KPI_mean": 45.2,
   "KPI_errors": 0,
-  "createApplication_mean": 2.5,
-  "createComponent_mean": 5.1,
-  "validatePipelineRunCondition_mean": 180.3,
-  ...
-  "validatePipelineRunCondition_p95": 210.5,
+  "createApplication": {
+    "mean": 2.5,
+    "p95": 2.6,
+    ...
+  },
+  "validatePipelineRunCondition": {
+    "mean": 101.2,
+    "p95": 210.5,
+    ...
+  },
   ...
 }
 ```
 
 ### errors.py - Error Categorization
 
-**Purpose:** Parse error patterns and generate error summary reports
+**Purpose:** Investigate test artifacts for error patterns and generate error summary reports
 
 **Usage:**
 ```bash
-python3 errors.py load-test-errors.csv ci-scripts/config/errors.yaml > error-report.txt
+python3 errors.py load-test-errors.csv load-test-timings.json load-test-errors.json /collected-data/
 ```
 
 **What it does:**
 1. Loads error pattern definitions from YAML
-2. Categorizes errors by pattern matching
+2. Categorizes errors from failed journeys by pattern matching
 3. Generates human-readable error summaries
-4. Provides error code mapping for dashboards
+4. Stores summary to JSON file for dashboards
 
-**Error Pattern Configuration:** `ci-scripts/config/errors.yaml` (YAML format with regex patterns)
+**Error Pattern Configuration:** `ci-scripts/config/errors.yaml` (YAML format with regex patterns). This file together with tests and tooling is managed in https://gitlab.cee.redhat.com/jhutar/probe-errors-detector/ repository.
 
 ### Data Flow
 
 ```
-Loadtest Execution → CSV Files → Python Analysis → JSON Output → Horreum/Grafana
-                     (timings,       (evaluate.py,    (metrics,      (dashboards,
-                      errors)         errors.py)        statistics)    alerts)
+Loadtest → CSV Files → Python analysis → JSON output → Horreum server → PostgreSQL → Grafana
+           (timings,   (evaluate.py,     (metrics,     (dashboards,     (hourly job
+            errors)     errors.py,        statistics,   alerts)          syncing data)
+                        monitoring data)  parameters)
 ```
 
 ## CI/CD Integration
 
 ### Tekton Pipelines
+
+This project uses Konflux itself to build container image used to run the probe tests. This creates chicken/egg refference.
 
 **Pipeline Definitions:**
 - `.tekton/loadtest-pull-request.yaml` - PR validation pipeline
@@ -422,34 +379,35 @@ Loadtest Execution → CSV Files → Python Analysis → JSON Output → Horreum
 ### GitHub Actions
 
 **Workflow:** `.github/workflows/loadtest.yaml`
-- Triggers on PR and push events
-- Runs unit tests
-- Builds container image
+- Provides a simplified way to run the loadtest against Stage server
 
 ### Jenkins Integration
 
-The tool runs hourly in Jenkins jobs configured in `ci-configs` repository:
+The tool runs hourly (for probe runs) in Jenkins jobs configured in `ci-configs` repository:
 - Job DSL configs: `src/jobs/StoneSoupLoadTestProbe_<cluster>Job.groovy`
 - Jenkinsfiles: `jenkins/StoneSoupLoadTestProbe_<cluster>.groovy`
 - Shared library: `vars/runKonfluxProbeTest.groovy`
 
 ### Horreum Export
 
-Results are automatically exported to Horreum (performance benchmarking system) for historical tracking and alerting. Schema defined in `ci-scripts/config/horreum-schema.json`.
+Results are collected to single JSON file and uploaded to Horreum (performance benchmarking system) for historical tracking and alerting.
+
+Horreum schema defining important data in the JSON we are uploading (called "labels") is defined in `ci-scripts/config/horreum-schema.json`.
 
 ### Grafana Dashboards
 
-Production dashboards at https://grafana.corp.redhat.com/ (Konflux perf&scale organization):
+Production dashboards at https://grafana.corp.redhat.com/ (Konflux perf&scale organization) are maintainer in https://github.com/redhat-appstudio/perfscale/ repository:
 - Single-arch container probe results
 - Multi-arch container probe results
 - RPM build probe results
+- Error trends
 
 ## Repository Structure
 
 ```
 loadtest/
 ├── loadtest.go                          # Main CLI entry point (426 lines)
-├── go.mod, go.sum                       # Go dependencies
+├── go.mod, go.sum                       # Go dependencies tracking
 ├── Containerfile                        # Docker build definition
 │
 ├── pkg/                                 # Core packages
@@ -489,7 +447,7 @@ loadtest/
 ├── run-max-concurrency.sh               # High-concurrency test script
 ├── run-stage-max-concurrency.sh         # Stage high-concurrency variant
 │
-├── cluster_read_config.yaml             # Prometheus queries (~200 entries)
+├── cluster_read_config.yaml             # Prometheus queries for monitoring collection (~200 entries)
 │
 ├── ci-scripts/                          # CI/CD support scripts
 │   ├── config/
@@ -506,10 +464,8 @@ loadtest/
 │   ├── loadtest-pull-request.yaml
 │   └── loadtest-push.yaml
 │
-├── .github/workflows/                   # GitHub Actions workflows
-│   └── loadtest.yaml
-│
-└── internal/                            # Internal implementation details (e2e-tests dependency)
+└── .github/workflows/                   # GitHub Actions workflows
+    └── loadtest.yaml
 ```
 
 ## Configuration
@@ -530,88 +486,18 @@ For stage environments, users are loaded from JSON (via `pkg/loadtestutils/useru
 [
   {
     "username": "testuser",
+    "namespace": "testuser-tenant",
     "token": "sha256~...",
     "apiurl": "https://api.cluster.example.com:6443"
   }
 ]
 ```
 
-### Error Pattern Configuration
-
-`ci-scripts/config/errors.yaml` defines regex patterns for error categorization:
-
-```yaml
-patterns:
-  - code: 1001
-    pattern: "TaskRunImagePullFailed"
-    category: "Build Failure"
-  - code: 1002
-    pattern: "PipelineRunTimeout"
-    category: "Timeout"
-```
-
-## Development Guide
-
-### Building
-
-```bash
-go build -o loadtest loadtest.go
-```
-
-### Running Unit Tests
-
-```bash
-go test ./... -v
-```
-
-### Adding New Metrics
-
-1. **Add measurement in journey handler** (`pkg/journey/handle_*.go`):
-   ```go
-   _, err = logging.Measure(ctx, myNewFunction, args...)
-   ```
-
-2. **Add metric to evaluation** (`evaluate.py:24-47`):
-   ```python
-   METRICS = [
-       ...,
-       "myNewMetricName",
-   ]
-   ```
-
-3. **Update Horreum schema** (`ci-scripts/config/horreum-schema.json`) if needed
-
-### Debugging
-
-**Enable verbose logging:**
-```bash
-./loadtest --log-debug ...
-```
-
-**Enable trace logging (everything):**
-```bash
-./loadtest --log-trace ...
-```
-
-**Inspect CSV output:**
-```bash
-column -t -s, load-test-timings.csv | less -S
-```
-
-**Test without waiting for pipelines:**
-```bash
-# Creates resources but doesn't wait, useful for quick testing
-./loadtest --component-repo "..." --log-debug
-```
-
 ## Related Projects
 
-- **e2e-tests Framework**: Konflux end-to-end testing framework (dependency) - `github.com/konflux-ci/e2e-tests`
+- **Konflux Perf&Scale team repository**: dashboards definitions and tools - https://github.com/redhat-appstudio/perfscale/
+- **Errors catogorizer**: Load Test Probe Error Categorization - https://gitlab.cee.redhat.com/jhutar/probe-errors-detector/
+- **e2e-tests Framework**: Konflux end-to-end testing framework (dependency) - https://github.com/konflux-ci/e2e-tests
 - **Konflux Platform**: https://github.com/konflux-ci
 - **Tekton Pipelines**: https://tekton.dev/
 - **Horreum**: Performance benchmarking and analysis - https://horreum.hyperfoil.io/
-
----
-
-**Maintained by:** Konflux Performance & Scale Team  
-**Contact:** jhutar@redhat.com for probe test issues and errors
