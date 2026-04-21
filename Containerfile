@@ -5,8 +5,8 @@ FROM registry.access.redhat.com/ubi10/go-toolset:latest AS builder_go
 COPY go.mod go.sum .
 RUN go mod download -x
 # Copy rest of the source code and build it
-COPY ../../ e2e-tests
-RUN go build -C e2e-tests/tests/load-tests/ -v -o ../../../loadtest loadtest.go
+COPY ./ loadtest.git
+RUN go build -C loadtest.git/ -v -o ../loadtest loadtest.go
 # Test executable is OK
 RUN ./loadtest --help
 
@@ -42,7 +42,7 @@ COPY --from=builder_go /opt/app-root/src/loadtest /usr/bin/
 COPY --from=builder_oc /usr/bin/oc /usr/bin/
 COPY --from=builder_oc /usr/bin/kubectl /usr/bin/
 # Install internal CA certificate
-COPY tests/load-tests/ci-scripts/config/2022-IT-Root-CA.pem \
+COPY ci-scripts/config/2022-IT-Root-CA.pem \
      /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
 USER 0
 RUN update-ca-trust
@@ -55,10 +55,10 @@ RUN python3 -m pip install -U pip && \
     python3 -m pip install "git+https://github.com/redhat-performance/opl.git#egg=opl-rhcloud-perf-team-core&subdirectory=core" && \
     python3 -m pip install tabulate matplotlib
 # Install our scripts
-COPY tests/load-tests/run-stage.sh \
-     tests/load-tests/evaluate.py \
-     tests/load-tests/errors.py \
+COPY run-stage.sh \
+     evaluate.py \
+     errors.py \
      ./
-COPY tests/load-tests/ci-scripts/ \
+COPY ci-scripts/ \
      ./ci-scripts/
 CMD ["sleep", "5d"]
