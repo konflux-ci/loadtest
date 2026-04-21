@@ -26,7 +26,7 @@ def list_and_delete_repos(
     token: str,
     organization: str,
     regexp: str,
-    updated_before: datetime.datetime,
+    pushed_before: datetime.datetime,
     delete_repos: bool,
 ) -> None:
     """Lists repositories in a given organization and optionally deletes them.
@@ -35,7 +35,7 @@ def list_and_delete_repos(
         token: GitHub personal access token.
         organization: GitHub organization name.
         regexp: Regexp repo names have to match to list them.
-        updated_before: Filter repos updated before this date.
+        pushed_before: Filter repos pushed before this date.
         delete_repos: Whether to delete repositories.
     """
 
@@ -47,8 +47,8 @@ def list_and_delete_repos(
         if regexp is not None and not re.fullmatch(regexp, repo.name):
             continue
 
-        # Check if repo was updated before given date
-        if updated_before is not None and repo.updated_at >= updated_before:
+        # Check if repo was pushed before given date
+        if pushed_before is not None and repo.pushed_at >= pushed_before:
             continue
 
         # List or delete the repo
@@ -60,7 +60,7 @@ def list_and_delete_repos(
             finally:
                 print(f"{repo.name} - deleted")
         else:
-            print(f"{repo.name} updated at {repo.updated_at}")
+            print(f"{repo.name} pushed at {repo.pushed_at}")
 
 
 if __name__ == "__main__":
@@ -83,10 +83,10 @@ if __name__ == "__main__":
         help="Only list or delete repositories with matching name",
     )
     parser.add_argument(
-        "--updated-before",
+        "--pushed-before",
         type=iso_date,
         default=None,
-        help="Only list or delete repositories updated before this date (ISO 8601 format, defaults to UTC if no timezone is provided)",
+        help="Only list or delete repositories pushed before this date (ISO 8601 format, defaults to UTC if no timezone is provided)",
     )
     parser.add_argument(
         "--delete",
@@ -96,5 +96,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     list_and_delete_repos(
-        args.token, args.organization, args.regexp, args.updated_before, args.delete
+        args.token, args.organization, args.regexp, args.pushed_before, args.delete
     )
