@@ -24,7 +24,7 @@ spec:
   - name: output-image
     value: quay.io/redhat-user-workloads/konflux-perfscale-tenant/loadtest:{{revision}}
   - name: dockerfile
-    value: tests/load-tests/Containerfile
+    value: Containerfile
   - name: path-context
     value: .
   pipelineSpec:
