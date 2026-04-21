@@ -6,7 +6,7 @@ require (
 	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
 	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/application-api v0.0.0-20251210122215-555a927cf6d9
-	github.com/konflux-ci/e2e-tests v0.0.0-00010101000000-000000000000
+	github.com/konflux-ci/e2e-tests v0.0.0-20260421092215-087a3999c1ed
 	github.com/konflux-ci/release-service v0.0.0-20260113075649-fff62d349fa9
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
@@ -221,5 +221,3 @@ replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.7
 replace github.com/go-chi/chi/v5 => github.com/go-chi/chi/v5 v5.2.4
 
 replace github.com/go-chi/chi => github.com/go-chi/chi/v5 v5.2.4
-
-replace github.com/konflux-ci/e2e-tests => ../e2e-tests
