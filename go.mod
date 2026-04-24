@@ -1,16 +1,16 @@
 module github.com/konflux-ci/loadtest
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
 	github.com/google/go-github/v66 v66.0.0
-	github.com/konflux-ci/application-api v0.0.0-20251210122215-555a927cf6d9
+	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260421092215-087a3999c1ed
 	github.com/konflux-ci/release-service v0.0.0-20260113075649-fff62d349fa9
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
-	k8s.io/apimachinery v0.34.3
+	k8s.io/apimachinery v0.35.1
 	k8s.io/klog/v2 v2.130.1
 	sigs.k8s.io/controller-runtime v0.22.4
 )
@@ -118,7 +118,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.7 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
-	github.com/google/gofuzz v1.2.1-0.20210504230335-f78f29fc09ea // indirect
+	github.com/google/gofuzz v1.2.1-0.20221018181003-5dfa3b7056d4 // indirect
 	github.com/google/pprof v0.0.0-20260106004452-d7df1bf2cac7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
@@ -134,9 +134,9 @@ require (
 	github.com/kevinburke/ssh_config v1.4.0 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/konflux-ci/image-controller v0.0.0-20240530145826-3296e4996f6f // indirect
+	github.com/konflux-ci/image-controller v0.0.0-20260410172336-89d8e83c82fc // indirect
 	github.com/konflux-ci/integration-service v0.0.0-20260108133201-e2f5559a9544 // indirect
-	github.com/konflux-ci/operator-toolkit v0.0.0-20251118152634-b4f41f073069 // indirect
+	github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 // indirect
 	github.com/magefile/mage v1.14.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -149,7 +149,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/openshift-pipelines/pipelines-as-code v0.27.2 // indirect
-	github.com/openshift/api v0.0.0-20260112161841-5b45879294d5 // indirect
+	github.com/openshift/api v0.0.0-20260420151639-34e60874783e // indirect
 	github.com/openshift/client-go v0.0.0-20260108185524-48f4ccfc4e13 // indirect
 	github.com/operator-framework/operator-lib v0.19.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
@@ -180,17 +180,17 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
-	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
+	golang.org/x/mod v0.35.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/api v0.259.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
@@ -201,7 +201,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/api v0.34.3 // indirect
+	k8s.io/api v0.35.1 // indirect
 	k8s.io/apiextensions-apiserver v0.34.3 // indirect
 	k8s.io/client-go v11.0.0+incompatible // indirect
 	k8s.io/klog v1.0.0 // indirect
