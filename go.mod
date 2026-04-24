@@ -149,7 +149,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/openshift-pipelines/pipelines-as-code v0.34.0 // indirect
-	github.com/openshift/api v0.0.0-20260420151639-34e60874783e // indirect
+	github.com/openshift/api v0.0.0-20260424174501-4f63a40a2970 // indirect
 	github.com/openshift/client-go v0.0.0-20260416131737-a19e91702ab5 // indirect
 	github.com/operator-framework/operator-lib v0.19.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
