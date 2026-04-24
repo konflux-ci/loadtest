@@ -2732,3 +2732,27 @@
   test_dir:
   - run-stone-stg-rh01-2026_04_17T03_59_21_380000000_00_00
   type: loadtest
+- caused_by: test
+  id: repo_forking_failed_because_gitlab_cee_token_was_revoked
+  note: ''
+  reason: Repo forking failed because GitLab CEE token was revoked
+  regexp: 'FAIL\(80\): Repo forking failed: error getting project [^:]+: GET https://gitlab.cee.redhat.com/api/[^ ]+ 401 .error: invalid_token., .error_description: Token was revoked'
+  test_dir:
+  - run-stone-prod-p02-2026_04_23T23_20_21_177000000_00_00
+  type: loadtest
+- caused_by: test
+  id: windows_build_npm_install_failed_because_cachi2_dependency_file_not_found
+  note: ''
+  reason: Windows build npm install failed because cachi2 dependency file not found
+  regexp: 'npm ERR! enoent ENOENT: no such file or directory, open .C:.*cachi2.*output.*deps.*npm.*\.tgz.'
+  test_dir:
+  - run-stone-stage-p01-2026_04_20T14_01_27_312000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: tekton_bundle_resolver_failed_to_retrieve_task_from_quay_io_due_to_401_unauthorized
+  note: ''
+  reason: Tekton bundle resolver failed to retrieve task from quay.io due to 401 Unauthorized
+  regexp: 'Couldn.t retrieve Task.*bundleresolver.*cannot retrieve the oci image: GET https://quay.io/v2/auth.*unexpected status code 401 Unauthorized'
+  test_dir:
+  - run-stone-prd-rh01-2026_04_17T13_27_01_229000000_00_00
+  type: loadtest
