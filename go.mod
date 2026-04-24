@@ -136,7 +136,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/konflux-ci/image-controller v0.0.0-20240530145826-3296e4996f6f // indirect
 	github.com/konflux-ci/integration-service v0.0.0-20260108133201-e2f5559a9544 // indirect
-	github.com/konflux-ci/operator-toolkit v0.0.0-20251118152634-b4f41f073069 // indirect
+	github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 // indirect
 	github.com/magefile/mage v1.14.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
