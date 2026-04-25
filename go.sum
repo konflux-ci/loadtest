@@ -1500,8 +1500,8 @@ github.com/codeready-toolchain/toolchain-common v0.0.0-20220523142428-2558e76260
 github.com/codeready-toolchain/toolchain-common v0.0.0-20220523142428-2558e76260fb/go.mod h1:MRW2K1Es7tjgbqLt024he5iaDcpnMx03Xf2TaFG67ww=
 github.com/codeready-toolchain/toolchain-e2e v0.0.0-20220525131508-60876bfb99d3 h1:Dj9Gp8/qM322+4CVxqQBSoKBGrvL/pw3JhxFqQsfEz4=
 github.com/codeready-toolchain/toolchain-e2e v0.0.0-20220525131508-60876bfb99d3/go.mod h1:klt61SndSV3ZWfVEmjt9/uxDmqgLQsMi33s6KaDE9gY=
-github.com/conforma/crds/api v0.1.7 h1:IBsIw35A5QkP5i1Se6/BASaFvTnW+xTlWEqJMdX7EiA=
-github.com/conforma/crds/api v0.1.7/go.mod h1:vaUCN54r99HME4555KRKOUPGJxBNAlX1agZ4jlGI2YA=
+github.com/conforma/crds/api v0.1.10 h1:KE5S9qRyYJsnupDSKFPn3mBKBzNedjkKHzI+UCUrnbc=
+github.com/conforma/crds/api v0.1.10/go.mod h1:vaUCN54r99HME4555KRKOUPGJxBNAlX1agZ4jlGI2YA=
 github.com/containerd/stargz-snapshotter/estargz v0.18.1 h1:cy2/lpgBXDA3cDKSyEfNOFMA/c10O1axL69EU7iirO8=
 github.com/containerd/stargz-snapshotter/estargz v0.18.1/go.mod h1:ALIEqa7B6oVDsrF37GkGN20SuvG/pIMm7FwP7ZmRb0Q=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
