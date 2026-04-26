@@ -3,7 +3,7 @@ module github.com/konflux-ci/loadtest
 go 1.25.0
 
 require (
-	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
+	github.com/devfile/library/v2 v2.4.0
 	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260428105747-f0b222ad8cb6
