@@ -206,7 +206,7 @@ go run loadtest.go --purge-only
 | `--release-pipeline-url` | string | `https://github.com/konflux-ci/release-service-catalog.git` | Release pipeline repo |
 | `--release-pipeline-revision` | string | `production` | Release pipeline branch |
 | `--release-pipeline-path` | string | `pipelines/managed/e2e/e2e.yaml` | Release pipeline file |
-| `--release-ociStorage` | string | `quay.io/rhtap-test-local/perf-release-service-trusted-artifacts` | OCI storage for release artifacts |
+| `--release-ociStorage` | string | `quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts` | OCI storage for release artifacts |
 | `--release-pipeline-service-account` | string | `release-serviceaccount` | ServiceAccount for release pipeline |
 | `--pipeline-mintmaker-disabled` | bool | `true` | Disable Mintmaker update PRs |
 | `--pipeline-repo-templating` | bool | `false` | Use in-repo pipeline templating (for multi-arch) |
