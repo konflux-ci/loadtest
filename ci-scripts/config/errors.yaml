@@ -61,7 +61,8 @@
   note: ''
   reason: Bad Gateway when pulling container image from quay.io
   regexp: 'Error: initializing source docker://quay.io/[^ ]+: reading manifest [^ ]+ in quay.io/[^ ]+: received unexpected HTTP status: 502 Bad Gateway '
-  test_dir: []
+  test_dir:
+  - run-kflux-ocp-p01-2026_04_22T01_57_26_371000000_00_00
   type: logs
 - caused_by: test
   id: build_container_failed_because_dockerfile_was_not_found
@@ -2827,4 +2828,77 @@
   regexp: no image found in manifest list for architecture.*amd64
   test_dir:
   - run-stone-stage-p01-2026_04_22T13_55_25_414000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: quay_io_registry_error_image_not_found_when_fetching_by_sha256_digest
+  note: ''
+  reason: 'quay.io registry error: image not found when fetching by SHA256 digest'
+  regexp: 'Error response from registry: quay\.io/[^ ]+@sha256:[a-f0-9]+: not found'
+  test_dir:
+  - run-stone-prod-p02-2026_04_21T23_20_19_775000000_00_00
+  type: logs
+- caused_by: mcr.microsoft.com
+  id: windows_container_image_not_compatible_with_linux_architecture
+  note: ''
+  reason: Windows container image not compatible with Linux architecture
+  regexp: 'choosing an image from manifest list docker://mcr\.microsoft\.com/windows/[^:]+:[^ ]+: no image found in manifest list for architecture "amd64", variant "", OS "linux"'
+  test_dir:
+  - run-stone-stage-p01-2026_04_22T11_44_45_128000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: registry_access_redhat_com_returned_502_bad_gateway_when_fetching_blob
+  note: ''
+  reason: registry.access.redhat.com returned 502 Bad Gateway when fetching blob
+  regexp: 'reading blob sha256:[a-f0-9]+: fetching blob: received unexpected HTTP status: 502 Bad Gateway.*registry\.access\.redhat\.com'
+  test_dir:
+  - run-stone-prod-p02-2026_04_22T13_53_51_851000000_00_00
+  type: logs
+- caused_by: koji.fedoraproject.org
+  id: koji_hub_returned_502_bad_gateway
+  note: ''
+  reason: Koji Hub returned 502 Bad Gateway
+  regexp: 'HTTPError: 502 Server Error: Bad Gateway for url: https://koji\.fedoraproject\.org/kojihub'
+  test_dir:
+  - run-kfluxfedorap01-2026_04_23T11_56_18_887000000_00_00
+  type: logs
+- caused_by: registry.fedoraproject.org
+  id: connection_reset_by_peer_when_pulling_from_registry_fedoraproject_org
+  note: ''
+  reason: Connection reset by peer when pulling from registry.fedoraproject.org
+  regexp: 'initializing source docker://registry\.fedoraproject\.org/[^ ]+: pinging container registry registry\.fedoraproject\.org: Get "https://registry\.fedoraproject\.org/v2/": read tcp [^ ]+: read: connection reset by peer'
+  test_dir:
+  - run-stone-prd-rh01-2026_04_23T11_52_30_865000000_00_00
+  - run-stone-prd-rh01-2026_04_26T19_44_18_658000000_00_00
+  type: logs
+- caused_by: kubernetes
+  id: pod_was_rejected_nodeaffinity_predicate_failed
+  note: ''
+  reason: 'Pod was rejected: NodeAffinity predicate failed'
+  regexp: '"message": "Pod was rejected: Predicate NodeAffinity failed: node\(s\) didn''t match Pod''s node affinity/selector"'
+  test_dir:
+  - run-kflux-prd-rh02-2026_04_25T12_11_20_066000000_00_00
+  type: condition
+- caused_by: quay.io
+  id: quay_io_returned_504_gateway_timeout
+  note: ''
+  reason: quay.io returned 504 Gateway Timeout
+  regexp: 'unable to read image quay\.io/[^ ]+@sha256:[a-f0-9]+: endpoint "https://quay\.io" does not support v2 API \(got 504 Gateway Timeout\)'
+  test_dir:
+  - run-stone-stg-rh01-2026_04_25T18_09_20_450000000_00_00
+  type: logs
+- caused_by: koji.fedoraproject.org
+  id: unable_to_connect_to_koji_server
+  note: ''
+  reason: Unable to connect to Koji server
+  regexp: 'konflux-mock-profile main @ARCH@ Error: Unable to connect to server'
+  test_dir:
+  - run-kfluxfedorap01-2026_04_27T06_56_19_770000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: quay_io_returned_502_bad_gateway_when_reading_manifest
+  note: ''
+  reason: quay.io returned 502 Bad Gateway when reading manifest
+  regexp: 'Error parsing image name .*docker://quay\.io/[^ ]+@sha256:[a-f0-9]+.*: reading manifest sha256:[a-f0-9]+ in quay\.io/[^ ]+: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-kflux-ocp-p01-2026_04_22T01_57_26_371000000_00_00
   type: logs
