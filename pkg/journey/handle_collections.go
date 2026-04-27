@@ -38,13 +38,12 @@ func writeToFile(dirPath, file string, contents []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to open file %s: %v", fileName, err)
 	}
+	defer func() { _ = fd.Close() }()
 
 	_, err = fd.Write(contents)
 	if err != nil {
 		return fmt.Errorf("failed to write to file %s: %v", fileName, err)
 	}
-
-	defer fd.Close()
 
 	return nil
 }
