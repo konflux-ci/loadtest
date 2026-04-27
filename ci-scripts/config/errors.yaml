@@ -2756,3 +2756,75 @@
   test_dir:
   - run-stone-prd-rh01-2026_04_17T13_27_01_229000000_00_00
   type: loadtest
+- caused_by: mcr.microsoft.com
+  id: build_images_task_failed_because_microsoft_container_registry_image_has_no_matching_manifest_for_windows_platform
+  note: ''
+  reason: Build images task failed because Microsoft Container Registry image has no matching manifest for Windows platform
+  regexp: no matching manifest for windows\([0-9.]+\)/amd64 in the manifest list entries
+  test_dir:
+  - run-stone-stage-p01-2026_04_20T12_14_13_251000000_00_00
+  type: logs
+- caused_by: mcr.microsoft.com
+  id: build_images_task_failed_because_microsoft_container_registry_manifest_tag_not_found
+  note: ''
+  reason: Build images task failed because Microsoft Container Registry manifest/tag not found
+  regexp: 'manifest for mcr.microsoft.com/[^:]+:[^ ]+ not found: manifest unknown: manifest tagged by .[^.]+ is not found'
+  test_dir:
+  - run-stone-stage-p01-2026_04_20T11_45_44_508000000_00_00
+  type: logs
+- caused_by: task
+  id: build_images_task_failed_because_docker_workdir_path_is_invalid_on_windows
+  note: ''
+  reason: Build images task failed because Docker WORKDIR path is invalid on Windows
+  regexp: the working directory '.*' is invalid, it needs to be an absolute path
+  test_dir:
+  - run-stone-stage-p01-2026_04_20T12_46_34_171000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_images_task_push_to_quay_failed_because_access_to_the_requested_resource_is_not_authorized
+  note: ''
+  reason: Build images task push to Quay failed because access to the requested resource is not authorized
+  regexp: 'The push refers to repository \[quay.io/.*unauthorized: access to the requested resource is not authorized'
+  test_dir:
+  - run-stone-stage-p01-2026_04_21T17_09_03_471000000_00_00
+  type: logs
+- caused_by: task
+  id: build_images_task_failed_because_powershell_remove_item_command_failed_on_windows
+  note: ''
+  reason: Build images task failed because PowerShell Remove-Item command failed on Windows
+  regexp: 'The command ''powershell -Command Remove-Item -Force -ErrorAction SilentlyContinue .npmrc'' returned a non-zero code: 1'
+  test_dir:
+  - run-stone-stage-p01-2026_04_20T16_24_09_894000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_image_index_task_failed_because_quay_io_returned_502_bad_gateway_during_buildah_manifest_add
+  note: ''
+  reason: Build image index task failed because Quay.io returned 502 Bad Gateway during buildah manifest add
+  regexp: 'setting up to read manifest and configuration from.*quay.io.*Requesting bearer token: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-kflux-prd-rh03-2026_04_21T22_00_24_729000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_image_index_task_failed_because_quay_io_returned_504_gateway_time_out_reading_config_blob
+  note: ''
+  reason: Build image index task failed because Quay.io returned 504 Gateway Time-out reading config blob
+  regexp: 'reading info about config blob from.*quay.io.*received unexpected HTTP status: 504 Gateway Time-out'
+  test_dir:
+  - run-stone-stg-rh01-2026_04_25T16_39_22_851000000_00_00
+  type: logs
+- caused_by: task
+  id: build_images_task_failed_because_windows_setx_command_denied_registry_access
+  note: ''
+  reason: Build images task failed because Windows setx command denied registry access
+  regexp: 'ERROR: Access to the registry path is denied.*The command ''cmd /S /C setx /M PATH'
+  test_dir:
+  - run-stone-stage-p01-2026_04_22T10_49_08_748000000_00_00
+  type: logs
+- caused_by: task
+  id: apply_tags_task_failed_because_no_image_found_in_manifest_list_for_amd64_architecture
+  note: ''
+  reason: Apply tags task failed because no image found in manifest list for amd64 architecture
+  regexp: no image found in manifest list for architecture.*amd64
+  test_dir:
+  - run-stone-stage-p01-2026_04_22T13_55_25_414000000_00_00
+  type: logs
