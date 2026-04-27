@@ -169,7 +169,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/tektoncd/cli v0.43.0 // indirect
-	github.com/vbatts/tar-split v0.12.2 // indirect
+	github.com/vbatts/tar-split v0.12.3 // indirect
 	github.com/vmware-tanzu/velero v1.17.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/go-gitlab v0.114.0 // indirect

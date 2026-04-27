@@ -2517,8 +2517,8 @@ github.com/tonglil/buflogr v1.1.1 h1:CKAjOHBSMmgbRFxpn/RhQHPj5oANc7ekhlsoUDvcZIg
 github.com/tonglil/buflogr v1.1.1/go.mod h1:WLLtPRLqcFYWQLbA+ytXy5WrFTYnfA+beg1MpvJCxm4=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
-github.com/vbatts/tar-split v0.12.2 h1:w/Y6tjxpeiFMR47yzZPlPj/FcPLpXbTUi/9H7d3CPa4=
-github.com/vbatts/tar-split v0.12.2/go.mod h1:eF6B6i6ftWQcDqEn3/iGFRFRo8cBIMSJVOpnNdfTMFA=
+github.com/vbatts/tar-split v0.12.3 h1:Cd46rkGXI3Td4yrVNwU8ripbxFaQbmesqhjBUUYAJSw=
+github.com/vbatts/tar-split v0.12.3/go.mod h1:sQOc6OlqGCr7HkGx/IDBeKiTIvqhmj8KffNhEXG4Nq0=
 github.com/vmware-tanzu/velero v1.17.2 h1:U2C/j+iewacNA+f967PX++vw6+FG8O6o5aDyw3QjV9Y=
 github.com/vmware-tanzu/velero v1.17.2/go.mod h1:2y09xNcilIWUC75zXACiqtERlDpM6AwyE5rZH0TGxzk=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
