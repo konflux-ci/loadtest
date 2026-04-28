@@ -2277,8 +2277,8 @@ github.com/openshift/api v0.0.0-20260420151639-34e60874783e/go.mod h1:pyVjK0nZ4s
 github.com/openshift/build-machinery-go v0.0.0-20210712174854-1bb7fd1518d3/go.mod h1:b1BuldmJlbA/xYtdZvKi+7j5YGB44qJUJDZ9zwiNCfE=
 github.com/openshift/build-machinery-go v0.0.0-20210806203541-4ea9b6da3a37/go.mod h1:b1BuldmJlbA/xYtdZvKi+7j5YGB44qJUJDZ9zwiNCfE=
 github.com/openshift/client-go v0.0.0-20210831095141-e19a065e79f7/go.mod h1:D6P8RkJzwdkBExQdYUnkWcePMLBiTeCCr8eQIQ7y8Dk=
-github.com/openshift/client-go v0.0.0-20260416131737-a19e91702ab5 h1:R5gdIA+R7MONtwKIEfZ7WM0k9ELv6GM2AbYApaCRNrA=
-github.com/openshift/client-go v0.0.0-20260416131737-a19e91702ab5/go.mod h1:u56GmXEMF6bvws8ipkT1ZRNJH52RF5sZ/yRP+6PwkH4=
+github.com/openshift/client-go v0.0.0-20260428164731-4b85fc5b4e75 h1:UMBIwb0f9Zre46LksO8P7V8dCNrGOBUdn8fXDgAhepA=
+github.com/openshift/client-go v0.0.0-20260428164731-4b85fc5b4e75/go.mod h1:lITKsplmZ9kJ6zvk4hW52XMZ9tt621GZGb69YSp+CSY=
 github.com/openshift/library-go v0.0.0-20220211144658-96cd7a701be1/go.mod h1:5TSPiu4ZEPW5NwUspgqYqjSD/wF86JWGy+x8jB+9oB4=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/openzipkin/zipkin-go v0.4.3 h1:9EGwpqkgnwdEIJ+Od7QVSEIH+ocmm5nPat0G7sjsSdg=
