@@ -7,7 +7,7 @@ require (
 	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260421092215-087a3999c1ed
-	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
+	github.com/konflux-ci/release-service dcca498936f0
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
 	k8s.io/apimachinery v0.35.3
