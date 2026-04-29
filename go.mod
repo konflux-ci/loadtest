@@ -6,7 +6,7 @@ require (
 	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
 	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
-	github.com/konflux-ci/e2e-tests v0.0.0-20260421092215-087a3999c1ed
+	github.com/konflux-ci/e2e-tests v0.0.0-20260428105747-f0b222ad8cb6
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
@@ -48,7 +48,7 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.34.2
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.34.2
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.20.2
-	vbom.ml/util => github.com/fvbommel/util v0.0.0-20180919145318-efcd4e0f9787
+	vbom.ml/util => github.com/fvbommel/util v0.0.3
 )
 
 require (
@@ -215,7 +215,7 @@ require (
 
 replace github.com/cyphar/filepath-securejoin => github.com/cyphar/filepath-securejoin v0.3.6
 
-replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.7
+replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.8
 
 replace github.com/go-chi/chi/v5 => github.com/go-chi/chi/v5 v5.2.5
 
