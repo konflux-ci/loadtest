@@ -1,6 +1,6 @@
 module github.com/konflux-ci/loadtest
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
@@ -10,9 +10,9 @@ require (
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
-	k8s.io/apimachinery v0.35.3
-	k8s.io/klog/v2 v2.130.1
-	sigs.k8s.io/controller-runtime v0.22.4
+	k8s.io/apimachinery v0.36.0
+	k8s.io/klog/v2 v2.140.0
+	sigs.k8s.io/controller-runtime v0.24.0
 )
 
 replace (
@@ -47,7 +47,7 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.34.2
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.34.2
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.34.2
-	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.20.2
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.24.0
 	vbom.ml/util => github.com/fvbommel/util v0.0.3
 )
 
@@ -195,17 +195,17 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260420184626-e10c466a9529 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/api v0.35.3 // indirect
-	k8s.io/apiextensions-apiserver v0.35.3 // indirect
+	k8s.io/api v0.36.0 // indirect
+	k8s.io/apiextensions-apiserver v0.36.0 // indirect
 	k8s.io/client-go v11.0.0+incompatible // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260427204847-8949caaa1199 // indirect
-	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
+	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 // indirect
 	knative.dev/pkg v0.0.0-20250424013628-d5e74d29daa3 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
