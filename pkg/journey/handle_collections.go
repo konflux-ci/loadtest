@@ -1,7 +1,6 @@
 package journey
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 
 	k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func getDirName(baseDir, namespace, iteration string) string {
@@ -352,25 +350,6 @@ func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 	return nil
 }
 
-func collectEvents(f *framework.Framework, dirPath, namespace string) error {
-	eventsList, err := f.AsKubeAdmin.CommonController.KubeInterface().CoreV1().Events(namespace).List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to list events in namespace %s: %v", namespace, err)
-	}
-
-	eventsJSON, err := json.Marshal(eventsList)
-	if err != nil {
-		return fmt.Errorf("failed to dump events JSON: %v", err)
-	}
-
-	err = writeToFile(dirPath, "collected-events.json", eventsJSON)
-	if err != nil {
-		return fmt.Errorf("failed to write events: %v", err)
-	}
-
-	return nil
-}
-
 func HandlePerUserCollection(ctx *types.PerUserContext) error {
 	if ctx.Namespace == "" {
 		logging.Logger.Debug("Namespace not populated, so skipping per-user collections")
@@ -391,11 +370,6 @@ func HandlePerUserCollection(ctx *types.PerUserContext) error {
 	err = createDir(dirPath)
 	if err != nil {
 		return logging.Logger.Fail(108, "Failed to create dir: %v", err)
-	}
-
-	err = collectEvents(ctx.Framework, dirPath, ctx.Namespace)
-	if err != nil {
-		return logging.Logger.Fail(109, "Failed to collect events: %v", err)
 	}
 
 	return nil
