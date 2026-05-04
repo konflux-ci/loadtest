@@ -9,7 +9,6 @@ import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-import github "github.com/google/go-github/v66/github"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 var fileList = []string{"COMPONENT-pull-request.yaml", "COMPONENT-push.yaml"}
@@ -157,7 +156,6 @@ func templateRepoFile(f *framework.Framework, repoUrl, repoRevision, sourceRepo,
 // Fork repository and return forked repo URL
 func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgName string) (string, error) {
 	// For PaC testing, let's template repo and return forked repo name
-	var forkRepo *github.Repository
 	var sourceName string
 	var sourceOrgName string
 	var targetName string
@@ -197,19 +195,21 @@ func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgNa
 		}
 
 		// Create fork and make sure it appears
+		var forkURL string
 		err = utils.WaitUntilWithInterval(func() (done bool, err error) {
-			forkRepo, err = f.AsKubeAdmin.CommonController.Github.ForkRepositoryWithOrgs(sourceOrgName, sourceName, targetOrgName, targetName)
+			forkRepo, err := f.AsKubeAdmin.CommonController.Github.ForkRepositoryWithOrgs(sourceOrgName, sourceName, targetOrgName, targetName)
 			if err != nil {
 				logging.Logger.Debug("Repo forking failed, trying again: %v", err)
 				return false, nil
 			}
+			forkURL = forkRepo.GetHTMLURL()
 			return true, nil
 		}, time.Second * 20, time.Minute * 10)
 		if err != nil {
 			return "", err
 		}
 
-		return forkRepo.GetHTMLURL(), nil
+		return forkURL, nil
 	}
 }
 

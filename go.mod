@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/devfile/library/v2 v2.4.0
-	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260504092310-b36058c5521c
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
@@ -117,6 +116,7 @@ require (
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.7 // indirect
+	github.com/google/go-github/v66 v66.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/gofuzz v1.2.1-0.20221018181003-5dfa3b7056d4 // indirect
 	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
