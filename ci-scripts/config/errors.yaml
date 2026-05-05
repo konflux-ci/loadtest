@@ -61,8 +61,7 @@
   note: ''
   reason: Bad Gateway when pulling container image from quay.io
   regexp: 'Error: initializing source docker://quay.io/[^ ]+: reading manifest [^ ]+ in quay.io/[^ ]+: received unexpected HTTP status: 502 Bad Gateway '
-  test_dir:
-  - run-kflux-ocp-p01-2026_04_22T01_57_26_371000000_00_00
+  test_dir: []
   type: logs
 - caused_by: test
   id: build_container_failed_because_dockerfile_was_not_found
@@ -2825,7 +2824,7 @@
   id: apply_tags_task_failed_because_no_image_found_in_manifest_list_for_amd64_architecture
   note: ''
   reason: Apply tags task failed because no image found in manifest list for amd64 architecture
-  regexp: no image found in manifest list for architecture.*amd64
+  regexp: 'Error parsing manifest for image: choosing image instance: no image found in manifest list for architecture.*amd64'
   test_dir:
   - run-stone-stage-p01-2026_04_22T13_55_25_414000000_00_00
   type: logs
@@ -2849,7 +2848,7 @@
   id: registry_access_redhat_com_returned_502_bad_gateway_when_fetching_blob
   note: ''
   reason: registry.access.redhat.com returned 502 Bad Gateway when fetching blob
-  regexp: 'reading blob sha256:[a-f0-9]+: fetching blob: received unexpected HTTP status: 502 Bad Gateway.*registry\.access\.redhat\.com'
+  regexp: 'registry\.access\.redhat\.com.*reading blob sha256:[a-f0-9]+: fetching blob: received unexpected HTTP status: 502 Bad Gateway'
   test_dir:
   - run-stone-prod-p02-2026_04_22T13_53_51_851000000_00_00
   type: logs
@@ -2901,4 +2900,100 @@
   regexp: 'Error parsing image name .*docker://quay\.io/[^ ]+@sha256:[a-f0-9]+.*: reading manifest sha256:[a-f0-9]+ in quay\.io/[^ ]+: received unexpected HTTP status: 502 Bad Gateway'
   test_dir:
   - run-kflux-ocp-p01-2026_04_22T01_57_26_371000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: release_pipeline_trusted_artifact_upload_failed_due_to_quay_io_authentication
+  note: ''
+  reason: Release Pipeline trusted artifact upload failed due to Quay.io authentication
+  regexp: 'Using token for quay.io Uploading [a-f0-9]+ sourceDataArtifact.*Error response from registry: unauthorized: access to the requested resource is not authorized'
+  test_dir:
+  - run-stone-prd-rh01-2026_04_27T13_20_51_816000000_00_00
+  type: logs
+- caused_by: registry.fedoraproject.org
+  id: hermetic_build_failed_due_to_connection_reset_by_peer_when_fetching_manifest_from_registry_fedoraproject_org
+  note: ''
+  reason: Hermetic build failed due to connection reset by peer when fetching manifest from registry.fedoraproject.org
+  regexp: 'Get "https://registry\.fedoraproject\.org/v2/[^"]+/manifests/sha256:[a-f0-9]+": read tcp [^ ]+: read: connection reset by peer'
+  test_dir:
+  - run-stone-prd-rh01-2026_04_27T14_48_30_724000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: source_image_build_failed_because_quay_io_returned_502_bad_gateway_when_requesting_bearer_token
+  note: ''
+  reason: Source image build failed because Quay.io returned 502 Bad Gateway when requesting bearer token
+  regexp: 'Error parsing image name .*docker://quay\.io/[^"]+@sha256:[a-f0-9]+.*: Requesting bearer token: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-kflux-ocp-p01-2026_04_27T17_15_19_372000000_00_00
+  type: logs
+- caused_by: MPC
+  id: mpc_remote_build_failed_because_ssh_connection_to_build_vm_timed_out
+  note: ''
+  reason: MPC remote build failed because SSH connection to build VM timed out
+  regexp: 'ssh_dispatch_run_fatal: Connection to [0-9.]+ port 22: Connection timed out'
+  test_dir:
+  - run-stone-stage-p01-2026_04_27T20_45_02_487000000_00_00
+  type: logs
+- caused_by: test
+  id: post_test_data_collection_failed_because_component_resource_was_not_found
+  note: ''
+  reason: Post-test data collection failed because component resource was not found
+  regexp: 'FAIL\(103\): Failed to collect component JSONs: failed to get Component [a-z0-9-]+: components\.appstudio\.redhat\.com "[a-z0-9-]+" not found'
+  test_dir:
+  - run-stone-stg-rh01-2026_04_29T03_59_21_329000000_00_00
+  type: loadtest
+- caused_by: quay.io
+  id: dockerfile_upload_to_quay_io_failed_due_to_eof_when_requesting_authentication_token
+  note: ''
+  reason: Dockerfile upload to quay.io failed due to EOF when requesting authentication token
+  regexp: 'oras \[stderr\] Error: POST \\"https://quay\.io/v2/[^\\]+/blobs/uploads/\\": GET \\"https://quay\.io/v2/auth\?[^\\"]*\\": failed to decode response: EOF'
+  test_dir:
+  - run-kflux-prd-rh03-2026_04_29T07_01_20_592000000_00_00
+  type: logs
+- caused_by: release-service
+  id: release_plan_creation_failed_because_release_service_webhook_was_unavailable
+  note: ''
+  reason: Release Plan creation failed because release-service webhook was unavailable
+  regexp: 'FAIL\(91\): Release Plan failed creation: unable to create the releasePlan [a-z0-9-]+ in [a-z0-9-]+: Internal error occurred: failed calling webhook "[^"]+": failed to call webhook: Post "https://release-service-webhook-service\.release-service\.svc:[0-9]+/[^"]+": no endpoints available for service "release-service-webhook-service"'
+  test_dir:
+  - run-kfluxfedorap01-2026_04_29T09_56_20_462000000_00_00
+  type: loadtest
+- caused_by: kojipkgs.fedoraproject.org
+  id: rpm_build_failed_because_koji_server_was_unavailable_during_startup
+  note: ''
+  reason: RPM build failed because Koji server was unavailable during startup
+  regexp: 'koji: ServerOffline: server startup error'
+  test_dir:
+  - run-kfluxfedorap01-2026_04_29T21_56_20_114000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: rpm_build_failed_because_tls_handshake_timeout_when_fetching_container_signatures_from_registry_access_redhat_com
+  note: ''
+  reason: RPM build failed because TLS handshake timeout when fetching container signatures from registry.access.redhat.com
+  regexp: 'reading signatures: Get "https://access\.redhat\.com/webassets/docker/content/sigstore/[^"]+": net/http: TLS handshake timeout'
+  test_dir:
+  - run-stone-prod-p02-2026_05_01T02_20_18_375000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: dockerfile_upload_to_quay_io_failed_due_to_504_gateway_timeout
+  note: ''
+  reason: Dockerfile upload to quay.io failed due to 504 Gateway Timeout
+  regexp: 'oras \[stderr\] Error response from registry: PUT \\"https://quay\.io/v2/[^\\]+/blobs/uploads/[^\\]+\\": response status code 504: Gateway Timeout'
+  test_dir:
+  - run-kflux-rhel-p01-2026_05_01T11_36_50_347000000_00_00
+  type: logs
+- caused_by: cluster
+  id: release_plan_creation_failed_due_to_resource_quota_evaluation_timeout
+  note: ''
+  reason: Release Plan creation failed due to resource quota evaluation timeout
+  regexp: 'FAIL\(91\): Release Plan failed creation: unable to create the releasePlan [a-z0-9-]+ in [a-z0-9-]+: Internal error occurred: resource quota evaluation timed out'
+  test_dir:
+  - run-stone-prod-p02-2026_05_04T09_00_14_137000000_00_00
+  type: loadtest
+- caused_by: remote-build-vm
+  id: mpc_remote_build_failed_because_network_connection_lost_during_rsync_back
+  note: ''
+  reason: MPC remote build failed because network connection was lost when copying results back
+  regexp: 'Rsync back Read from remote host [0-9.]+: No route to host.*rsync: connection unexpectedly closed.*rsync error: error in rsync protocol data stream'
+  test_dir:
+  - run-kflux-ocp-p01-2026_04_29T18_50_17_734000000_00_00
   type: logs
