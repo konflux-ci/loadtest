@@ -6,7 +6,7 @@ require (
 	github.com/devfile/library/v2 v2.4.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260506085906-2e394d3dcf2e
-	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
+	github.com/konflux-ci/release-service 6a2bc9061d35
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.7.0
 	k8s.io/apimachinery v0.35.3
