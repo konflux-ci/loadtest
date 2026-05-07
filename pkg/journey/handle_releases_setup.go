@@ -7,10 +7,6 @@ import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-import meta "k8s.io/apimachinery/pkg/api/meta"
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-import releaseApi "github.com/konflux-ci/release-service/api/v1alpha1"
-import tektonutils "github.com/konflux-ci/release-service/tekton/utils"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 // Create ReleasePlan CR
@@ -33,17 +29,7 @@ func createReleasePlanAdmission(f *framework.Framework, namespace, appName, poli
 	name := appName + "-rpa"
 	logging.Logger.Debug("Creating release plan admission %s in namespace %s with policy %s and pipeline SA %s", name, namespace, policyName, releasePipelineSAName)
 
-	pipeline := &tektonutils.PipelineRef{
-		Resolver: "git",
-		Params: []tektonutils.Param{
-			{Name: "url", Value: releasePipelineUrl},
-			{Name: "revision", Value: releasePipelineRevision},
-			{Name: "pathInRepo", Value: releasePipelinePath},
-		},
-		OciStorage: releaseOciStorage,
-	}
-	// CreateReleasePlanAdmission(name, namespace, environment, origin, policy, serviceAccountName string, applications []string, autoRelease bool, pipelineRef *tektonutils.PipelineRef, data *runtime.RawExtension)
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmission(name, namespace, "", namespace, policyName, releasePipelineSAName, []string{appName}, true, pipeline, nil)
+	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, namespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, nil)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the releasePlanAdmission %s in %s: %v", name, namespace, err)
 	}
@@ -66,25 +52,18 @@ func validateReleasePlan(f *framework.Framework, namespace, name string) error {
 			return false, nil
 		}
 
-		condition := meta.FindStatusCondition(releasePlan.Status.Conditions, releaseApi.MatchedConditionType.String())
+		condition := f.AsKubeDeveloper.ReleaseController.GetReleasePlanMatchedCondition(releasePlan)
 		if condition == nil {
 			logging.Logger.Debug("MatchedConditon of %s is still not set\n", releasePlan.Name)
 			return false, nil
 		}
-		// it may need a period of time for the ReleasePlanCR to be reconciled
-		if condition.Status == metav1.ConditionFalse {
-			logging.Logger.Debug("MatchedConditon of %s has not reconciled yet\n", releasePlan.Name)
-			return false, nil
-		}
-		if condition.Status != metav1.ConditionTrue {
-			logging.Logger.Debug("MatchedConditon of %s is not true yet\n", releasePlan.Name)
-			return false, nil
-		}
-		if condition.Reason == releaseApi.MatchedReason.String() {
+
+		if f.AsKubeDeveloper.ReleaseController.IsReleasePlanMatched(releasePlan) {
 			return true, nil
 		}
 
-		return false, fmt.Errorf("MatchedConditon of %s incorrect: %v", releasePlan.Name, condition)
+		logging.Logger.Debug("MatchedConditon of %s not matched yet: %v\n", releasePlan.Name, condition)
+		return false, nil
 	}, interval, timeout)
 
 	return err
@@ -105,25 +84,18 @@ func validateReleasePlanAdmission(f *framework.Framework, namespace, name string
 			return false, nil
 		}
 
-		condition := meta.FindStatusCondition(releasePlanAdmission.Status.Conditions, releaseApi.MatchedConditionType.String())
+		condition := f.AsKubeDeveloper.ReleaseController.GetReleasePlanAdmissionMatchedCondition(releasePlanAdmission)
 		if condition == nil {
 			logging.Logger.Debug("MatchedConditon of %s is still not set\n", releasePlanAdmission.Name)
 			return false, nil
 		}
-		// it may need a period of time for the ReleasePlanCR to be reconciled
-		if condition.Status == metav1.ConditionFalse {
-			logging.Logger.Debug("MatchedConditon of %s has not reconciled yet\n", releasePlanAdmission.Name)
-			return false, nil
-		}
-		if condition.Status != metav1.ConditionTrue {
-			logging.Logger.Debug("MatchedConditon of %s is not true yet\n", releasePlanAdmission.Name)
-			return false, nil
-		}
-		if condition.Reason == releaseApi.MatchedReason.String() {
+
+		if f.AsKubeDeveloper.ReleaseController.IsReleasePlanAdmissionMatched(releasePlanAdmission) {
 			return true, nil
 		}
 
-		return false, fmt.Errorf("MatchedConditon of %s incorrect: %v", releasePlanAdmission.Name, condition)
+		logging.Logger.Debug("MatchedConditon of %s not matched yet: %v\n", releasePlanAdmission.Name, condition)
+		return false, nil
 	}, interval, timeout)
 
 	return err

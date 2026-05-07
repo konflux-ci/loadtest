@@ -10,7 +10,6 @@ import "time"
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
-import appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
 import constants "github.com/konflux-ci/e2e-tests/pkg/constants"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
@@ -101,21 +100,7 @@ func createComponent(f *framework.Framework, namespace, repoUrl, repoRevision, c
 		annotationsMap[key] = value
 	}
 
-	componentObj := appstudioApi.ComponentSpec{
-		ComponentName: name,
-		Source: appstudioApi.ComponentSource{
-			ComponentSourceUnion: appstudioApi.ComponentSourceUnion{
-				GitSource: &appstudioApi.GitSource{
-					URL:           repoUrl,
-					Revision:      repoRevision,
-					Context:       containerContext,
-					DockerfileURL: containerFile,
-				},
-			},
-		},
-	}
-
-	_, err := f.AsKubeDeveloper.HasController.CreateComponent(componentObj, namespace, "", "", appName, false, annotationsMap)
+	_, err := f.AsKubeDeveloper.HasController.CreateComponentFromGitSource(name, namespace, appName, repoUrl, repoRevision, containerContext, containerFile, false, annotationsMap)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the Component %s: %v", name, err)
 	}
@@ -158,13 +143,12 @@ func validateComponent(f *framework.Framework, namespace, name string) error {
 func getPaCPullNumber(f *framework.Framework, namespace, name string) (int, error) {
 	interval := time.Second * 20
 	timeout := time.Minute * 15
-	var comp *appstudioApi.Component
 	var pull string
 	var pullNumber int
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		comp, err = f.AsKubeDeveloper.HasController.GetComponent(name, namespace)
+		comp, err := f.AsKubeDeveloper.HasController.GetComponent(name, namespace)
 		if err != nil {
 			logging.Logger.Debug("Unable to get created Component %s in namespace %s: %v", name, namespace, err)
 			return false, nil

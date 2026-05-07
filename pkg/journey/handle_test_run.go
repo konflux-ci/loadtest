@@ -7,7 +7,6 @@ import "time"
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
-import appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
@@ -17,15 +16,16 @@ func validateSnapshotCreation(f *framework.Framework, namespace, compName string
 
 	interval := time.Second * 20
 	timeout := time.Minute * 5
-	var snap *appstudioApi.Snapshot
+	var snapName string
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		snap, err = f.AsKubeDeveloper.IntegrationController.GetSnapshot("", "", compName, namespace)
+		snap, err := f.AsKubeDeveloper.IntegrationController.GetSnapshot("", "", compName, namespace)
 		if err != nil {
 			logging.Logger.Debug("Unable to get created Snapshot for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
 		}
+		snapName = snap.Name
 		return true, nil
 	}, interval, timeout)
 
@@ -33,7 +33,7 @@ func validateSnapshotCreation(f *framework.Framework, namespace, compName string
 		return "", err
 	}
 
-	return snap.Name, err
+	return snapName, err
 }
 
 func validateTestPipelineRunCreation(f *framework.Framework, namespace, itsName, snapName string) error {
