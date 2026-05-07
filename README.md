@@ -192,7 +192,6 @@ loadtest/
 │   │   ├── handle_releases_run.go       # Release execution
 │   │   ├── handle_repo_templating.go    # Multi-arch template handling
 │   │   ├── handle_collections.go        # Artifact collection
-│   │   ├── handle_persistent_volume_claim.go  # PVC data collection
 │   │   └── handle_purge.go              # Resource cleanup
 │   │
 │   ├── logging/                         # Measurement & logging system

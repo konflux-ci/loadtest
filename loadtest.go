@@ -262,16 +262,6 @@ func perUserThread(perUserCtx *types.PerUserContext) {
 
 	}
 
-	// Collect info about PVCs
-	_, err = logging.Measure(
-		perUserCtx,
-		journey.HandlePersistentVolumeClaim,
-		perUserCtx,
-	)
-	if err != nil {
-		logging.Logger.Error("Thread failed: %v", err)
-		return
-	}
 
 }
 
