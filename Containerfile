@@ -36,6 +36,8 @@ RUN oc version --client
 
 # Runner
 FROM registry.access.redhat.com/ubi10/python-312-minimal:latest
+# Include license information required by Red Hat certification
+COPY LICENSE /licenses/LICENSE
 # Copy loadtest binary from builder container
 COPY --from=builder_go /opt/app-root/src/loadtest /usr/bin/
 # Copy OpenShift CLI binary from builder container
