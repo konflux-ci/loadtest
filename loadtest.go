@@ -13,17 +13,6 @@ import klog "k8s.io/klog/v2"
 import textlogger "k8s.io/klog/v2/textlogger"
 import ctrl "sigs.k8s.io/controller-runtime"
 
-//import "os"
-//import "context"
-//import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-//import schema "k8s.io/apimachinery/pkg/runtime/schema"
-//import watch "k8s.io/apimachinery/pkg/watch"
-////import fields "k8s.io/apimachinery/pkg/fields"
-////import runtime "k8s.io/apimachinery/pkg/runtime"
-//import appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
-/////import eventsv1 "k8s.io/api/events/v1"
-//import unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
 var opts = options.Opts{}
 
 var rootCmd = &cobra.Command{
@@ -164,83 +153,6 @@ func perUserThread(perUserCtx *types.PerUserContext) {
 
 	var err error
 
-	//watchCtx := context.Background()
-	//gvr := schema.GroupVersionResource{
-	//	Group:   "appstudio.redhat.com",
-	//	Version: "v1alpha1",
-	//	Resource: "applications",
-	//}
-	//timeOut := int64(60)
-	////name := "test-rhtap-1-app-zxlst"
-	//listOptions := metav1.ListOptions{
-	//	TimeoutSeconds: &timeOut,
-	//	//FieldSelector: fields.OneTermEqualSelector("metadata.name", name).String(),
-	//}
-	//// Create watcher
-	//fmt.Print("Creating watcher...\n")
-	//watcher, err2 := perUserCtx.Framework.AsKubeDeveloper.CommonController.DynamicClient().
-	//	Resource(gvr).
-	//	Namespace(perUserCtx.Namespace).
-	//	Watch(watchCtx, listOptions)
-	//if err2 != nil {
-	//	fmt.Printf("Can not get watcher: %v", err2)
-	//}
-	//// Process events from the watcher
-	//fmt.Print("Processing events...\n")
-	//for event := range watcher.ResultChan() {
-	//	if event.Type == watch.Added || event.Type == watch.Modified || event.Type == watch.Deleted {
-	//		// Handle the event based on its type and the received object
-	//		// You can cast the object to your custom resource type for further processing
-	//		// event.Object will be of type runtime.Object
-	//		fmt.Printf("Event type: %s, Object type: %T, Object kind: %s, Object info: %+v\n", event.Type, event.Object, event.Object.GetObjectKind().GroupVersionKind().Kind, event.Object)
-	//		typedObj := event.Object.(*unstructured.Unstructured)
-	//		bytes, _ := typedObj.MarshalJSON()
-	//		var crdObj *appstudioApi.Application
-	//		//json.Unmarshal(bytes, &crdObj)
-	//		fmt.Printf("Unstructured: %v\n", bytes)
-	//		fmt.Printf("Unstructured2: %+v\n", crdObj)
-	//		//unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(event.Object)
-	//		//if err != nil {
-	//		//	fmt.Printf("Error: %+v", err)
-	//		//}
-	//		//fmt.Printf("Unstructured: %+v\n", unstructuredObj["status"]["conditions"])
-	//		//// Try to cast the object to your custom type
-	//		//customResource, ok := event.Object.(*appstudioApi.Application)
-	//		////customResource, ok := event.Object.(*eventsv1.Event)
-	//		//if ok {
-	//		//	//// Access conditions through your custom resource type's getter method (if exists)
-	//		//	//conditions := customResource.GetStatus().Conditions
-	//		//	//// Process the conditions list
-	//		//	//for _, condition := range conditions {
-	//		//	//	fmt.Printf("Condition type: %s, Status: %s, Reason: %s\n", condition.Type, condition.Status, condition.Reason)
-	//		//	//}
-	//		//	fmt.Printf("customResource type: %T, content: %+v\n", customResource, customResource)
-	//		//} else {
-	//		//	// Handle unexpected object type
-	//		//	fmt.Printf("Error: %+v %+v\n", ok, customResource)
-	//		//}
-	//		//watchObject, ok := event.Object.(watch.Object)
-	//		//if ok {
-	//		//	// Access the actual resource object from watchObject.Object
-	//		//	resource := watchObject.Object
-	//		//	// Now you can use approach 1 to access conditions based on your resource type
-	//		//	conditions := resource.GetStatus().Conditions
-	//		//	fmt.Printf("Condition %+v", conditions)
-	//		//} else {
-	//		//	// Handle unexpected object type
-	//		//}
-	//	}
-	//	// Handle errors from the channel
-	//	if err3 := watchCtx.Err(); err3 != nil {
-	//		// Handle watch error
-	//		fmt.Printf("Error watching for resource: %v\n", err3)
-	//		// You can choose to retry watching, exit the program, etc. based on your logic
-	//	}
-	//}
-	//// Close the watcher when finished
-	//watcher.Stop()
-	//os.Exit(10)
-
 	for perUserCtx.JourneyRepeatsCounter = 0; perUserCtx.JourneyRepeatsCounter < perUserCtx.Opts.JourneyRepeats; perUserCtx.JourneyRepeatsCounter++ {
 
 		// Start given number of `perApplicationThread()` threads using `journey.PerApplicationSetup()` and wait for them to finish
@@ -261,8 +173,6 @@ func perUserThread(perUserCtx *types.PerUserContext) {
 		}
 
 	}
-
-
 }
 
 // Single application journey (there can be multiple parallel apps per user)
