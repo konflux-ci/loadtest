@@ -3,7 +3,6 @@ module github.com/konflux-ci/loadtest
 go 1.25.0
 
 require (
-	github.com/devfile/library/v2 v2.4.0
 	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17
 	github.com/konflux-ci/e2e-tests v0.0.0-20260506085906-2e394d3dcf2e
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
@@ -76,6 +75,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
+	github.com/devfile/library/v2 v2.4.0 // indirect
 	github.com/docker/cli v29.0.3+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v28.5.2+incompatible // indirect
