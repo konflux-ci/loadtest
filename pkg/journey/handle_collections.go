@@ -1,21 +1,18 @@
 package journey
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
+import "context"
+import "encoding/json"
+import "errors"
+import "fmt"
+import "os"
+import "path/filepath"
 
-	logging "github.com/konflux-ci/loadtest/pkg/logging"
-	types "github.com/konflux-ci/loadtest/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
-	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-
-	k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
+import k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 func getDirName(baseDir, namespace, iteration string) string {
 	return filepath.Join(baseDir, "collected-data", namespace, iteration) + "/"

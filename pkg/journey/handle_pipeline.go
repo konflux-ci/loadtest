@@ -1,19 +1,15 @@
 package journey
 
-import (
-	"fmt"
-	"strings"
-	"time"
+import "fmt"
+import "strings"
+import "time"
 
-	logging "github.com/konflux-ci/loadtest/pkg/logging"
-	types "github.com/konflux-ci/loadtest/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
-	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-
-	utils "github.com/konflux-ci/e2e-tests/pkg/utils"
-
-	pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
-)
+import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
+import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
+import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 
 func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName string) error {
 	interval := time.Second * 20

@@ -1,13 +1,11 @@
 package journey
 
-import (
-	"fmt"
-	"time"
+import "fmt"
+import "time"
 
-	logging "github.com/konflux-ci/loadtest/pkg/logging"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
 
-	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-)
+import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 
 func purgeStage(f *framework.Framework, namespace string) error {
 	var err error

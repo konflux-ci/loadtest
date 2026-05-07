@@ -1,16 +1,13 @@
 package journey
 
-import (
-	"fmt"
-	"time"
+import "fmt"
+import "time"
 
-	logging "github.com/konflux-ci/loadtest/pkg/logging"
-	types "github.com/konflux-ci/loadtest/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
-	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-
-	utils "github.com/konflux-ci/e2e-tests/pkg/utils"
-)
+import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
+import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 func createIntegrationTestScenario(f *framework.Framework, namespace, appName, scenarioGitURL, scenarioRevision, scenarioPathInRepo string) (string, error) {
 	interval := time.Second * 10

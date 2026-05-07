@@ -1,26 +1,20 @@
 package journey
 
-import (
-	"encoding/json"
-	"fmt"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
+import "encoding/json"
+import "fmt"
+import "regexp"
+import "strconv"
+import "strings"
+import "time"
 
-	logging "github.com/konflux-ci/loadtest/pkg/logging"
-	types "github.com/konflux-ci/loadtest/pkg/types"
+import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
-	constants "github.com/konflux-ci/e2e-tests/pkg/constants"
-
-	framework "github.com/konflux-ci/e2e-tests/pkg/framework"
-
-	utils "github.com/konflux-ci/e2e-tests/pkg/utils"
-
-	appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
-
-	pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
-)
+import appstudioApi "github.com/konflux-ci/application-api/api/v1alpha1"
+import constants "github.com/konflux-ci/e2e-tests/pkg/constants"
+import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
+import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
+import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 
 // Parse PR number out of PR url
 func getPRNumberFromPRUrl(prUrl string) (int, error) {
