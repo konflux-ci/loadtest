@@ -2997,3 +2997,11 @@
   test_dir:
   - run-kflux-ocp-p01-2026_04_29T18_50_17_734000000_00_00
   type: logs
+- caused_by: MPC
+  id: mpc_remote_build_failed_due_to_dns_resolution_failure_during_skopeo_container_image_sync
+  note: ''
+  reason: MPC remote build failed due to DNS resolution failure during skopeo container image sync
+  regexp: 'dial tcp: lookup [^ :]+: Temporary failure in name resolution'
+  test_dir:
+  - run-kflux-rhel-p01-2026_05_06T12_00_15_758000000_00_00
+  type: logs
