@@ -1,0 +1,21 @@
+name: Lint AGENTS.md
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+
+jobs:
+  check-line-count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Ensure AGENTS.md is under 60 lines
+        run: |
+          lines=$(wc -l < AGENTS.md)
+          echo "AGENTS.md has $lines lines"
+          if [ "$lines" -ge 60 ]; then
+            echo "::error::AGENTS.md must be under 60 lines (currently $lines)"
+            exit 1
+          fi
