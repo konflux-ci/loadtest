@@ -24,34 +24,29 @@ exported as CSV, analysed by Python scripts, and stored in Horreum.
 
 - Go (main codebase), Python (analysis scripts), Bash (execution/CI scripts)
 
-## Build and validate
+## Testing
+
+For Go code, we do not have any tests, but `go vet` and build needs to pass:
 
 ```bash
 go vet ./...
 go mod vendor && go mod tidy && go run loadtest.go -h
 ```
 
-## Linting
+Bash scripts must pass `shellcheck`:
 
 ```bash
-shellcheck <file.sh>          # Bash scripts must pass shellcheck
-black --check <file.py>       # Python code must pass black
-flake8 <file.py>              # Python code must pass flake8
+shellcheck <file.sh>
 ```
 
-## Testing
+Python code has to pass `black` and `flake8`:
 
-There is no unit test suite yet. The build-and-validate command above is the
-only automated check to verify code correctness. Functional testing requires
-a live Konflux cluster.
-
-## Key patterns
-
-- All timed operations use `logging.Measure()` from `pkg/logging/time_and_log.go`
-- Three nested context types drive concurrency: `PerUserContext` → `PerApplicationContext` → `PerComponentContext`
-- CLI options are defined in `pkg/options/options.go`
+```bash
+black --check <file.py>
+flake8 <file.py>
+```
 
 ## CI
 
-Pull requests are validated by Tekton pipelines (`.tekton/`) and GitHub
-Actions (`.github/workflows/`).
+Pull requests are validated by Konflux Tekton pipelines (`.tekton/`)
+and GitHub Actions (`.github/workflows/`).
