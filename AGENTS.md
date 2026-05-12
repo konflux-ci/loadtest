@@ -26,10 +26,11 @@ exported as CSV, analysed by Python scripts, and stored in Horreum.
 
 ## Testing
 
-For Go code, we do not have any tests, but `go vet` and build needs to pass:
+For Go code, we do not have any tests, but linting and build needs to pass:
 
 ```bash
 go vet ./...
+golangci-lint run ./...
 go mod vendor && go mod tidy && go run loadtest.go -h
 ```
 
