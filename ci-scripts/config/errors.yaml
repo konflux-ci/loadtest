@@ -3056,3 +3056,105 @@
   test_dir:
   - run-stone-stage-p01-2026_05_11T00_59_08_058000000_00_00
   type: logs
+- caused_by: cluster
+  id: task_failed_because_cluster_node_was_low_on_ephemeral_storage
+  note: ''
+  reason: Task failed because cluster node was low on ephemeral-storage
+  regexp: '.message.*The node was low on resource: ephemeral-storage'
+  test_dir:
+  - run-stone-prod-p02-2026_05_12T14_46_52_220000000_00_00
+  type: condition
+- caused_by: quay.io
+  id: build_image_index_task_failed_because_quay_io_returned_503_service_unavailable_when_fetching_config_blob
+  note: ''
+  reason: Build image index task failed because Quay.io returned 503 Service Unavailable when fetching config blob
+  regexp: 'reading info about config blob from.*quay\.io.*fetching blob: received unexpected HTTP status: 503 Service Unavailable'
+  test_dir:
+  - run-stone-stg-rh01-2026_05_12T18_09_23_069000000_00_00
+  type: logs
+- caused_by: gitlab.cee.redhat.com
+  id: build_pipeline_failed_because_git_task_resolver_clone_from_gitlab_cee_required_authentication
+  note: ''
+  reason: Build pipeline failed because git task resolver clone from GitLab CEE required authentication
+  regexp: 'Reason:CouldntGetTask.*resolver type git.*gitlab\.cee\.redhat\.com.*clone error: authentication required'
+  test_dir:
+  - run-stone-prod-p02-2026_05_13T07_20_20_178000000_00_00
+  type: loadtest
+- caused_by: gitlab.cee.redhat.com
+  id: repo_templating_pac_file_update_failed_because_gitlab_cee_returned_error_400
+  note: ''
+  reason: Repo templating PaC file update failed because GitLab CEE returned error 400
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [^:]+: failed to update/create file: PUT https://gitlab.cee.redhat.com/api/[^ ]+/repository/files/[^ :]+: 400 .message: A file with this name doesn.t exist.'
+  test_dir:
+  - run-stone-stage-p01-2026_05_14T16_59_23_100000000_00_00
+  type: loadtest
+- caused_by: image-controller
+  id: create_trusted_artifact_failed_because_quay_io_image_repository_token_was_not_found
+  note: ''
+  reason: Create trusted artifact failed because quay.io image repository token was not found
+  regexp: 'Token not found for quay.io/[^ ]+.*Error response from registry: unauthorized: access to the requested resource is not authorized'
+  test_dir:
+  - run-stone-prod-p01-2026_05_15T12_17_18_670000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: sast_results_upload_failed_because_quay_io_auth_redirected_to_brew_registry_redhat_io_returned_401
+  note: ''
+  reason: SAST results upload failed because quay.io auth redirected to brew.registry.redhat.io returned 401
+  regexp: 'GET .https://brew.registry.redhat.io/auth/[^ ]+.: response status code 401: unauthorized'
+  test_dir:
+  - run-stone-prod-p02-2026_05_15T14_02_38_738000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: mpc_remote_build_failed_to_pull_base_image_because_registry_access_redhat_com_returned_unauthorized
+  note: ''
+  reason: MPC remote build failed to pull base image because registry.access.redhat.com returned unauthorized
+  regexp: 'unable to copy from source docker://registry.access.redhat.com/[^ :]+:.*unauthorized: Access to the requested resource is not authorized'
+  test_dir:
+  - run-kflux-ocp-p01-2026_05_15T13_50_19_368000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: mpc_remote_build_failed_to_pull_builder_image_because_blob_digest_did_not_match
+  note: ''
+  reason: MPC remote build failed to pull builder image because blob digest did not match
+  regexp: 'Trying to pull quay.io/[^ ]+.*copying system image from manifest list: reading blob sha256:[a-f0-9]+: Digest did not match, expected sha256:[a-f0-9]+, got sha256:[a-f0-9]+'
+  test_dir:
+  - run-stone-prod-p02-2026_05_15T18_26_00_008000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: rpm_mock_build_failed_because_registry_access_redhat_com_returned_504_gateway_timeout
+  note: ''
+  reason: RPM mock build failed because registry.access.redhat.com returned 504 Gateway Timeout
+  regexp: 'pinging container registry registry.access.redhat.com: received unexpected HTTP status: 504 Gateway Time-out'
+  test_dir:
+  - run-stone-prod-p02-2026_05_15T19_22_44_154000000_00_00
+  type: logs
+- caused_by: gitlab.cee.redhat.com
+  id: repo_forking_project_deletion_failed_because_gitlab_cee_returned_error_500
+  note: ''
+  reason: Repo forking project deletion failed because GitLab CEE returned error 500
+  regexp: 'Repo forking failed: error deleting project [^ :]+: DELETE https://gitlab.cee.redhat.com/api/[^ :]+: 500 .message: 500 Internal Server Error.'
+  test_dir:
+  - run-stone-prod-p02-2026_05_16T15_20_23_769000000_00_00
+  type: loadtest
+- caused_by: quay.io
+  id: build_image_index_task_failed_because_quay_io_returned_500_internal_server_error_when_fetching_config_blob
+  note: ''
+  reason: Build image index task failed because quay.io returned 500 Internal Server Error when fetching config blob
+  regexp: 'reading info about config blob from.*quay\.io.*fetching blob: received unexpected HTTP status: 500 Internal Server Error'
+  test_dir:
+  - run-kflux-prd-rh03-2026_05_19T03_45_20_278000000_00_00
+  type: logs
+- caused_by: SKIP
+  id: post_test_pod_log_collection_failed_due_to_unauthorized_api_access
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Unauthorized'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
+  id: post_test_event_collection_failed_due_to_unauthorized_api_access
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect events: failed to list events in namespace [^ :]+: Unauthorized'
+  test_dir: []
+  type: loadtest
