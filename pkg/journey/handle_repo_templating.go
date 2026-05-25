@@ -175,12 +175,14 @@ func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgNa
 
 	if strings.Contains(repoUrl, "gitlab.") {
 		// Cleanup if it already exists
+		logging.Logger.Debug("Deleting GitLab repo if exists before forking: %s/%s", targetOrgName, targetName)
 		err = f.AsKubeAdmin.CommonController.Gitlab.DeleteRepositoryIfExists(targetOrgName + "/" + targetName)
 		if err != nil {
 			return "", err
 		}
 
 		// Create fork and make sure it appears
+		logging.Logger.Debug("Forking GitLab repo: %s/%s -> %s/%s", sourceOrgName, sourceName, targetOrgName, targetName)
 		forkedRepoURL, err := f.AsKubeAdmin.CommonController.Gitlab.ForkRepository(sourceOrgName, sourceName, targetOrgName, targetName)
 		if err != nil {
 			return "", err
@@ -189,6 +191,7 @@ func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgNa
 		return forkedRepoURL.WebURL, nil
 	} else {
 		// Cleanup if it already exists
+		logging.Logger.Debug("Deleting GitHub repo if exists before forking: %s/%s", targetOrgName, targetName)
 		err = f.AsKubeAdmin.CommonController.Github.DeleteRepositoryIfExists(targetName)
 		if err != nil {
 			return "", err
@@ -196,6 +199,7 @@ func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgNa
 
 		// Create fork and make sure it appears
 		var forkURL string
+		logging.Logger.Debug("Forking GitHub repo: %s/%s -> %s/%s", sourceOrgName, sourceName, targetOrgName, targetName)
 		err = utils.WaitUntilWithInterval(func() (done bool, err error) {
 			forkRepo, err := f.AsKubeAdmin.CommonController.Github.ForkRepositoryWithOrgs(sourceOrgName, sourceName, targetOrgName, targetName)
 			if err != nil {
