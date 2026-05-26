@@ -3158,3 +3158,19 @@
   regexp: 'Failed to collect events: failed to list events in namespace [^ :]+: Unauthorized'
   test_dir: []
   type: loadtest
+- caused_by: task
+  id: windows_build_failed_because_npm_command_was_not_recognized_by_powershell
+  note: ''
+  reason: Windows build failed because npm command was not recognized by PowerShell
+  regexp: The term .npm. is not recognized as the name of a cmdlet
+  test_dir:
+  - run-stone-stage-p01-2026_05_23T04_45_41_033000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: image_pull_failed_due_to_quay_cdn_tls_internal_error_during_image_config_parsing
+  note: ''
+  reason: Image pull failed due to Quay CDN TLS internal error during image config parsing
+  regexp: 'Error: copying system image from manifest list: parsing image configuration: Get .https://cdn[0-9]+\.quay\.io/[^ ]+.: remote error: tls: internal error'
+  test_dir:
+  - run-kflux-ocp-p01-2026_05_25T14_50_19_412000000_00_00
+  type: logs
