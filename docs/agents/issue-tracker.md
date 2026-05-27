@@ -8,8 +8,7 @@ Issues for this repo are tracked in Jira.
 
 ## Conventions
 
-- Issues are managed via the Jira web UI or API — there is no CLI tool configured.
-- When referencing an issue, use the full key (e.g. `KONFLUX-1234`).
+- Issues are managed via the Jira web UI or API or `acli` CLI tool.
 - New issues should have the component set to "Performance".
 
 ## When a skill says "publish to the issue tracker"
