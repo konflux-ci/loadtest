@@ -1,53 +1,37 @@
 # AGENTS.md
 
-For full project documentation, see [README.md](README.md).
+This file follows the [Global Engineering AGENTS.md best practices](https://gitlab.cee.redhat.com/global-engineering/wg-agentic-sdlc/-/tree/main/best-practices/repo-scaffolding?ref_type=heads).
 
-## Project overview
+Go-based load testing tool for Konflux CI/CD. For full project documentation, see [README.md](README.md).
 
-Go-based load testing tool for the Konflux CI/CD platform. It simulates
-realistic user journeys (create applications, components, build pipelines,
-integration tests, releases) with configurable concurrency. Results are
-exported as CSV, analysed by Python scripts, and stored in Horreum.
+## Build & Test Commands
 
-## Repository layout
-
-- `loadtest.go` — CLI entry point
-- `pkg/journey/` — user journey handlers (users, apps, components, pipelines, tests, releases)
-- `pkg/logging/` — measurement wrappers and CSV output
-- `pkg/options/` — CLI flag definitions
-- `pkg/types/` — context types (PerUser, PerApp, PerComp)
-- `evaluate.py`, `errors.py` — post-run analysis scripts
-- `run.sh`, `run-stage.sh` — execution scripts
-- `ci-scripts/` — CI helpers and error-pattern config
-
-## Languages and tools
-
-- Go (main codebase), Python (analysis scripts), Bash (execution/CI scripts)
-
-## Testing
-
-For Go code, we do not have any tests, but linting and build needs to pass:
-
+Go — lint, build, and verify:
 ```bash
 go vet ./...
 golangci-lint run ./...
 go mod vendor && go mod tidy && go run loadtest.go -h
 ```
 
-Bash scripts must pass `shellcheck`:
-
+Bash — lint a single script:
 ```bash
 shellcheck <file.sh>
 ```
 
-Python code has to pass `black` and `flake8`:
-
+Python — lint a single file:
 ```bash
 black --check <file.py>
 flake8 <file.py>
 ```
 
+There are no Go unit tests. Verification relies on linting and a successful build.
+
+## Key Conventions
+
+- Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.
+- CSV output files and Python analysis scripts (`evaluate.py`, `errors.py`) are tightly coupled — column names in Go logging must match what Python expects.
+- Error pattern matching rules live in `ci-scripts/probe-errors-detector/` as YAML; these are maintained separately from Go code.
+
 ## CI
 
-Pull requests are validated by Konflux Tekton pipelines (`.tekton/`)
-and GitHub Actions (`.github/workflows/`).
+Pull requests are validated by Konflux Tekton pipelines (`.tekton/`) and GitHub Actions (`.github/workflows/`).
