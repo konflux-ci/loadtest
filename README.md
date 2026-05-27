@@ -236,6 +236,25 @@ loadtest/
     └── loadtest.yaml
 ```
 
+## AI Agent Skills
+
+This repo uses the [`skills` CLI](https://github.com/mattpocock/skills) to manage reusable AI agent skills. Installed skills live in `.agents/skills/` with symlinks in `.claude/skills/`, and versions are tracked in `skills-lock.json`.
+
+After cloning, restore installed skills from the lock file:
+
+```bash
+npx skills@latest experimental_install
+```
+
+Other useful commands:
+
+```bash
+npx skills@latest list                      # List installed skills
+npx skills@latest add mattpocock/skills     # Add skills from a package
+npx skills@latest update                    # Update to latest versions
+npx skills@latest remove                    # Remove a skill
+```
+
 ## Related Projects
 
 - **Konflux Perf&Scale team repository**: dashboards definitions and tools - https://github.com/redhat-appstudio/perfscale/
