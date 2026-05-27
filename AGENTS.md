@@ -35,3 +35,13 @@ There are no Go unit tests. Verification relies on linting and a successful buil
 ## CI
 
 Pull requests are validated by Konflux Tekton pipelines (`.tekton/`) and GitHub Actions (`.github/workflows/`).
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in Jira at redhat.atlassian.net, project KONFLUX, component "Performance". See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout (one `CONTEXT.md` at repo root). See `docs/agents/domain.md`.
