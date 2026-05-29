@@ -140,8 +140,15 @@ status_data.py \
 
 } 2>&1 | tee "${ARTIFACT_DIR}/collect-results.log"
 
+errors=$(jq -r '.results.measurements.KPI.errors // "null"' "${ARTIFACT_DIR}/load-test.json")
+
+if [[ "$errors" != "null" ]] && [[ "$errors" -eq 0 ]] && [[ -d "${ARTIFACT_DIR}/collected-data" ]]; then
+    echo "[$(date --utc -Ins)] Test passed, compressing collected-data/ to save storage"
+    tar -cf "${ARTIFACT_DIR}/collected-data.tar.xz" -I 'xz -9' -C "${ARTIFACT_DIR}" collected-data/
+    rm -rf "${ARTIFACT_DIR}/collected-data"
+fi
+
 if [[ "${OPTION_EXIT_ON_FAIL}" == "true" ]]; then
-    errors=$(jq -r '.results.measurements.KPI.errors // "null"' "${ARTIFACT_DIR}/load-test.json")
     if [[ "$errors" == "null" ]]; then
         echo "[$(date --utc -Ins)] Error: .results.measurements.KPI.errors is missing in ${ARTIFACT_DIR}/load-test.json"
         exit "$OPTION_EXIT_CODE_ON_ERROR"
