@@ -15,6 +15,7 @@ venv/
 users*.json
 
 # Temp data
+bin/
 OLD/
 run-*/
 
