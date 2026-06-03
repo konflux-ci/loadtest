@@ -102,12 +102,7 @@ make bootstrap
 
 **Run all checks:**
 ```bash
-make check
-```
-
-**Format code:**
-```bash
-make fmt
+make check-all
 ```
 
 ## Metrics & Measurement
