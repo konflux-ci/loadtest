@@ -6,25 +6,24 @@ Go-based load testing tool for Konflux CI/CD. For full project documentation, se
 
 ## Build & Test Commands
 
-Go — lint, build, and verify:
+The project uses `pre-commit` for all code checks (Go, Shell, Python, YAML).
+
+Bootstrap development environment:
 ```bash
-go vet ./...
-golangci-lint run ./...
-go mod vendor && go mod tidy && go run loadtest.go -h
+make bootstrap
 ```
 
-Bash — lint a single script:
+Run all checks:
 ```bash
-shellcheck <file.sh>
+make check
 ```
 
-Python — lint a single file:
+Build the tool:
 ```bash
-black --check <file.py>
-flake8 <file.py>
+make go-build
 ```
 
-There are no Go unit tests. Verification relies on linting and a successful build.
+Verification relies on linting and a successful build as there are no Go unit tests.
 
 ## Key Conventions
 

@@ -91,6 +91,25 @@ This automatically records:
 
 Check `go run loadtest.go --help` for all possible options.
 
+## Development
+
+The project uses `pre-commit` to ensure code quality across Go, Shell, Python, and YAML files.
+
+**Bootstrap development environment:**
+```bash
+make bootstrap
+```
+
+**Run all checks:**
+```bash
+make check
+```
+
+**Format code:**
+```bash
+make fmt
+```
+
 ## Metrics & Measurement
 
 ### KPI Calculation
