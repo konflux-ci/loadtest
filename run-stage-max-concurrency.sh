@@ -2,6 +2,7 @@
 
 # Stage high-concurrency variant
 
+# shellcheck disable=SC1091
 source "$( dirname "$0" )/user-prefix.sh"
 
 timestamp=$(date +%Y_%m_%dT%H_%M_%S)
