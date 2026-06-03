@@ -6,7 +6,7 @@ set -o pipefail
 
 # shellcheck disable=SC1090
 source "/usr/local/ci-secrets/redhat-appstudio-load-test/load-test-scenario.${1:-concurrent}"
-source "$( dirname $0 )/../user-prefix.sh"
+source "$( dirname "$0" )/../user-prefix.sh"
 
 pushd "${2:-./tests/load-tests}"
 

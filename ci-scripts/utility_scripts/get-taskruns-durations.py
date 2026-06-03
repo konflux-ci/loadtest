@@ -20,7 +20,7 @@ def str2date(date_str):
     else:
         try:
             return datetime.datetime.fromisoformat(date_str)
-        except ValueError:   # Python before 3.11
+        except ValueError:  # Python before 3.11
             # Convert "...Z" to "...+00:00"
             date_str = date_str.replace("Z", "+00:00")
             # Remove microseconds part
@@ -90,7 +90,9 @@ class Something:
 
                 if data["kind"] == "List":
                     if "items" not in data:
-                        logging.info(f"Skipping {datafile} as it does not contain items")
+                        logging.info(
+                            f"Skipping {datafile} as it does not contain items"
+                        )
                         continue
 
                     for i in data["items"]:
@@ -108,7 +110,9 @@ class Something:
         elif data["kind"] == "TaskRun":
             self._populate_taskrun(data)
         else:
-            logging.debug(f"Skipping item because it has unexpected kind {data['kind']}")
+            logging.debug(
+                f"Skipping item because it has unexpected kind {data['kind']}"
+            )
             return
 
     def _populate_pipelinerun(self, pr):
@@ -119,24 +123,36 @@ class Something:
             pr_creation_time = str2date(pr["metadata"]["creationTimestamp"])
             pr_start_time = str2date(pr["status"]["startTime"])
             pr_completion_time = str2date(pr["status"]["completionTime"])
-            _pr_succeeded = [cond for cond in pr["status"]["conditions"] if cond["type"] == "Succeeded"]
-            assert len(_pr_succeeded) == 1, f"PipelineRun should have exactly one 'Succeeded' condition: {_pr_succeeded}"
+            _pr_succeeded = [
+                cond
+                for cond in pr["status"]["conditions"]
+                if cond["type"] == "Succeeded"
+            ]
+            assert len(_pr_succeeded) == 1, (
+                f"PipelineRun should have exactly one 'Succeeded' condition: {_pr_succeeded}"
+            )
             pr_result = _pr_succeeded[0]["status"] == "True"
-            pr_tasks = [t["name"] for t in pr["status"]["childReferences"] if t["kind"] == "TaskRun"]
+            pr_tasks = [
+                t["name"]
+                for t in pr["status"]["childReferences"]
+                if t["kind"] == "TaskRun"
+            ]
         except KeyError as e:
             logging.info(f"PipelineRun incomplete, skipping: {e}, {str(pr)[:200]}")
             self.pr_skips += 1
             return
 
-        self.data_pipelineruns.append({
-            "name": pr_name,
-            "type": pr_type,
-            "result": pr_result,
-            "creation": pr_creation_time,
-            "start": pr_start_time,
-            "completion": pr_completion_time,
-            "tasks": pr_tasks,
-        })
+        self.data_pipelineruns.append(
+            {
+                "name": pr_name,
+                "type": pr_type,
+                "result": pr_result,
+                "creation": pr_creation_time,
+                "start": pr_start_time,
+                "completion": pr_completion_time,
+                "tasks": pr_tasks,
+            }
+        )
 
     def _populate_taskrun(self, tr):
         """Load TaskRun (and it's steps)."""
@@ -147,26 +163,46 @@ class Something:
             tr_creation_time = str2date(tr["metadata"]["creationTimestamp"])
             tr_start_time = str2date(tr["status"]["startTime"])
             tr_completion_time = str2date(tr["status"]["completionTime"])
-            _tr_succeeded = [cond for cond in tr["status"]["conditions"] if cond["type"] == "Succeeded"]
-            assert len(_tr_succeeded) == 1, f"TaskRun should have exactly one 'Succeeded' condition: {_tr_succeeded}"
+            _tr_succeeded = [
+                cond
+                for cond in tr["status"]["conditions"]
+                if cond["type"] == "Succeeded"
+            ]
+            assert len(_tr_succeeded) == 1, (
+                f"TaskRun should have exactly one 'Succeeded' condition: {_tr_succeeded}"
+            )
             tr_result = _tr_succeeded[0]["status"] == "True"
 
             tr_platform = None
             if "params" in tr["spec"]:
                 for p in tr["spec"]["params"]:
-                    if p["name"] in ("PLATFORM", "image-arch", "image-platform", "platform"):
+                    if p["name"] in (
+                        "PLATFORM",
+                        "image-arch",
+                        "image-platform",
+                        "platform",
+                    ):
                         tr_platform = p["value"]
                         break
 
             tr_steps = {}
             for s in tr["status"]["steps"]:
                 try:
-                    if s["terminationReason"] == "Completed" and s["terminated"]["exitCode"] == 0 and s["terminated"]["reason"] == "Completed":
+                    if (
+                        s["terminationReason"] == "Completed"
+                        and s["terminated"]["exitCode"] == 0
+                        and s["terminated"]["reason"] == "Completed"
+                    ):
                         s_result = True
                     else:
                         s_result = False
-                    if s["terminated"]["startedAt"] is None or s["terminated"]["finishedAt"] is None:
-                        raise KeyError("Field terminated.startedAt and/or terminated.finishedAt is None")
+                    if (
+                        s["terminated"]["startedAt"] is None
+                        or s["terminated"]["finishedAt"] is None
+                    ):
+                        raise KeyError(
+                            "Field terminated.startedAt and/or terminated.finishedAt is None"
+                        )
                     tr_steps[s["container"]] = {
                         "started": str2date(s["terminated"]["startedAt"]),
                         "finished": str2date(s["terminated"]["finishedAt"]),
@@ -181,17 +217,19 @@ class Something:
             self.tr_skips += 1
             return
 
-        self.data_taskruns.append({
-            "name": tr_name,
-            "task": tr_task,
-            "pipelinerun": tr_pipelinerun,
-            "result": tr_result,
-            "creation": tr_creation_time,
-            "start": tr_start_time,
-            "completion": tr_completion_time,
-            "platform": tr_platform,
-            "steps": tr_steps,
-        })
+        self.data_taskruns.append(
+            {
+                "name": tr_name,
+                "task": tr_task,
+                "pipelinerun": tr_pipelinerun,
+                "result": tr_result,
+                "creation": tr_creation_time,
+                "start": tr_start_time,
+                "completion": tr_completion_time,
+                "platform": tr_platform,
+                "steps": tr_steps,
+            }
+        )
 
     def _dump_as_csv(self, name, table, table_header):
         name_full = os.path.join(self.data_dir, name)
@@ -232,14 +270,18 @@ class Something:
         for t in existing:
             # If both ends are inside of existing interval, we ignore it
             if t[start] <= new[start] <= t[end] and t[start] <= new[end] <= t[end]:
-                logging.info(f"Interval {self._format_interval(new)} is inside of member {self._format_interval(t)}, no action needed")
-                return existing   # no more processing needed
+                logging.info(
+                    f"Interval {self._format_interval(new)} is inside of member {self._format_interval(t)}, no action needed"
+                )
+                return existing  # no more processing needed
 
             # If start is inside existing interval, but end is outside of it,
             # we extend existing interval
             if t[start] <= new[start] <= t[end]:
                 if new[end] > t[end]:
-                    logging.info(f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to right of it and need to recompute")
+                    logging.info(
+                        f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to right of it and need to recompute"
+                    )
                     existing.remove(t)
                     t[end] = new[end]
                     return self._merge_time_interval(t, existing)
@@ -248,14 +290,18 @@ class Something:
             # we extend existing interval
             if t[start] <= new[end] <= t[end]:
                 if new[start] < t[start]:
-                    logging.info(f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to left of it and need to recompute")
+                    logging.info(
+                        f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to left of it and need to recompute"
+                    )
                     existing.remove(t)
                     t[start] = new[start]
                     return self._merge_time_interval(t, existing)
 
         # If new interval did not collided with none of existing ones,
         # just add it to the list
-        logging.info(f"Interval {self._format_interval(new)} does not collide with any member, adding it")
+        logging.info(
+            f"Interval {self._format_interval(new)} does not collide with any member, adding it"
+        )
         return existing + [new]
 
     def doit(self):
@@ -278,14 +324,18 @@ class Something:
         for tr in self.data_taskruns:
             # Check if TR's PR was correctly loaded
             if tr["pipelinerun"] not in data:
-                logging.warning(f"TaskRuns {tr['name']} pipelinerun {tr['pipelinerun']} was not loaded, skipping it")
+                logging.warning(
+                    f"TaskRuns {tr['name']} pipelinerun {tr['pipelinerun']} was not loaded, skipping it"
+                )
                 self.pr_skips += 1
                 continue
 
             # Check if TR's task is expected by TR's PR
             if tr["name"] not in data[tr["pipelinerun"]]["tasks"]:
-                logging.error(f"TaskRuns {tr['name']} ({tr['task']}) missing in pipelinerun {tr['pipelinerun']}, this is strange")
-                sys.exit(1)   # If this happened, it is very strange
+                logging.error(
+                    f"TaskRuns {tr['name']} ({tr['task']}) missing in pipelinerun {tr['pipelinerun']}, this is strange"
+                )
+                sys.exit(1)  # If this happened, it is very strange
 
             data[tr["pipelinerun"]]["taskruns"][tr["name"]] = {
                 "task": tr["task"],
@@ -302,19 +352,17 @@ class Something:
             expected_trs = set(pr_data["tasks"])
             current_trs = set(list(pr_data["taskruns"].keys()))
             if expected_trs != current_trs:
-                logging.warning(f"Not all pipelinerun {pr_name} task runs were loaded: {expected_trs - current_trs}")
+                logging.warning(
+                    f"Not all pipelinerun {pr_name} task runs were loaded: {expected_trs - current_trs}"
+                )
                 self.tr_skips += len(expected_trs) - len(current_trs)
 
         # Collect data
         result = {
-            "pipelineruns": {
-            },
-            "taskruns": {
-            },
-            "platformtaskruns": {
-            },
-            "steps": {
-            },
+            "pipelineruns": {},
+            "taskruns": {},
+            "platformtaskruns": {},
+            "steps": {},
         }
         for pr_name, pr_data in data.items():
             pr_id = pr_data["type"]
@@ -339,13 +387,17 @@ class Something:
             # Composing list of TRs intervals to get idle time later
             pr_tr_intervals = []
             for tr_name, tr_data in pr_data["taskruns"].items():
-                pr_tr_intervals = self._merge_time_interval([tr_data["creation"], tr_data["completion"]], pr_tr_intervals)
+                pr_tr_intervals = self._merge_time_interval(
+                    [tr_data["creation"], tr_data["completion"]], pr_tr_intervals
+                )
 
             pr_result = "passed" if pr_data["result"] else "failed"
             pr_duration = pr_data["completion"] - pr_data["creation"]
             pr_running = pr_data["completion"] - pr_data["start"]
             pr_scheduled = pr_data["start"] - pr_data["creation"]
-            pr_idle = pr_duration - sum([i[1] - i[0] for i in pr_tr_intervals], datetime.timedelta())
+            pr_idle = pr_duration - sum(
+                [i[1] - i[0] for i in pr_tr_intervals], datetime.timedelta()
+            )
 
             result["pipelineruns"][pr_id][pr_result]["duration"].append(pr_duration)
             result["pipelineruns"][pr_id][pr_result]["running"].append(pr_running)
@@ -376,20 +428,24 @@ class Something:
                 # Composing list of TRs intervals to get idle time later
                 tr_s_intervals = []
                 for s_name, s_data in tr_data["steps"].items():
-                    tr_s_intervals = self._merge_time_interval([s_data["started"], s_data["finished"]], tr_s_intervals)
+                    tr_s_intervals = self._merge_time_interval(
+                        [s_data["started"], s_data["finished"]], tr_s_intervals
+                    )
 
                 tr_result = "passed" if tr_data["result"] else "failed"
                 tr_duration = tr_data["completion"] - tr_data["creation"]
                 tr_running = tr_data["completion"] - tr_data["start"]
                 tr_scheduled = tr_data["start"] - tr_data["creation"]
-                tr_idle = tr_duration - sum([i[1] - i[0] for i in tr_s_intervals], datetime.timedelta())
+                tr_idle = tr_duration - sum(
+                    [i[1] - i[0] for i in tr_s_intervals], datetime.timedelta()
+                )
 
                 result["taskruns"][tr_id][tr_result]["duration"].append(tr_duration)
                 result["taskruns"][tr_id][tr_result]["running"].append(tr_running)
                 result["taskruns"][tr_id][tr_result]["scheduled"].append(tr_scheduled)
                 result["taskruns"][tr_id][tr_result]["idle"].append(tr_idle)
 
-                if tr_data['platform'] is not None:
+                if tr_data["platform"] is not None:
                     if ptr_id not in result["platformtaskruns"]:
                         result["platformtaskruns"][ptr_id] = {
                             "passed": {
@@ -405,10 +461,18 @@ class Something:
                                 "idle": [],
                             },
                         }
-                    result["platformtaskruns"][ptr_id][tr_result]["duration"].append(tr_duration)
-                    result["platformtaskruns"][ptr_id][tr_result]["running"].append(tr_running)
-                    result["platformtaskruns"][ptr_id][tr_result]["scheduled"].append(tr_scheduled)
-                    result["platformtaskruns"][ptr_id][tr_result]["idle"].append(tr_idle)
+                    result["platformtaskruns"][ptr_id][tr_result]["duration"].append(
+                        tr_duration
+                    )
+                    result["platformtaskruns"][ptr_id][tr_result]["running"].append(
+                        tr_running
+                    )
+                    result["platformtaskruns"][ptr_id][tr_result]["scheduled"].append(
+                        tr_scheduled
+                    )
+                    result["platformtaskruns"][ptr_id][tr_result]["idle"].append(
+                        tr_idle
+                    )
 
                 for s_name, s_data in tr_data["steps"].items():
                     s_id = f"{tr_id}/{s_name}"
@@ -445,7 +509,9 @@ class Something:
 
                         my_data2[my_stat] = {
                             "mean": statistics.mean(my_data3),
-                            "stdev": statistics.stdev(my_data3) if len(my_data3) >= 2 else 0,
+                            "stdev": statistics.stdev(my_data3)
+                            if len(my_data3) >= 2
+                            else 0,
                             "min": min(my_data3),
                             "max": max(my_data3),
                             "samples": len(my_data3),
