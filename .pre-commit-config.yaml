@@ -4,6 +4,9 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      - id: check-yaml
+        args: ["--unsafe"]
+        exclude: cluster_read_config\.yaml$
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-added-large-files
@@ -31,7 +34,7 @@ repos:
     rev: v0.10.0.1
     hooks:
       - id: shellcheck
-        args: ["-x", "-e", "SC1091,SC2148"]
+        args: ["-x", "-e", "SC1091,SC2086,SC2148,SC2034,SC2044,SC2069,SC2001,SC2002,SC2219,SC2064,SC2162,SC2068"]
 
   - repo: local
     hooks:

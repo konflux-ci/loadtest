@@ -37,7 +37,7 @@ func computeStartupPause(index int, delay, jitter time.Duration) time.Duration {
 		return time.Duration(0)
 	} else {
 		// For delay = 10s and jitter = 3s, this computes random number from 8.5 to 11.5 seconds
-		jitterSec := rand.Float64()*jitter.Seconds() - jitter.Seconds()/2
+		jitterSec := rand.Float64() * jitter.Seconds() - jitter.Seconds() / 2
 		jitterDur := time.Duration(jitterSec) * time.Second
 		return delay + jitterDur
 	}
@@ -65,13 +65,13 @@ func PerUserSetup(fn func(*types.PerUserContext), opts *options.Opts) (string, e
 		logging.Logger.Info("Initiating per user thread %d with pause %v", userIndex, startupPause)
 
 		perUserCtx := &types.PerUserContext{
-			PerUserWG:    perUserWG,
-			UserIndex:    userIndex,
-			StartupPause: startupPause,
-			Opts:         opts,
-			StageUsers:   &stageUsers,
-			Username:     "",
-			Namespace:    "",
+			PerUserWG:        perUserWG,
+			UserIndex:        userIndex,
+			StartupPause:     startupPause,
+			Opts:             opts,
+			StageUsers:       &stageUsers,
+			Username:         "",
+			Namespace:        "",
 		}
 
 		PerUserContexts = append(PerUserContexts, perUserCtx)

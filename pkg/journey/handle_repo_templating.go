@@ -78,9 +78,9 @@ func getRepoFileContent(f *framework.Framework, repoUrl, repoRevision, fileName 
 	}
 
 	if strings.Contains(repoUrl, "gitlab.") {
-		fileContent, err = f.AsKubeAdmin.CommonController.Gitlab.GetFile(repoOrgName+"/"+repoName, fileName, repoRevision)
+		fileContent, err = f.AsKubeAdmin.CommonController.Gitlab.GetFile(repoOrgName + "/" + repoName, fileName, repoRevision)
 		if err != nil {
-			return "", fmt.Errorf("failed to get file %s from repo %s revision %s: %v", fileName, repoOrgName+"/"+repoName, repoRevision, err)
+			return "", fmt.Errorf("failed to get file %s from repo %s revision %s: %v", fileName, repoOrgName + "/" + repoName, repoRevision, err)
 		}
 	} else {
 		fileResponse, err := f.AsKubeAdmin.CommonController.Github.GetFileWithOrg(repoOrgName, repoName, fileName, repoRevision)
@@ -111,9 +111,9 @@ func updateRepoFileContent(f *framework.Framework, repoUrl, repoRevision, fileNa
 	}
 
 	if strings.Contains(repoUrl, "gitlab.") {
-		commitSha, err = f.AsKubeAdmin.CommonController.Gitlab.UpdateFile(repoOrgName+"/"+repoName, fileName, fileContent, repoRevision)
+		commitSha, err = f.AsKubeAdmin.CommonController.Gitlab.UpdateFile(repoOrgName + "/" + repoName, fileName, fileContent, repoRevision)
 		if err != nil {
-			return "", fmt.Errorf("failed to update file %s in repo %s revision %s: %v", fileName, repoOrgName+"/"+repoName, repoRevision, err)
+			return "", fmt.Errorf("failed to update file %s in repo %s revision %s: %v", fileName, repoOrgName + "/" + repoName, repoRevision, err)
 		}
 	} else {
 		fileResponse, err := f.AsKubeAdmin.CommonController.Github.GetFile(repoName, fileName, repoRevision)
@@ -135,7 +135,7 @@ func updateRepoFileContent(f *framework.Framework, repoUrl, repoRevision, fileNa
 // Template file from source repo and dir to '.tekton/...' in component repo, expanding placeholders (even in file name), no matter if on GitLab or GitHub
 // Returns SHA of the commit
 func templateRepoFile(f *framework.Framework, repoUrl, repoRevision, sourceRepo, sourceRepoDir, fileName string, placeholders *map[string]string) (string, error) {
-	fileContent, err := getRepoFileContent(f, sourceRepo, "main", sourceRepoDir+fileName)
+	fileContent, err := getRepoFileContent(f, sourceRepo, "main", sourceRepoDir + fileName)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +145,7 @@ func templateRepoFile(f *framework.Framework, repoUrl, repoRevision, sourceRepo,
 		fileName = strings.ReplaceAll(fileName, key, value)
 	}
 
-	commitSha, err := updateRepoFileContent(f, repoUrl, repoRevision, ".tekton/"+fileName, fileContent)
+	commitSha, err := updateRepoFileContent(f, repoUrl, repoRevision, ".tekton/" + fileName, fileContent)
 	if err != nil {
 		return "", err
 	}
@@ -208,7 +208,7 @@ func ForkRepo(f *framework.Framework, repoUrl, repoRevision, suffix, targetOrgNa
 			}
 			forkURL = forkRepo.GetHTMLURL()
 			return true, nil
-		}, time.Second*20, time.Minute*10)
+		}, time.Second * 20, time.Minute * 10)
 		if err != nil {
 			return "", err
 		}

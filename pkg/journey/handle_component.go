@@ -121,7 +121,7 @@ func validateComponent(f *framework.Framework, namespace, name string) error {
 
 		// If build.appstudio.openshift.io/request annotation is gone, component finished onboarding
 		_, ok := comp.Annotations["build.appstudio.openshift.io/request"]
-		if !ok {
+		if ! ok {
 			logging.Logger.Debug("Finished onboarding of component %s in namespace %s", name, namespace)
 			return true, nil
 		}

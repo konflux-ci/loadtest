@@ -1,70 +1,123 @@
 #!/bin/bash
 
-# Utility functions for result collection
+set -o nounset
+set -o errexit
+set -o pipefail
 
-collect_applications() {
-    local oc_opts=$1
-    local file_json=$2
-    local file_csv=$3
-    local jq_cmd=".items[] | [.metadata.creationTimestamp, .metadata.name, .status.conditions[] | select(.type==\"Ready\").status] | @csv"
 
-    oc get applications.appstudio.redhat.com "$oc_opts" -o json >"$file_json"
-    jq -rc "$jq_cmd" < "$file_json" | sed -e 's,Z,,g' >>"$file_csv"
+csv_delim=";"
+csv_delim_quoted="\"$csv_delim\""
+dt_format='"%Y-%m-%dT%H:%M:%SZ"'
+
+
+function collect_application() {
+    local oc_opts="${1:--A}"
+    local file_stub="${2:-$ARTIFACT_DIR/collected-applications.appstudio.redhat.com}"
+    local file_csv="${file_stub}.csv"
+    local file_json="${file_stub}.json"
+
+    oc get applications.appstudio.redhat.com $oc_opts -o json >"$file_json"
+
+    echo "Application${csv_delim}CreatedTimestamp" >"$file_csv"
+    local jq_cmd=".items[] | (.metadata.name) \
+    + $csv_delim_quoted + (.metadata.creationTimestamp)"
+    cat "$file_json" | jq -rc "$jq_cmd" | sed -e 's,Z,,g' >>"$file_csv"
 }
 
-collect_components() {
-    local oc_opts=$1
-    local file_json=$2
-    local file_csv=$3
-    local jq_cmd=".items[] | [.metadata.creationTimestamp, .metadata.name, .status.conditions[] | select(.type==\"Ready\").status] | @csv"
+function collect_component() {
+    local oc_opts="${1:--A}"
+    local file_stub="${2:-$ARTIFACT_DIR/collected-components.appstudio.redhat.com}"
+    local file_csv="${file_stub}.csv"
+    local file_json="${file_stub}.json"
 
-    oc get components.appstudio.redhat.com "$oc_opts" -o json >"$file_json"
-    jq -rc "$jq_cmd" < "$file_json" | sed -e 's,Z,,g' >>"$file_csv"
+    oc get components.appstudio.redhat.com $oc_opts -o json >"$file_json"
+
+    echo "Component${csv_delim}Namespace${csv_delim}CreationTimestamp" >"$file_csv"
+    jq_cmd=".items[] | (.metadata.name) \
+    + $csv_delim_quoted + (.metadata.namespace) \
+    + $csv_delim_quoted + (.metadata.creationTimestamp)"
+    cat "$file_json" | jq -rc "$jq_cmd" | sed -e 's,Z,,g' >>"$file_csv"
 }
 
-collect_pipelineruns() {
-    local oc_opts=$1
-    local file_json=$2
-    local file_csv=$3
-    local jq_cmd=".items[] | [.metadata.creationTimestamp, .metadata.name, .status.startTime, .status.completionTime, .status.conditions[] | select(.type==\"Succeeded\").status] | @csv"
+function collect_pipelinerun() {
+    local oc_opts="${1:--A}"
+    local file_stub="${2:-$ARTIFACT_DIR/collected-pipelineruns.tekton.dev}"
+    local file_csv="${file_stub}.csv"
+    local file_json="${file_stub}.json"
 
-    oc get pipelineruns.tekton.dev "$oc_opts" -o json >"$file_json"
-    jq "$jq_cmd" < "$file_json" | sed -e "s/\n//g" -e "s/^\"//g" -e "s/\"$//g" -e "s/Z;/;/g" | sort -t ";" -k 13 -r -n >>"$file_csv"
+    oc get pipelineruns.tekton.dev $oc_opts -o json >"$file_json"
+
+    echo "PipelineRun${csv_delim}Namespace${csv_delim}Succeeded${csv_delim}Reason${csv_delim}Message${csv_delim}Created${csv_delim}Started${csv_delim}FinallyStarted${csv_delim}Completed${csv_delim}Created->Started${csv_delim}Started->FinallyStarted${csv_delim}FinallyStarted->Completed${csv_delim}SucceededDuration${csv_delim}FailedDuration" >"$file_csv"
+    jq_cmd=".items[] | (.metadata.name) \
+    + $csv_delim_quoted + (.metadata.namespace) \
+    + $csv_delim_quoted + (.status.conditions[0].status) \
+    + $csv_delim_quoted + (.status.conditions[0].reason) \
+    + $csv_delim_quoted + (.status.conditions[0].message|split($csv_delim_quoted)|join(\"_\")) \
+    + $csv_delim_quoted + (.metadata.creationTimestamp) \
+    + $csv_delim_quoted + (.status.startTime) \
+    + $csv_delim_quoted + (.status.finallyStartTime) \
+    + $csv_delim_quoted + (.status.completionTime) \
+    + $csv_delim_quoted + (if .status.startTime != null and .metadata.creationTimestamp != null then ((.status.startTime | strptime($dt_format) | mktime) - (.metadata.creationTimestamp | strptime($dt_format) | mktime) | tostring) else \"\" end) \
+    + $csv_delim_quoted + (if .status.finallyStartTime != null and .status.startTime != null then ((.status.finallyStartTime | strptime($dt_format) | mktime) - (.status.startTime | strptime($dt_format) | mktime) | tostring) else \"\" end) \
+    + $csv_delim_quoted + (if .status.completionTime != null and .status.finallyStartTime != null then ((.status.completionTime | strptime($dt_format) | mktime) - (.status.finallyStartTime | strptime($dt_format) | mktime) | tostring) else \"\" end) \
+    + $csv_delim_quoted + (if .status.conditions[0].status == \"True\" and .status.completionTime != null and .metadata.creationTimestamp != null then ((.status.completionTime | strptime($dt_format) | mktime) - (.metadata.creationTimestamp | strptime($dt_format) | mktime) | tostring) else \"\" end) \
+    + $csv_delim_quoted + (if .status.conditions[0].status == \"False\" and .status.completionTime != null and .metadata.creationTimestamp != null then ((.status.completionTime | strptime($dt_format) | mktime) - (.metadata.creationTimestamp | strptime($dt_format) | mktime) | tostring) else \"\" end)"
+    cat "$file_json" | jq "$jq_cmd" | sed -e "s/\n//g" -e "s/^\"//g" -e "s/\"$//g" -e "s/Z;/;/g" | sort -t ";" -k 13 -r -n >>"$file_csv"
 }
 
-collect_taskruns() {
-    local oc_opts=$1
-    local file_json=$2
+function collect_taskrun() {
+    local oc_opts="${1:--A}"
+    local file_stub="${2:-$ARTIFACT_DIR/collected-taskruns.tekton.dev}"
+    local file_json="${file_stub}.json"
 
-    oc get taskruns.tekton.dev "$oc_opts" -o json >"$file_json"
+    oc get taskruns.tekton.dev $oc_opts -o json >"$file_json"
 }
 
-collect_pods() {
-    local oc_opts=$1
-    local file_json=$2
-    local pods_on_nodes_csv=$3
-    local all_pods_distribution_csv=$4
-    local task_pods_distribution_csv=$5
+function collect_pods() {
+    local oc_opts="${1:--A}"
+    local file_stub="${2:-$ARTIFACT_DIR/collected-pods}"
+    local file_json="${file_stub}.json"
+    local file_logs="${file_stub}.log"
 
-    oc get pod "$oc_opts" -o json >"$file_json"
+    oc get pod $oc_opts -o json >"$file_json"
 
-    jq -r ".items[] | [.spec.nodeName, .metadata.namespace, .metadata.name] | @tsv" < "$file_json" | sort -V >>"$pods_on_nodes_csv"
-    jq -r ".items[] | .spec.nodeName" < "$file_json" | sort | uniq -c | sed -e 's,\s\+\([0-9]\+\)\s\+\(.*\),\2;\1,g' >>"$all_pods_distribution_csv"
-    jq -r '.items[] | select(.metadata.labels."appstudio.openshift.io/application" != null).spec.nodeName' < "$file_json" | sort | uniq -c | sed -e 's,\s\+\([0-9]\+\)\s\+\(.*\),\2;\1,g' >>"$task_pods_distribution_csv"
+    pods_on_nodes_csv="${file_stub}-on-nodes.csv"
+    echo "Node;Namespace;Pod" >"$pods_on_nodes_csv"
+    jq_cmd=".items[] | select(.metadata.labels.\"appstudio.openshift.io/application\" != null) \
+    | .spec.nodeName \
+    + $csv_delim_quoted + .metadata.namespace \
+    + $csv_delim_quoted + .metadata.name"
+    cat "$file_json" | jq -r "$jq_cmd" | sort -V >>"$pods_on_nodes_csv"
 
-    oc get pod "$oc_opts" -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers=true | while IFS=$'\n' read -r row; do
-        ns=${row%% *}
-        name=${row##* }
-        echo "Found pod $name in $ns"
+    all_pods_distribution_csv="${file_stub}-distribution.csv"
+    echo "Node;Pods" >"$all_pods_distribution_csv"
+    cat "$file_json" | jq -r ".items[] | .spec.nodeName" | sort | uniq -c | sed -e 's,\s\+\([0-9]\+\)\s\+\(.*\),\2;\1,g' >>"$all_pods_distribution_csv"
+
+    task_pods_distribution_csv="${file_stub}-task-distribution.csv"
+    echo "Node;Pods" >"$task_pods_distribution_csv"
+    cat "$file_json" | jq -r '.items[] | select(.metadata.labels."appstudio.openshift.io/application" != null).spec.nodeName' | sort | uniq -c | sed -e 's,\s\+\([0-9]\+\)\s\+\(.*\),\2;\1,g' >>"$task_pods_distribution_csv"
+
+    oc get pod $oc_opts -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers=true | while IFS=$'\n' read row; do
+        ns=$( echo "$row" | sed 's/\s\+.*$//' )
+        name=$( echo "$row" | sed 's/^.*\s\+//' )
+        echo -e "\n\n##### $ns - $name #####\n\n" >>"$file_logs"
+        oc -n "$ns" logs --prefix=true --all-containers=true --timestamps=true "$name" >>"$file_logs"
     done
 }
 
-collect_events() {
-    local oc_opts=$1
-    local file_json=$2
-    local file_csv=$3
-    local jq_cmd=".items[] | [.lastTimestamp, .metadata.namespace, .involvedObject.kind, .involvedObject.name, .reason, .message] | @csv"
+function collect_nodes() {
+    local file_stub="${1:-$ARTIFACT_DIR/collected-nodes}"
+    local file_csv="${file_stub}.csv"
+    local file_json="${file_stub}.json"
 
-    oc get events "$oc_opts" -o json >"$file_json"
-    jq -r "$jq_cmd" < "$file_json" >>"$file_csv"
+    oc get nodes -o json >"$file_json"
+
+    echo "Node;CPUs;Memory;InstanceType;NodeType;Zone" >"$file_csv"
+    jq_cmd=".items[] | .metadata.name \
+    + $csv_delim_quoted + .status.capacity.cpu \
+    + $csv_delim_quoted + .status.capacity.memory \
+    + $csv_delim_quoted + .metadata.labels.\"node.kubernetes.io/instance-type\" \
+    + $csv_delim_quoted + (if .metadata.labels.\"node-role.kubernetes.io/worker\" != null then \"worker\" else \"master\" end) \
+    + $csv_delim_quoted + .metadata.labels.\"topology.kubernetes.io/zone\""
+    cat "$file_json" | jq -r "$jq_cmd" >>"$file_csv"
 }

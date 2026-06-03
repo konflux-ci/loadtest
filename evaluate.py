@@ -103,9 +103,7 @@ class SinglePass:
 
     def add(self, metric, duration):
         """Adds given metric to data about this pass."""
-        assert metric not in self._metrics, (
-            f"Metric {metric} can not be in current metrics"
-        )
+        assert metric not in self._metrics, f"Metric {metric} can not be in current metrics"
         self._metrics[metric] = duration
 
     def complete(self, expected_metrics):
@@ -139,14 +137,13 @@ def str2date(date_str):
     else:
         try:
             return datetime.datetime.fromisoformat(date_str)
-        except ValueError:  # Python before 3.11
+        except ValueError:   # Python before 3.11
             # Convert "...Z" to "...+00:00"
             date_str = date_str.replace("Z", "+00:00")
             # Remove microseconds part
             date_str = re.sub(r"(.*)(\.\d+)(\+.*)", r"\1\3", date_str)
             # Convert simplified date
             return datetime.datetime.fromisoformat(date_str)
-
 
 def count_stats(data):
     if len(data) == 0:
@@ -166,7 +163,6 @@ def count_stats(data):
             "stdev": statistics.stdev(data) if len(data) >= 2 else -1,
         }
 
-
 def count_stats_when(data):
     if len(data) == 0:
         return {}
@@ -181,9 +177,7 @@ def count_stats_when(data):
         return {
             "min": min(data).isoformat(),
             "max": max(data).isoformat(),
-            "mean": datetime.datetime.fromtimestamp(
-                statistics.mean([i.timestamp() for i in data]), tz=datetime.timezone.utc
-            ).isoformat(),
+            "mean": datetime.datetime.fromtimestamp(statistics.mean([i.timestamp() for i in data]), tz=datetime.timezone.utc).isoformat(),
             "span": (max(data) - min(data)).total_seconds(),
         }
 
@@ -201,19 +195,13 @@ def main():
     to_skip = []
     to_reuse = []
     if options["Stage"]:
-        print(
-            "NOTE: Ignoring CI cluster related metrics because running against non-CI cluster"
-        )
+        print("NOTE: Ignoring CI cluster related metrics because running against non-CI cluster")
         to_skip += METRICS_CI
     if options["TestScenarioGitURL"] == "":
-        print(
-            "NOTE: Ignoring ITS related metrics because they were disabled at test run"
-        )
+        print("NOTE: Ignoring ITS related metrics because they were disabled at test run")
         to_skip += METRICS_ITS
     if options["ReleasePolicy"] == "":
-        print(
-            "NOTE: Ignoring Release related metrics because they were disabled at test run"
-        )
+        print("NOTE: Ignoring Release related metrics because they were disabled at test run")
         to_skip += METRICS_RELEASE
     if options["JourneyReuseApplications"]:
         print("NOTE: Will reuse application metrics as we were reusing applications")
@@ -289,12 +277,10 @@ def main():
     # Now when we have data about all passes, add metrics that had incomplete identifiers (with wildcards)
     for incomplete in rows_incomplete:
         identifier, metric, duration = incomplete
-        found = [
-            v for k, v in stats_passes.items() if SinglePass.i_matches(identifier, k)
-        ]
+        found = [v for k, v in stats_passes.items() if SinglePass.i_matches(identifier, k)]
         for i in found:
             i.add(metric, duration)
-            # print(f"Metric {metric} added from {identifier}")
+            #print(f"Metric {metric} added from {identifier}")
 
     # Now add reused metrics if needed
     for pass_id, pass_data in stats_passes.items():
@@ -302,11 +288,11 @@ def main():
             if reuse_metric not in pass_data:
                 reuse_from_id = pass_id[:3] + (0,)
                 pass_data.add(reuse_metric, stats_passes[reuse_from_id][reuse_metric])
-                # print(f"Metric {reuse_metric} reused from {reuse_from_id} to {pass_id}")
+                #print(f"Metric {reuse_metric} reused from {reuse_from_id} to {pass_id}")
 
-    # print("Raw stats:")
-    # print(json.dumps(stats_raw, indent=4, default=lambda o: '<' + str(o) + '>'))
-    # print(json.dumps({str(k): v for k, v in stats_passes.items()}, indent=4, default=lambda o: '<' + str(o._metrics) + '>'))
+    #print("Raw stats:")
+    #print(json.dumps(stats_raw, indent=4, default=lambda o: '<' + str(o) + '>'))
+    #print(json.dumps({str(k): v for k, v in stats_passes.items()}, indent=4, default=lambda o: '<' + str(o._metrics) + '>'))
 
     stats = {}
     kpi_mean_data = []
@@ -314,20 +300,14 @@ def main():
     kpi_errors = failed_before_start
 
     for m in expected_metrics:
-        stats[m] = {
-            "pass": {"duration": {"samples": 0}, "when": {}},
-            "fail": {"duration": {"samples": 0}, "when": {}},
-        }
+        stats[m] = {"pass": {"duration": {"samples": 0}, "when": {}}, "fail": {"duration": {"samples": 0}, "when": {}}}
         if m in stats_raw:
             stats[m]["pass"]["duration"] = count_stats(stats_raw[m]["pass"]["duration"])
             stats[m]["fail"]["duration"] = count_stats(stats_raw[m]["fail"]["duration"])
             stats[m]["pass"]["when"] = count_stats_when(stats_raw[m]["pass"]["when"])
             stats[m]["fail"]["when"] = count_stats_when(stats_raw[m]["fail"]["when"])
 
-        s = (
-            stats[m]["pass"]["duration"]["samples"]
-            + stats[m]["fail"]["duration"]["samples"]
-        )
+        s = stats[m]["pass"]["duration"]["samples"] + stats[m]["fail"]["duration"]["samples"]
         if s == 0:
             stats[m]["error_rate"] = None
         else:
@@ -345,8 +325,8 @@ def main():
     stats["KPI"]["successes"] = kpi_successes
     stats["KPI"]["errors"] = kpi_errors
 
-    # print("Final stats:")
-    # print(json.dumps(stats, indent=4))
+    #print("Final stats:")
+    #print(json.dumps(stats, indent=4))
 
     print(f"KPI mean: {stats['KPI']['mean']}")
     print(f"KPI successes: {stats['KPI']['successes']}")

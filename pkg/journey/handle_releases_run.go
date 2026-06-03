@@ -35,6 +35,7 @@ func validateReleaseCreation(f *framework.Framework, namespace, snapshotName str
 	return releaseName, err
 }
 
+
 // Wait for release pipeline run to be created
 func validateReleasePipelineRunCreation(f *framework.Framework, namespace, releaseName string) error {
 	logging.Logger.Debug("Waiting for release pipeline for release %s in namespace %s to be created", releaseName, namespace)
@@ -57,6 +58,7 @@ func validateReleasePipelineRunCreation(f *framework.Framework, namespace, relea
 
 	return err
 }
+
 
 // Wait for release pipeline run to succeed
 func validateReleasePipelineRunCondition(f *framework.Framework, namespace, releaseName string) error {
@@ -96,6 +98,7 @@ func validateReleasePipelineRunCondition(f *framework.Framework, namespace, rele
 
 	return err
 }
+
 
 // Wait for Release CR to have a succeeding status
 func validateReleaseCondition(f *framework.Framework, namespace, releaseName string) error {
@@ -140,6 +143,7 @@ func validateReleaseCondition(f *framework.Framework, namespace, releaseName str
 
 	return err
 }
+
 
 func HandleReleaseRun(ctx *types.PerComponentContext) error {
 	if ctx.ParentContext.ParentContext.Opts.ReleasePolicy == "" || !ctx.ParentContext.ParentContext.Opts.WaitRelease {
