@@ -54,3 +54,10 @@ repos:
         language: system
         types: [go]
         pass_filenames: false
+
+      - id: lint-agents-md-size
+        name: lint AGENTS.md size
+        entry: bash -c 'lines=$(wc -l < AGENTS.md); if [ "$lines" -ge 60 ]; then echo "AGENTS.md must be under 60 lines (currently $lines)"; exit 1; fi'
+        language: system
+        files: ^AGENTS\.md$
+        pass_filenames: false
