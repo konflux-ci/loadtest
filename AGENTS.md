@@ -13,14 +13,9 @@ Bootstrap development environment:
 make bootstrap
 ```
 
-Run all checks:
+Run all checks (includes build and tidy):
 ```bash
 make check-all
-```
-
-Build the tool:
-```bash
-make go-build
 ```
 
 Verification relies on linting and a successful build as there are no Go unit tests.

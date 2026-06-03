@@ -55,6 +55,18 @@ repos:
         types: [go]
         pass_filenames: false
 
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: bash -c 'go mod tidy && go mod vendor'
+        language: system
+        pass_filenames: false
+
+      - id: go-build
+        name: go build
+        entry: go build -o bin/loadtest loadtest.go
+        language: system
+        pass_filenames: false
+
       - id: lint-agents-md-size
         name: lint AGENTS.md size
         entry: bash -c 'lines=$(wc -l < AGENTS.md); if [ "$lines" -ge 60 ]; then echo "AGENTS.md must be under 60 lines (currently $lines)"; exit 1; fi'
