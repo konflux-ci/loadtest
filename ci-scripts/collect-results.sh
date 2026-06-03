@@ -2,9 +2,7 @@
 
 # Collects results from a load test run
 
-# shellcheck disable=SC1091
 source "$( dirname "$0" )/utils.sh"
-# shellcheck disable=SC1091
 source "$( dirname "$0" )/user-prefix.sh"
 
 # ARTIFACT_DIR is where results will be stored

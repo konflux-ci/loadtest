@@ -1,4 +1,3 @@
-# shellcheck shell=bash
 # This is supposed to be sourced
 
 export USER_PREFIX="${USER_PREFIX:-testuser}"
