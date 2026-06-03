@@ -34,7 +34,9 @@ class ErrorMatcher:
         self.patterns: list[tuple[str, Pattern, str]] = []
         self._load_config(raw_config_data, rule_type)
 
-    def _load_config(self, raw_config_data: dict[str, Any], rule_type: str | None) -> None:
+    def _load_config(
+        self, raw_config_data: dict[str, Any], rule_type: str | None
+    ) -> None:
         """Loads and compiles regex patterns from a YAML configuration file."""
         for entry in raw_config_data:
             if rule_type and entry.get("type") != rule_type:
@@ -118,10 +120,7 @@ class Analyzer:
 
         for plr in self.find_all_failed_plrs():
             labels = plr.get("metadata", {}).get("labels", {})
-            if (
-                labels.get("pipelines.appstudio.openshift.io/type")
-                == target_label
-            ):
+            if labels.get("pipelines.appstudio.openshift.io/type") == target_label:
                 return plr
         return None
 
@@ -135,9 +134,7 @@ class Analyzer:
 
     def check_task_run(self, ns: str, tr_name: str) -> tuple[bool, str, Path]:
         """Checks a specific TaskRun file for failure conditions."""
-        tr_path = (
-            self.dump_dir / ns / "0" / f"collected-taskrun-{tr_name}.json"
-        )
+        tr_path = self.dump_dir / ns / "0" / f"collected-taskrun-{tr_name}.json"
 
         if not tr_path.exists():
             print(f"WARNING: Missing file: {tr_path}")
@@ -171,9 +168,7 @@ class Analyzer:
         self, ns: str, tr_name: str
     ) -> Generator[tuple[str, str], None, None]:
         """Identifies which containers in a TaskRun have failed."""
-        tr_path = (
-            self.dump_dir / ns / "0" / f"collected-taskrun-{tr_name}.json"
-        )
+        tr_path = self.dump_dir / ns / "0" / f"collected-taskrun-{tr_name}.json"
         data = self.load_json(tr_path)
 
         pod_name = data.get("status", {}).get("podName")
@@ -218,15 +213,9 @@ class Analyzer:
 
                 if is_valid:
                     try:
-                        for pod, container in self.get_failed_containers(
-                            ns, tr_name
-                        ):
-                            log_content = self.read_container_log(
-                                ns, pod, container
-                            )
-                            reason, caused_by = self.plr_matcher.match(
-                                log_content
-                            )
+                        for pod, container in self.get_failed_containers(ns, tr_name):
+                            log_content = self.read_container_log(ns, pod, container)
+                            reason, caused_by = self.plr_matcher.match(log_content)
                             if reason != "SKIP":
                                 reasons.append((reason, caused_by))
                     except FileNotFoundError as e:
@@ -363,17 +352,12 @@ def process_csv_mode(
     stats.dump(output_file)
 
 
-
-
-
 def main():
     """Entry point for the script, handling command line arguments."""
     args = sys.argv[1:]
 
     if len(args) == 4:
-        process_csv_mode(
-            Path(args[0]), Path(args[1]), Path(args[2]), Path(args[3])
-        )
+        process_csv_mode(Path(args[0]), Path(args[1]), Path(args[2]), Path(args[3]))
     else:
         sys.exit(1)
 

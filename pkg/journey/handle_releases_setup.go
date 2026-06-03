@@ -22,7 +22,6 @@ func createReleasePlan(f *framework.Framework, namespace, appName string) (strin
 	return name, nil
 }
 
-
 // Create ReleasePlanAdmission CR
 // Assumes enterprise contract policy and service account with required permissions is already there
 func createReleasePlanAdmission(f *framework.Framework, namespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string) (string, error) {
@@ -36,7 +35,6 @@ func createReleasePlanAdmission(f *framework.Framework, namespace, appName, poli
 
 	return name, nil
 }
-
 
 // Wait for ReleasePlan CR to be created and to have status "Matched"
 func validateReleasePlan(f *framework.Framework, namespace, name string) error {
@@ -69,7 +67,6 @@ func validateReleasePlan(f *framework.Framework, namespace, name string) error {
 	return err
 }
 
-
 // Wait for ReleasePlanAdmission CR to be created and to have status "Matched"
 func validateReleasePlanAdmission(f *framework.Framework, namespace, name string) error {
 	logging.Logger.Debug("Validating release plan admission %s in namespace %s", name, namespace)
@@ -100,7 +97,6 @@ func validateReleasePlanAdmission(f *framework.Framework, namespace, name string
 
 	return err
 }
-
 
 func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	if ctx.ReleasePlanName != "" {
@@ -179,7 +175,6 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	if err != nil {
 		return logging.Logger.Fail(96, "Release Plan Admission failed validation: %v", err)
 	}
-
 
 	logging.Logger.Info("Configured release %s & %s for application %s in namespace %s", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace)
 

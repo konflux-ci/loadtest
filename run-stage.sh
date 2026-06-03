@@ -1,52 +1,59 @@
 #!/bin/bash
 
-set -o nounset
-set -o errexit
-set -o pipefail
+source "$( dirname "$0" )/../utils.sh"
+source "$( dirname "$0" )/../user-prefix.sh"
 
+timestamp=$(date +%Y_%m_%dT%H_%M_%S)
+output_dir=${ARTIFACT_DIR:-/tmp/load-test-$(whoami)-$timestamp}
+mkdir -p "$output_dir"
+
+# Options for the load test tool
 options=""
-[[ -n "${PIPELINE_IMAGE_PULL_SECRETS:-}" ]] && for s in $PIPELINE_IMAGE_PULL_SECRETS; do options="$options --pipeline-image-pull-secrets $s"; done
 
-trap "date -Ins --utc >ended" EXIT
-
-if type loadtest &>/dev/null; then
-    cmd="loadtest"
-    echo "Running loadtest from $( type -p loadtest ) binary"
-else
-    cmd="go run loadtest.go"
-    echo "Running loadtest from $( pwd ) with '$cmd' command"
+if [ -n "${CONCURRENCY}" ]; then
+    options="$options --concurrency=${CONCURRENCY}"
 fi
 
-date -Ins --utc >started
-$cmd \
-    --applications-count "${APPLICATIONS_COUNT:-1}" \
-    --build-pipeline-selector-bundle "${BUILD_PIPELINE_SELECTOR_BUNDLE:-}" \
-    --component-repo "${COMPONENT_REPO:-https://github.com/devfile-samples/devfile-sample-code-with-quarkus}" \
-    --component-repo-revision "${COMPONENT_REPO_REVISION:-main}" \
-    --components-count "${COMPONENTS_COUNT:-1}" \
-    --concurrency "${CONCURRENCY:-1}" \
-    --fork-target "${FORK_TARGET:-}" \
-    --journey-duration "${JOURNEY_DURATION:-1h}" \
-    --journey-repeats "${JOURNEY_REPEATS:-1}" \
-    --log-"${LOGGING_LEVEL:-info}" \
-    --pipeline-repo-templating="${PIPELINE_REPO_TEMPLATING:-false}" \
-    --pipeline-repo-templating-source="${PIPELINE_REPO_TEMPLATING_SOURCE:-}" \
-    --pipeline-repo-templating-source-dir="${PIPELINE_REPO_TEMPLATING_SOURCE_DIR:-}" \
-    --output-dir "${OUTPUT_DIR:-.}" \
-    --purge="${PURGE:-true}" \
-    --quay-repo "${QUAY_REPO:-redhat-user-workloads-stage}" \
-    --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
-    --test-scenario-path-in-repo "${TEST_SCENARIO_PATH_IN_REPO:-pipelines/integration_resolver_pipeline_pass.yaml}" \
-    --test-scenario-revision "${TEST_SCENARIO_REVISION:-main}" \
-    --release-policy "${RELEASE_POLICY:-}" \
-    --release-pipeline-url "${RELEASE_PIPELINE_URL:-https://github.com/konflux-ci/release-service-catalog.git}" \
-    --release-pipeline-revision "${RELEASE_PIPELINE_REVISION:-production}" \
-    --release-pipeline-path "${RELEASE_PIPELINE_PATH:-pipelines/managed/e2e/e2e.yaml}" \
-    --release-ociStorage "${OCI_STORAGE:-quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts-stage}" \
-    --release-pipeline-service-account "${RELEASE_PIPELINE_SERVICE_ACCOUNT:-loadtest-probe-serviceaccount}" \
-    --runprefix "${USER_PREFIX:-undef}" \
-    --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
+if [ -n "${JOURNEY_REPEATS}" ]; then
+    options="$options --journey-repeats=${JOURNEY_REPEATS}"
+fi
+
+if [ -n "${JOURNEY_DURATION}" ]; then
+    options="$options --journey-duration=${JOURNEY_DURATION}"
+fi
+
+if [ -n "${APPLICATIONS_COUNT}" ]; then
+    options="$options --applications-count=${APPLICATIONS_COUNT}"
+fi
+
+if [ -n "${COMPONENTS_COUNT}" ]; then
+    options="$options --components-count=${COMPONENTS_COUNT}"
+fi
+
+if [ -n "${PIPELINES_WAIT}" ]; then
+    options="$options --waitpipelines=${PIPELINES_WAIT}"
+fi
+
+if [ -n "${PIPELINES_TIMEOUT}" ]; then
+    options="$options --pipelinetimeout=${PIPELINES_TIMEOUT}"
+fi
+
+if [ -n "${PURGE}" ]; then
+    options="$options --purge=${PURGE}"
+fi
+
+# Run the load test
+go run loadtest.go \
+    --output-dir="$output_dir" \
+    --username="$USER_PREFIX" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
-    --waitrelease="${WAIT_RELEASE:-true}" \
-    $options \
-    --stage
+    "$options" \
+    2>&1 | tee "$output_dir/load-test.log"
+
+LOADTEST_EXIT_STATUS=${PIPESTATUS[0]}
+
+if [ "${LOADTEST_EXIT_STATUS}" -ne 0 ]; then
+    echo "Load test failed with exit status ${LOADTEST_EXIT_STATUS}"
+fi
+
+exit "${LOADTEST_EXIT_STATUS}"
