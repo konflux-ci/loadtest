@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help bootstrap lint lint-all check fmt \
-       go-build go-lint go-fmt go-vet go-tidy \
+       go-build go-tidy \
        test
 
 # Let Go automatically download the toolchain version required by go.mod.
@@ -15,9 +15,6 @@ help:
 	@echo "  check                - Run all checks (same as lint-all)"
 	@echo "  fmt                  - Format code"
 	@echo "  go-build             - Build the loadtest binary"
-	@echo "  go-lint              - Run golangci-lint"
-	@echo "  go-fmt               - Format Go code"
-	@echo "  go-vet               - Run go vet"
 	@echo "  go-tidy              - Run go mod tidy"
 	@echo "  test                 - Run all checks"
 
@@ -51,15 +48,6 @@ fmt:
 
 go-build:
 	go build -o bin/loadtest loadtest.go
-
-go-lint:
-	golangci-lint run ./...
-
-go-fmt:
-	gofmt -l -w .
-
-go-vet:
-	go vet ./...
 
 go-tidy:
 	go mod tidy && go mod vendor
