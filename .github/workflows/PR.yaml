@@ -11,12 +11,18 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-      - run: go version
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          args: --timeout=10m
-          version: v2.12
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install pre-commit
+        run: uv pip install --system pre-commit
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - name: Run checks
+        run: make check
       - name: Run Gosec Security Scanner
         uses: securego/gosec@v2.26.1
         with:
