@@ -15,7 +15,7 @@ make bootstrap
 
 Run all checks:
 ```bash
-make check
+make check-all
 ```
 
 Build the tool:
