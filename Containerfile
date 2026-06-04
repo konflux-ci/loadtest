@@ -57,8 +57,6 @@ RUN python3 -m pip install -U pip && \
     python3 -m pip install "git+https://github.com/redhat-performance/opl.git#egg=opl-rhcloud-perf-team-core&subdirectory=core" && \
     python3 -m pip install tabulate matplotlib
 # Install our scripts
-COPY run-stage.sh \
-     ./
 COPY ci-scripts/ \
      ./ci-scripts/
 CMD ["sleep", "5d"]
