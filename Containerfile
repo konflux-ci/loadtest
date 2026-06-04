@@ -58,8 +58,6 @@ RUN python3 -m pip install -U pip && \
     python3 -m pip install tabulate matplotlib
 # Install our scripts
 COPY run-stage.sh \
-     evaluate.py \
-     errors.py \
      ./
 COPY ci-scripts/ \
      ./ci-scripts/

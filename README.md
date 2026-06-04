@@ -221,15 +221,14 @@ loadtest/
 │   └── loadtestutils/                   # Helper utilities
 │       └── userutils.go                 # User JSON loader
 │
-├── evaluate.py                          # Post-test analysis script
-├── errors.py                            # Error categorization script
-│
 ├── run.sh                               # Main execution script with profiling
 ├── run-stage.sh                         # Stage environment variant
 │
 ├── cluster_read_config.yaml             # Prometheus queries for monitoring collection
 │
 ├── ci-scripts/                          # CI/CD support scripts
+|   ├── evaluate.py                      # Post-test analysis script
+|   ├── errors.py                        # Error categorization script
 │   ├── config/
 │   │   ├── errors.yaml                  # Error pattern definitions
 │   │   ├── horreum-schema.json          # Horreum metric schema
