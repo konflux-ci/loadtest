@@ -4,14 +4,14 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-# shellcheck disable=SC1090
+# shellcheck disable=SC1090,SC1091
 source "/usr/local/ci-secrets/redhat-appstudio-load-test/load-test-scenario.${1:-concurrent}"
 
 echo "[$(date --utc -Ins)] Collecting load test results"
 
 # Setup directories
 ARTIFACT_DIR=${ARTIFACT_DIR:-artifacts}
-mkdir -p ${ARTIFACT_DIR}
+mkdir -p "${ARTIFACT_DIR}"
 pushd "${2:-./tests/load-tests}"
 
 {
@@ -26,6 +26,7 @@ echo "[$(date --utc -Ins)] Setting up Python venv"
 {
 python3 -m venv venv
 set +u
+# shellcheck source=/dev/null
 source venv/bin/activate
 set -u
 python3 -m pip install -U pip
@@ -74,72 +75,22 @@ status_data.py \
 deactivate
 
 echo "[$(date --utc -Ins)] Collecting additional info"
-mkdir -p $ARTIFACT_DIR/collected-data
-application_stub=$ARTIFACT_DIR/collected-data/collected-applications.appstudio.redhat.com
-component_stub=$ARTIFACT_DIR/collected-data/collected-components.appstudio.redhat.com
-node_stub=$ARTIFACT_DIR/collected-data/collected-nodes
+mkdir -p "${ARTIFACT_DIR}/collected-data"
 
 ## Application service log segments per user app
 echo "[$(date --utc -Ins)] Collecting application service log"
-application_service_log=$ARTIFACT_DIR/application-service.log
+application_service_log="${ARTIFACT_DIR}/application-service.log"
 oc logs -l "control-plane=controller-manager" --tail=-1 -n application-service >"$application_service_log"
 
 ## Collect Tekton profiling data
 if [ "${TEKTON_PERF_ENABLE_CPU_PROFILING:-}" == "true" ] || [ "${TEKTON_PERF_ENABLE_MEMORY_PROFILING:-}" == "true" ]; then
     echo "[$(date --utc -Ins)] Collecting profiling data from Tekton"
-    for pprof_profile in $(find . -name "*.pprof"); do
+    find . -name "*.pprof" | while read -r pprof_profile; do
         file=$(basename "$pprof_profile")
-        go tool pprof -text "$pprof_profile" >"$ARTIFACT_DIR/$file.txt" || true
-        go tool pprof -svg -output="$ARTIFACT_DIR/$file.svg" "$pprof_profile" || true
+        go tool pprof -text "$pprof_profile" >"${ARTIFACT_DIR}/$file.txt" || true
+        go tool pprof -svg -output="${ARTIFACT_DIR}/$file.svg" "$pprof_profile" || true
     done
 fi
-
-#echo "[$(date --utc -Ins)] Installing Tekton Artifact Performance Analysis (tapa)"
-#{
-#tapa_dir=./tapa.git
-#rm -rf "$tapa_dir"
-#git clone https://github.com/gabemontero/tekton-artifact-performance-analysis "$tapa_dir"
-#pushd "$tapa_dir"
-#go mod tidy
-#go mod vendor
-#go build -o tapa . && chmod +x ./tapa
-#popd
-#} &>"${ARTIFACT_DIR}/tapa-installation.log"
-#export PATH="$PATH:$tapa_dir"
-#
-#tapa="tapa -t csv"
-#
-#echo "[$(date --utc -Ins)] Running Tekton Artifact Performance Analysis"
-#tapa_prlist_csv=$ARTIFACT_DIR/tapa.prlist.csv
-#tapa_trlist_csv=$ARTIFACT_DIR/tapa.trlist.csv
-#tapa_podlist_csv=$ARTIFACT_DIR/tapa.podlist.csv
-#tapa_podlist_containers_csv=$ARTIFACT_DIR/tapa.podlist.containers.csv
-#tapa_all_csv=$ARTIFACT_DIR/tapa.all.csv
-#tapa_tmp=tapa.tmp
-#
-#sort_csv() {
-#    if [ -f "$1" ]; then
-#        head -n1 "$1" >"$2"
-#        tail -n+2 "$1" | sort -t ";" -k 2 -r -n >>"$2"
-#    else
-#        echo "WARNING: File $1 not found!"
-#    fi
-#}
-#
-#$tapa prlist "${pipelinerun_stub}.json" >"$tapa_tmp"
-#sort_csv "$tapa_tmp" "$tapa_prlist_csv"
-#
-#$tapa trlist "${taskrun_stub}.json" >"$tapa_tmp"
-#sort_csv "$tapa_tmp" "$tapa_trlist_csv"
-#
-#$tapa podlist "${pod_stub}.json" >"$tapa_tmp"
-#sort_csv "$tapa_tmp" "$tapa_podlist_csv"
-#
-#$tapa podlist --containers-only "${pod_stub}.json" >"$tapa_tmp"
-#sort_csv "$tapa_tmp" "$tapa_podlist_containers_csv"
-#
-#$tapa all "${pipelinerun_stub}.json" "${taskrun_stub}.json" "${pod_stub}.json" >"$tapa_tmp"
-#sort_csv "$tapa_tmp" "$tapa_all_csv"
 
 } 2>&1 | tee "${ARTIFACT_DIR}/collect-results.log"
 

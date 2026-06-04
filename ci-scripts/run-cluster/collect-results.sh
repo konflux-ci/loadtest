@@ -8,11 +8,11 @@ echo "[$(date --utc -Ins)] Collecting load test results"
 
 # Setup directories
 ARTIFACT_DIR=${ARTIFACT_DIR:-artifacts}
-mkdir -p ${ARTIFACT_DIR}
+mkdir -p "${ARTIFACT_DIR}"
 pushd "${2:-./tests/load-tests}"
 
 # Construct $PROMETHEUS_HOST by extracting BASE_URL from $MEMBER_CLUSTER
-BASE_URL=$(echo $MEMBER_CLUSTER | grep -oP 'https://api\.\K[^:]+')
+BASE_URL=$(echo "$MEMBER_CLUSTER" | grep -oP 'https://api\.\K[^:]+')
 PROMETHEUS_HOST="thanos-querier-openshift-monitoring.apps.$BASE_URL"
 TOKEN=${OCP_PROMETHEUS_TOKEN}
 
@@ -28,6 +28,7 @@ echo "[$(date --utc -Ins)] Setting up Python venv"
 {
 python3 -m venv venv
 set +u
+# shellcheck source=/dev/null
 source venv/bin/activate
 set -u
 python3 -m pip install -U pip

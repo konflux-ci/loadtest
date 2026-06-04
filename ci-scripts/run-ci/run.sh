@@ -41,7 +41,7 @@ if [ "${TEKTON_PERF_ENABLE_MEMORY_PROFILING:-}" == "true" ]; then
 fi
 
 ## Switch KubeScheduler Debugging on
-if [ -n "$KUBE_SCHEDULER_LOG_LEVEL" ]; then
+if [ -n "${KUBE_SCHEDULER_LOG_LEVEL:-}" ]; then
     echo "Checking KubeScheduler log level"
     if [ "$(oc get KubeScheduler cluster -o jsonpath="{.spec.logLevel}")" == "$KUBE_SCHEDULER_LOG_LEVEL" ]; then
         echo "KubeScheduler log level is already at $KUBE_SCHEDULER_LOG_LEVEL level"
@@ -54,13 +54,13 @@ if [ -n "$KUBE_SCHEDULER_LOG_LEVEL" ]; then
     echo "Waiting for all kube scheduler pods to finish NodeInstallerProgressing"
     oc wait --for=condition=NodeInstallerProgressing=False kubescheduler/cluster -n openshift-kube-scheduler --timeout=900s
     echo "All kube scheduler pods are now at log level $KUBE_SCHEDULER_LOG_LEVEL, starting to capture logs"
-    oc logs -f -n openshift-kube-scheduler --prefix -l app=openshift-kube-scheduler --tail=-1 2>&1 >"$output_dir/openshift-kube-scheduler.log" &
+    oc logs -f -n openshift-kube-scheduler --prefix -l app=openshift-kube-scheduler --tail=-1 >"$output_dir/openshift-kube-scheduler.log" 2>&1 &
     KUBE_SCHEDULER_LOG_PID=$!
 fi
 
 ## Run the actual load test
-options=""
-[[ -n "${PIPELINE_IMAGE_PULL_SECRETS:-}" ]] && for s in $PIPELINE_IMAGE_PULL_SECRETS; do options="$options --pipeline-image-pull-secrets $s"; done
+options=()
+[[ -n "${PIPELINE_IMAGE_PULL_SECRETS:-}" ]] && for s in $PIPELINE_IMAGE_PULL_SECRETS; do options+=("--pipeline-image-pull-secrets" "$s"); done
 date -Ins --utc >started
 go run loadtest.go \
     --applications-count "${APPLICATIONS_COUNT:-1}" \
@@ -87,12 +87,12 @@ go run loadtest.go \
     --username "${USER_PREFIX:-testuser}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
-    $options \
+    "${options[@]}" \
     2>&1 | tee load-test.log
 
 # Capture and exit if there are unexpected errors in loadtest.go
 LOADTEST_EXIT_STATUS=${PIPESTATUS[0]}
-if [ ${LOADTEST_EXIT_STATUS} -ne 0 ]; then
+if [ "${LOADTEST_EXIT_STATUS}" -ne 0 ]; then
     echo "[$(date --utc -Ins)] loadtest.go exited with non-zero (${LOADTEST_EXIT_STATUS}) status code."
     exit 1
 fi
@@ -102,7 +102,7 @@ date -Ins --utc >ended
 ## Finish Tekton profiling
 if [ "${TEKTON_PERF_ENABLE_CPU_PROFILING:-}" == "true" ] || [ "${TEKTON_PERF_ENABLE_MEMORY_PROFILING:-}" == "true" ]; then
     echo "Waiting for the Tekton profiling to finish up to ${TEKTON_PERF_PROFILE_CPU_PERIOD}s"
-    for pid_file in $(find $output_dir -name 'tekton*.pid'); do
+    find "$output_dir" -name 'tekton*.pid' | while read -r pid_file; do
         wait "$(cat "$pid_file")"
         rm -rvf "$pid_file"
     done
@@ -125,7 +125,7 @@ if [ "${TEKTON_PERF_ENABLE_CPU_PROFILING:-}" == "true" ] || [ "${TEKTON_PERF_ENA
 fi
 
 ## Stop collecting KubeScheduler log
-if [ -n "$KUBE_SCHEDULER_LOG_LEVEL" ]; then
+if [ -n "${KUBE_SCHEDULER_LOG_LEVEL:-}" ]; then
     echo "Killing kube collector log collector"
-    kill "$KUBE_SCHEDULER_LOG_PID"
+    kill "${KUBE_SCHEDULER_LOG_PID}"
 fi

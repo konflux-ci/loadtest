@@ -22,7 +22,8 @@ mapfile -t ARTIFACT_URLS < <(
 cutoff=$(date -u -d "${HOURS_AGO} hours ago" +%s)
 
 tmpdir=$(mktemp -d)
-trap "rm -rf ${tmpdir}" EXIT
+# shellcheck disable=SC2064
+trap "rm -rf '${tmpdir}'" EXIT
 
 for base_url in "${ARTIFACT_URLS[@]}"; do
     echo "=== $( date --utc -Ins ) Processing ${base_url}"
@@ -42,6 +43,7 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
         fi
 
         # Convert 2026_04_15T06_26_24 to 2026-04-15T06:26:24
+        # shellcheck disable=SC2001
         ts_fmt=$(echo "${ts}" | sed 's/\([0-9]\{4\}\)_\([0-9]\{2\}\)_\([0-9]\{2\}\)T\([0-9]\{2\}\)_\([0-9]\{2\}\)_\([0-9]\{2\}\)/\1-\2-\3T\4:\5:\6/')
         run_epoch=$(date -u -d "${ts_fmt}" +%s)
 
@@ -89,17 +91,6 @@ for base_url in "${ARTIFACT_URLS[@]}"; do
             --matcher-label "${test_job_matcher_label}" \
             --start "@started" \
             --end "@ended"
-            ###--trashed \
-            ###--trashed-workaround-count 96
-
-        ###shovel.py horreum \
-        ###    --base-url "${HORREUM_HOST}" \
-        ###    --api-token "${HORREUM_API_TOKEN}" \
-        ###    result \
-        ###    --test-name "@name" \
-        ###    --output-file "${local_file}" \
-        ###    --start "@started" \
-        ###    --end "@ended"
 
         echo "${json_url}" >> "${DONE_FILE}"
         echo "    $( date --utc -Ins ) Done"
