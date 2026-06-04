@@ -16,7 +16,7 @@ To list existing label names:
 
 To sort ``labels`` alphabetically by ``name`` (deterministic order; no semantic change — only reordering):
 
-Run from ``tests/load-tests`` (same working directory as the other examples):
+Run from the project root (same working directory as the other examples):
 
 ```bash
 python3 <<'PY'
@@ -29,12 +29,12 @@ p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="ut
 PY
 ```
 
-To delete a label by it's name:
+To delete a label by its name:
 
     label_del="__results_durations_stats_taskruns__build_calculate_deps__passed_duration_mean"
     jq 'del(.labels[] | select(.name == "'"$label_del"'"))' ci-scripts/config/horreum-schema.json > tmp-$$.json && mv tmp-$$.json ci-scripts/config/horreum-schema.json
 
-To add a label given it's JSONPath expression:
+To add a label given its JSONPath expression:
 
     jsonpath_add='$.results.durations.stats.taskruns."build/calculate-deps".passed.duration.mean'
     label_add="$( echo "$jsonpath_add" | sed 's/[^a-zA-Z0-9]/_/g' )"
@@ -92,6 +92,6 @@ After changing the schema, re-import it in Horreum (see import guide above).
 Local verification
 ------------------
 
-- Validate schema and test JSON: ``jq empty horreum-schema.json horreum-test-ci.json``
-- List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|taskruns)")) | [.name, .extractors[0].jsonpath] | @tsv' horreum-schema.json``
+- Validate schema and test JSON: ``jq empty ci-scripts/config/horreum-schema.json ci-scripts/config/horreum-test-ci.json ci-scripts/config/horreum-test-probes.json``
+- List task/step labels: ``jq -r '.labels[] | select(.extractors[0].jsonpath | test("measurements\\.(steps|taskruns)")) | [.name, .extractors[0].jsonpath] | @tsv' ci-scripts/config/horreum-schema.json``
 - Check a path in load-test.json: ``jq '.measurements.steps."build/buildah-oci-ta/build".memory.mean' load-test.json``
