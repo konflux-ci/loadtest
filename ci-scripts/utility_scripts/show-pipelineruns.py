@@ -27,7 +27,7 @@ def str2date(date_str):
     else:
         try:
             return datetime.datetime.fromisoformat(date_str)
-        except ValueError:   # Python before 3.11
+        except ValueError:  # Python before 3.11
             # Convert "...Z" to "...+00:00"
             date_str = date_str.replace("Z", "+00:00")
             # Remove microseconds part
@@ -79,7 +79,9 @@ class Something:
         self.pr_duration = datetime.timedelta(0)  # total time of all PipelineRuns
         self.tr_duration = datetime.timedelta(0)  # total time of all TaskRuns
         self.pod_duration = datetime.timedelta(0)  # total time of all Pods running
-        self.pod_pending_duration = datetime.timedelta(0)  # total time of all Pods pending
+        self.pod_pending_duration = datetime.timedelta(
+            0
+        )  # total time of all Pods pending
         self.pr_idle_duration = datetime.timedelta(
             0
         )  # total time in PipelineRuns when no TaskRun was running
@@ -130,14 +132,19 @@ class Something:
                 self.pod_skips += 1
                 continue
 
-            if pod["task"] not in self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"]:
+            if (
+                pod["task"]
+                not in self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"]
+            ):
                 logging.info(f"Pod {pod['name']} task {pod['task']} unknown, skipping.")
                 self.pod_skips += 1
                 continue
 
             if (
                 pod["name"]
-                != self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]]["podName"]
+                != self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]][
+                    "podName"
+                ]
             ):
                 logging.info(
                     f"Pod {pod['name']} task labels does not match TaskRun podName, skipping."
@@ -145,13 +152,19 @@ class Something:
                 self.pod_skips += 1
                 continue
 
-            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]]["node_name"] = pod[
+            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]][
                 "node_name"
-            ]
+            ] = pod["node_name"]
 
-            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]]["pod_start_time"] = pod["start_time"]
-            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]]["pod_creation_timestamp"] = pod["creation_timestamp"]
-            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]]["pod_finished_time"] = pod["finished_time"]
+            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]][
+                "pod_start_time"
+            ] = pod["start_time"]
+            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]][
+                "pod_creation_timestamp"
+            ] = pod["creation_timestamp"]
+            self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"][pod["task"]][
+                "pod_finished_time"
+            ] = pod["finished_time"]
 
         self.data_pods = []
 
@@ -177,7 +190,9 @@ class Something:
 
                 if "kind" in data and data["kind"] == "List":
                     if "items" not in data:
-                        logging.info(f"Skipping {datafile} as it does not contain items")
+                        logging.info(
+                            f"Skipping {datafile} as it does not contain items"
+                        )
                         continue
 
                     for i in data["items"]:
@@ -197,7 +212,9 @@ class Something:
         elif something["kind"] == "Pod":
             self._populate_pod(something)
         else:
-            logging.info(f"Skipping item because it has unexpeted kind {something['kind']}")
+            logging.info(
+                f"Skipping item because it has unexpeted kind {something['kind']}"
+            )
             return
 
     def _populate_pipelinerun(self, pr):
@@ -266,8 +283,14 @@ class Something:
             return
 
         try:
-            if tr["metadata"]["labels"]["tekton.dev/pipelineTask"] == "build-images" and tr["metadata"]["labels"]["tekton.dev/task"] == "buildah-remote-oci-ta":
-                tr_task = "-".join(tr["metadata"]["name"].split("-")[-3:])   # HACK to get "build-images-1" out of "my-comp-1-on-push-zk7rt-build-images-1"
+            if (
+                tr["metadata"]["labels"]["tekton.dev/pipelineTask"] == "build-images"
+                and tr["metadata"]["labels"]["tekton.dev/task"]
+                == "buildah-remote-oci-ta"
+            ):
+                tr_task = "-".join(
+                    tr["metadata"]["name"].split("-")[-3:]
+                )  # HACK to get "build-images-1" out of "my-comp-1-on-push-zk7rt-build-images-1"
             else:
                 tr_task = tr["metadata"]["labels"]["tekton.dev/pipelineTask"]
             tr_pipelinerun = tr["metadata"]["labels"]["tekton.dev/pipelineRun"]
@@ -344,8 +367,14 @@ class Something:
 
         try:
             pod_pipelinerun = pod["metadata"]["labels"]["tekton.dev/pipelineRun"]
-            if pod["metadata"]["labels"]["tekton.dev/pipelineTask"] == "build-images" and pod["metadata"]["labels"]["tekton.dev/task"] == "buildah-remote-oci-ta":
-                pod_task = "-".join(pod["metadata"]["labels"]["tekton.dev/taskRun"].split("-")[-3:])   # HACK to get "build-images-1" out of "my-comp-1-on-push-zk7rt-build-images-1"
+            if (
+                pod["metadata"]["labels"]["tekton.dev/pipelineTask"] == "build-images"
+                and pod["metadata"]["labels"]["tekton.dev/task"]
+                == "buildah-remote-oci-ta"
+            ):
+                pod_task = "-".join(
+                    pod["metadata"]["labels"]["tekton.dev/taskRun"].split("-")[-3:]
+                )  # HACK to get "build-images-1" out of "my-comp-1-on-push-zk7rt-build-images-1"
             else:
                 pod_task = pod["metadata"]["labels"]["tekton.dev/pipelineTask"]
         except KeyError as e:
@@ -382,7 +411,9 @@ class Something:
                 elif pod_finished_time < container["state"]["terminated"]["finishedAt"]:
                     pod_finished_time = container["state"]["terminated"]["finishedAt"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing finishedAt timestamp for container, skipping: {e}")
+            logging.info(
+                f"Pod {pod_name} missing finishedAt timestamp for container, skipping: {e}"
+            )
             self.pod_skips += 1
             return
 
@@ -527,7 +558,9 @@ class Something:
         end = "completionTime"
 
         self.pr_count = len(self.data_pipelineruns)
-        self.tr_count = sum([len(i["taskRuns"]) for i in self.data_pipelineruns.values()])
+        self.tr_count = sum(
+            [len(i["taskRuns"]) for i in self.data_pipelineruns.values()]
+        )
         self.pod_count = sum(
             [
                 len([ii for ii in i["taskRuns"].values() if "node_name" in ii])
@@ -545,9 +578,17 @@ class Something:
             for tr_name, tr_times in pr_times["taskRuns"].items():
                 self.tr_duration += tr_times[end] - tr_times[start]
                 add_time_interval(trs, tr_times)
-                if "pod_finished_time" in tr_times and "pod_start_time" in tr_times and "pod_creation_timestamp" in tr_times:
-                    self.pod_duration += tr_times["pod_finished_time"] - tr_times["pod_start_time"]
-                    self.pod_pending_duration += tr_times["pod_start_time"] - tr_times["pod_creation_timestamp"]
+                if (
+                    "pod_finished_time" in tr_times
+                    and "pod_start_time" in tr_times
+                    and "pod_creation_timestamp" in tr_times
+                ):
+                    self.pod_duration += (
+                        tr_times["pod_finished_time"] - tr_times["pod_start_time"]
+                    )
+                    self.pod_pending_duration += (
+                        tr_times["pod_start_time"] - tr_times["pod_creation_timestamp"]
+                    )
                 else:
                     tr_without_pod_times += 1
 
@@ -679,7 +720,10 @@ class Something:
                 headers=["Condition message", "Count"],
             )
         )
-        self._dump_csv([["Condition message", "Count"]] + list(self.pr_conditions.items()), os.path.join(self.data_dir, "show-pipelineruns-pipelinerun-conditions.csv"))
+        self._dump_csv(
+            [["Condition message", "Count"]] + list(self.pr_conditions.items()),
+            os.path.join(self.data_dir, "show-pipelineruns-pipelinerun-conditions.csv"),
+        )
         print("\nTaskRuns conditions frequency")
         print(
             tabulate.tabulate(
@@ -687,7 +731,10 @@ class Something:
                 headers=["Condition message", "Count"],
             )
         )
-        self._dump_csv([["Condition message", "Count"]] + list(self.tr_conditions.items()), os.path.join(self.data_dir, "show-pipelineruns-taskrun-conditions.csv"))
+        self._dump_csv(
+            [["Condition message", "Count"]] + list(self.tr_conditions.items()),
+            os.path.join(self.data_dir, "show-pipelineruns-taskrun-conditions.csv"),
+        )
         print("\nTaskRuns status messages frequency")
         print(
             tabulate.tabulate(
@@ -702,7 +749,10 @@ class Something:
                 headers=["Condition description", "Count"],
             )
         )
-        self._dump_csv([["Condition description", "Count"]] + list(self.pod_conditions.items()), os.path.join(self.data_dir, "show-pipelineruns-pod-conditions.csv"))
+        self._dump_csv(
+            [["Condition description", "Count"]] + list(self.pod_conditions.items()),
+            os.path.join(self.data_dir, "show-pipelineruns-pod-conditions.csv"),
+        )
 
     def _plot_graph(self):
         """
@@ -761,7 +811,7 @@ class Something:
             for pr in pr_lane:
                 fig_x_min = get_min(pr, fig_x_min)
                 fig_x_max = get_max(pr, fig_x_max)
-        fig_x_repair = -1 * fig_x_min   # Repair all x coords by this value
+        fig_x_repair = -1 * fig_x_min  # Repair all x coords by this value
 
         for pr_lane in self.pr_lanes:
             for pr in pr_lane:
@@ -843,7 +893,7 @@ class Something:
         self._compute_times()
         self._plot_graph()
         self._show_pr_tr_conditions()
-        #self._show_pr_tr_nodes()
+        # self._show_pr_tr_nodes()
         self._compute_nodes()
 
 

@@ -73,7 +73,7 @@ load_test() {
         --waitpipelines="${WAIT_PIPELINES:-true}" \
         $options \
         2>&1 | tee "$workdir/load-test.log"
-    
+
     # Capture and exit if there are unexpected errors in loadtest.go
     LOADTEST_EXIT_STATUS=${PIPESTATUS[0]}
     if [ ${LOADTEST_EXIT_STATUS} -ne 0 ]; then

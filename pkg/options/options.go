@@ -98,14 +98,14 @@ func (o *Opts) ProcessOptions() error {
 	}
 
 	// Dump options to JSON file in putput directory for refference
-	err3 := os.WriteFile(o.OutputDir + "/load-test-options.json", jsonOptions, 0600)
+	err3 := os.WriteFile(o.OutputDir+"/load-test-options.json", jsonOptions, 0600)
 	if err3 != nil {
 		return fmt.Errorf("error writing to file: %v", err3)
 	}
 
 	// If startup delay specified, make sure jitter is not bigger than 2 * delay
 	if o.StartupDelay != 0 {
-		if o.StartupJitter > o.StartupDelay * 2 {
+		if o.StartupJitter > o.StartupDelay*2 {
 			fmt.Print("Warning: Lowering startup jitter as it was bigger than delay\n")
 			o.StartupJitter = o.StartupDelay * 2
 		}
@@ -114,7 +114,7 @@ func (o *Opts) ProcessOptions() error {
 	// If we are supposed to reuse components on additional journeys, we have to reuse applications
 	if o.JourneyRepeats > 1 {
 		if o.JourneyReuseComponents {
-			if ! o.JourneyReuseApplications {
+			if !o.JourneyReuseApplications {
 				fmt.Print("Warning: We are supposed to reuse components so will reuse applications as well\n")
 				o.JourneyReuseApplications = true
 			}
