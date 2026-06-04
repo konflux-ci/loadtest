@@ -4,9 +4,6 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-# shellcheck disable=SC1091
-source "$( dirname "$0" )/../utils.sh"
-
 OPTION_EXIT_ON_FAIL=false
 OPTION_EXIT_CODE_ON_FAIL=1
 OPTION_EXIT_CODE_ON_ERROR=2

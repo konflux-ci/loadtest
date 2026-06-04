@@ -6,7 +6,6 @@ set -o pipefail
 
 # shellcheck disable=SC1090
 source "/usr/local/ci-secrets/redhat-appstudio-load-test/load-test-scenario.${1:-concurrent}"
-source "$( dirname $0 )/utils.sh"
 source "$( dirname $0 )/user-prefix.sh"
 
 echo "[$(date --utc -Ins)] Collecting load test results"
@@ -80,10 +79,6 @@ mkdir -p $ARTIFACT_DIR/collected-data
 application_stub=$ARTIFACT_DIR/collected-data/collected-applications.appstudio.redhat.com
 component_stub=$ARTIFACT_DIR/collected-data/collected-components.appstudio.redhat.com
 node_stub=$ARTIFACT_DIR/collected-data/collected-nodes
-
-## Nodes info
-#echo "Collecting node specs"
-#collect_nodes "$node_stub"
 
 ## Application service log segments per user app
 echo "[$(date --utc -Ins)] Collecting application service log segments per user app"

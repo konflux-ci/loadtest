@@ -4,8 +4,6 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
-source "$( dirname $0 )/../utils.sh"
-
 echo "[$(date --utc -Ins)] Collecting load test results"
 
 # Setup directories
