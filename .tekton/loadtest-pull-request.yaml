@@ -144,6 +144,24 @@ spec:
         - name: kind
           value: task
         resolver: bundles
+
+    - name: my-verify-source
+      params:
+      - name: url
+        value: https://github.com/slsa-framework/source-tool
+      - name: revision
+        value: 134593d9158efd253e979e2e8d87b939945d091e
+      taskRef:
+        params:
+        - name: name
+          value: verify-source
+        - name: bundle
+          value: quay.io/konflux-ci/tekton-catalog/task-verify-source@sha256:a697384b9f82c8122d2ce121a03f35835f72c264ac1190bc06771bbcbd1ad247
+        - name: kind
+          value: task
+        resolver: bundles
+
+
     - name: clone-repository
       params:
       - name: url
