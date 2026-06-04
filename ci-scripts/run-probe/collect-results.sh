@@ -7,7 +7,7 @@ set -o pipefail
 OPTION_EXIT_ON_FAIL=false
 OPTION_EXIT_CODE_ON_FAIL=1
 OPTION_EXIT_CODE_ON_ERROR=2
-OPTION_TESTS_DIR="./tests/load-tests"
+OPTION_TESTS_DIR="./"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --help           Show this help message and exit"
       echo "  --exit-on-fail   Exit with provided error code if load test errors are detected"
       echo "  --exit-on-error  Exit with provided error code if this script errors out"
-      echo "  --tests-dir      Directory containing tests (default: ./tests/load-tests)"
+      echo "  --tests-dir      Directory containing tests (default: ./)"
       exit 0
       ;;
     --exit-on-fail)
