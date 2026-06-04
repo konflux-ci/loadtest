@@ -13,10 +13,7 @@ help:
 	@echo "  build                - Build the loadtest binary"
 	@echo "  vendor               - Tidy and vendor Go dependencies"
 
-BOOTSTRAP_BIN_DIR  := $(HOME)/.local/bin
-
 bootstrap:
-	@mkdir -p "$(BOOTSTRAP_BIN_DIR)"
 	@echo "==> Installing Python 3.12 (via uv)..."
 	uv python install 3.12
 	@echo "==> Installing pre-commit..."
@@ -24,10 +21,10 @@ bootstrap:
 	@echo "==> Installing golangci-lint..."
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	@echo "==> Installing pre-commit hooks..."
-	PATH="$(BOOTSTRAP_BIN_DIR):$(PATH)" pre-commit install
+	@PATH="$(HOME)/.local/bin:$(PATH)" pre-commit install
 	@echo ""
 	@echo "==> Bootstrap complete!"
-	@echo "    Make sure $(BOOTSTRAP_BIN_DIR) is on your PATH."
+	@echo "    Make sure $(HOME)/.local/bin is on your PATH."
 
 check:
 	pre-commit run

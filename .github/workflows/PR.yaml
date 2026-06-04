@@ -17,10 +17,10 @@ jobs:
           python-version: "3.12"
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-      - name: Install pre-commit
-        run: uv pip install --system pre-commit
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - name: Bootstrap
+        run: |
+          make bootstrap
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Run checks
         run: make check-all
       - name: Run Gosec Security Scanner
