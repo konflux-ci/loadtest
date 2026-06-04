@@ -226,8 +226,6 @@ loadtest/
 │
 ├── run.sh                               # Main execution script with profiling
 ├── run-stage.sh                         # Stage environment variant
-├── run-max-concurrency.sh               # High-concurrency test script
-├── run-stage-max-concurrency.sh         # Stage high-concurrency variant
 │
 ├── cluster_read_config.yaml             # Prometheus queries for monitoring collection
 │
