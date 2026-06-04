@@ -2,13 +2,13 @@
 # (this is to avoid installing all Golang dependencies to our runner image)
 FROM registry.access.redhat.com/ubi10/go-toolset:latest AS builder_go
 # Download dependencies based on just these two files to be able to cache the layer
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 RUN go mod download -x
 # Copy rest of the source code and build it
-COPY ./ loadtest.git
-RUN go build -C loadtest.git/ -v -o ../loadtest loadtest.go
+COPY . .
+RUN make build
 # Test executable is OK
-RUN ./loadtest --help
+RUN ./bin/loadtest --help
 
 
 
@@ -39,7 +39,7 @@ FROM registry.access.redhat.com/ubi10/python-312-minimal:latest
 # Include license information required by Red Hat certification
 COPY LICENSE /licenses/LICENSE
 # Copy loadtest binary from builder container
-COPY --from=builder_go /opt/app-root/src/loadtest /usr/bin/
+COPY --from=builder_go /opt/app-root/src/bin/loadtest /usr/bin/
 # Copy OpenShift CLI binary from builder container
 COPY --from=builder_oc /usr/bin/oc /usr/bin/
 COPY --from=builder_oc /usr/bin/kubectl /usr/bin/

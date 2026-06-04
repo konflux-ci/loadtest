@@ -58,15 +58,15 @@ repos:
         types: [go]
         pass_filenames: false
 
-      - id: go-mod-tidy
-        name: go mod tidy
-        entry: bash -c 'go mod tidy && go mod vendor'
+      - id: go-mod-vendor
+        name: go mod vendor
+        entry: bash -c 'make vendor && git diff --exit-code go.mod go.sum'
         language: system
         pass_filenames: false
 
       - id: go-build
         name: go build
-        entry: go build -o bin/loadtest loadtest.go
+        entry: make build
         language: system
         pass_filenames: false
 

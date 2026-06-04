@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help bootstrap check check-all
+.PHONY: help bootstrap check check-all build vendor
 
 # Let Go automatically download the toolchain version required by go.mod.
 export GOTOOLCHAIN := auto
@@ -10,6 +10,8 @@ help:
 	@echo "  bootstrap            - Install all development tools"
 	@echo "  check                - Run checks on staged changes"
 	@echo "  check-all            - Run checks on all files"
+	@echo "  build                - Build the loadtest binary"
+	@echo "  vendor               - Tidy and vendor Go dependencies"
 
 BOOTSTRAP_BIN_DIR  := $(HOME)/.local/bin
 
@@ -32,3 +34,10 @@ check:
 
 check-all:
 	pre-commit run --all-files
+
+build:
+	go build -o bin/loadtest loadtest.go
+
+vendor:
+	go mod tidy
+	go mod vendor
