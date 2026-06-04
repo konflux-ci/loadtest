@@ -1,6 +1,5 @@
 # Dependency directories
 vendor/
-tmp/
 venv/
 
 # User tools dirs
@@ -8,12 +7,23 @@ venv/
 .DS_Store
 .vscode/
 .agentready/
+.ruff_cache/
 
 # User secrets
 users*.json
 
 # Temp data
+tmp/
 bin/
 OLD/
 run-*/
-.ruff_cache/
+
+# Installed agent skills (restored via: npx skills@latest experimental_install)
+.agents/skills/grill-with-docs/
+.agents/skills/improve-codebase-architecture/
+.agents/skills/write-a-skill/
+.agents/skills/zoom-out/
+.claude/skills/grill-with-docs
+.claude/skills/improve-codebase-architecture
+.claude/skills/write-a-skill
+.claude/skills/zoom-out

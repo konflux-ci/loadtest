@@ -1,20 +1,19 @@
 # Dependency directories
 vendor/
-tmp/
 venv/
 
 # User tools dirs
 .*.swp
 .DS_Store
-.vscode/configurationCache.log
-.vscode/dryrun.log
-.vscode/targets.log
+.vscode/
 .agentready/
+.ruff_cache/
 
 # User secrets
 users*.json
 
 # Temp data
+tmp/
 bin/
 OLD/
 run-*/

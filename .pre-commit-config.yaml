@@ -76,3 +76,10 @@ repos:
         language: system
         files: ^AGENTS\.md$
         pass_filenames: false
+
+      - id: sync-gitignore-dockerignore
+        name: sync .gitignore and .dockerignore
+        entry: diff .gitignore .dockerignore
+        language: system
+        files: ^(\.gitignore|\.dockerignore)$
+        pass_filenames: false
