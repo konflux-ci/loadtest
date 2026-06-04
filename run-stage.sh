@@ -44,7 +44,7 @@ $cmd \
     --release-pipeline-path "${RELEASE_PIPELINE_PATH:-pipelines/managed/e2e/e2e.yaml}" \
     --release-ociStorage "${OCI_STORAGE:-quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts-stage}" \
     --release-pipeline-service-account "${RELEASE_PIPELINE_SERVICE_ACCOUNT:-loadtest-probe-serviceaccount}" \
-    --runprefix "${USER_PREFIX:-undef}" \
+    --runprefix "${RUN_PREFIX:-${USER_PREFIX:-undef}}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
     --waitrelease="${WAIT_RELEASE:-true}" \

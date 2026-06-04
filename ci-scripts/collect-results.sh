@@ -6,7 +6,6 @@ set -o pipefail
 
 # shellcheck disable=SC1090
 source "/usr/local/ci-secrets/redhat-appstudio-load-test/load-test-scenario.${1:-concurrent}"
-source "$( dirname $0 )/user-prefix.sh"
 
 echo "[$(date --utc -Ins)] Collecting load test results"
 
@@ -81,12 +80,9 @@ component_stub=$ARTIFACT_DIR/collected-data/collected-components.appstudio.redha
 node_stub=$ARTIFACT_DIR/collected-data/collected-nodes
 
 ## Application service log segments per user app
-echo "[$(date --utc -Ins)] Collecting application service log segments per user app"
+echo "[$(date --utc -Ins)] Collecting application service log"
 application_service_log=$ARTIFACT_DIR/application-service.log
-application_service_log_segments=$ARTIFACT_DIR/application-service-log-segments
 oc logs -l "control-plane=controller-manager" --tail=-1 -n application-service >"$application_service_log"
-mkdir -p "$application_service_log_segments"
-for i in $(grep -Eo "${USER_PREFIX}-....-app" "$application_service_log" | sort | uniq); do grep "$i" "$application_service_log" >"$application_service_log_segments/$i.log"; done
 
 ## Collect Tekton profiling data
 if [ "${TEKTON_PERF_ENABLE_CPU_PROFILING:-}" == "true" ] || [ "${TEKTON_PERF_ENABLE_MEMORY_PROFILING:-}" == "true" ]; then

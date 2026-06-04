@@ -4,7 +4,6 @@ export MY_GITHUB_ORG GITHUB_TOKEN
 TEKTON_PERF_PROFILE_CPU_PERIOD=${TEKTON_PERF_PROFILE_CPU_PERIOD:-300}
 
 output_dir="${OUTPUT_DIR:-.}"
-USER_PREFIX=${USER_PREFIX:-testuser}
 
 ## Enable CPU profiling in Tekton
 if [ "${TEKTON_PERF_ENABLE_CPU_PROFILING:-}" == "true" ]; then
@@ -85,7 +84,7 @@ go run loadtest.go \
     --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
     --test-scenario-path-in-repo "${TEST_SCENARIO_PATH_IN_REPO:-pipelines/integration_resolver_pipeline_pass.yaml}" \
     --test-scenario-revision "${TEST_SCENARIO_REVISION:-main}" \
-    --username "$USER_PREFIX" \
+    --username "${USER_PREFIX:-testuser}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
     $options \
