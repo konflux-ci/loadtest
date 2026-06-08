@@ -15,11 +15,17 @@ RUN ./bin/loadtest --help
 # Builder for oc
 # (this is to avoid installing tar to our runner image)
 FROM registry.access.redhat.com/ubi10/ubi:latest AS builder_oc
+ARG TARGETARCH
 # Download and install it, try multiple times as this is error prone
 RUN attempt=1; \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        ARCH_SUFFIX="-arm64"; \
+    else \
+        ARCH_SUFFIX=""; \
+    fi; \
     while true; do \
         echo "Attempt $attempt"; \
-        curl -v -L https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
+        curl -v -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux${ARCH_SUFFIX}.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
             tar zxvf /tmp/openshift-client-linux.tar.gz -C /usr/bin/ && \
             break; \
         if [[ $attempt -ge 5 ]]; then \
