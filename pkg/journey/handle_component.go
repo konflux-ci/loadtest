@@ -2,6 +2,7 @@ package journey
 
 import "encoding/json"
 import "fmt"
+import "os"
 import "regexp"
 import "strconv"
 import "strings"
@@ -325,10 +326,24 @@ func checkImageRepositoryCreatedBeforePR(ctx *types.PerComponentContext, mergeRe
 			prCreation = *mr.CreatedAt
 		}
 	} else {
+		repoOrg, err := getRepoOrgFromRepoUrl(ctx.ParentContext.ParentContext.ComponentRepoUrl)
+		if err != nil {
+			return fmt.Errorf("failed to get repo org from URL: %v", err)
+		}
 		repoName, err := getRepoNameFromRepoUrl(ctx.ParentContext.ParentContext.ComponentRepoUrl)
 		if err != nil {
 			return fmt.Errorf("failed to get repo name from URL: %v", err)
 		}
+
+		frameworkOrg := os.Getenv("MY_GITHUB_ORG")
+		if frameworkOrg == "" {
+			frameworkOrg = ctx.ParentContext.ParentContext.Opts.ForkTarget
+		}
+		if repoOrg != frameworkOrg {
+			logging.Logger.Debug("Skipping IR/PR creation time check: repo org %s differs from framework org %s (see KONFLUX-9428)", repoOrg, frameworkOrg)
+			return nil
+		}
+
 		pr, err := ctx.Framework.AsKubeAdmin.CommonController.Github.GetPullRequest(repoName, mergeRequestNumber)
 		if err != nil {
 			return fmt.Errorf("failed to get PR %d: %v", mergeRequestNumber, err)
