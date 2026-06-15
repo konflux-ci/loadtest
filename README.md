@@ -174,7 +174,7 @@ In Probe runs, these run automatically.
 3. Generates human-readable error summaries
 4. Stores summary to JSON file for dashboards
 
-**Error Pattern Configuration:** `ci-scripts/config/errors.yaml` (YAML format with regex patterns). This file together with tests and tooling is managed in https://gitlab.cee.redhat.com/jhutar/probe-errors-detector/ repository.
+**Error Pattern Configuration:** `ci-scripts/config/errors.yaml` (YAML format with regex patterns). This file together with tests and tooling is managed in https://github.com/konflux-ci/error-pattern-tests repository.
 
 ### Data Flow
 
@@ -268,8 +268,8 @@ npx skills@latest remove                    # Remove a skill
 
 ## Related Projects
 
-- **Konflux Perf&Scale team repository**: dashboards definitions and tools - https://github.com/redhat-appstudio/perfscale/
-- **Errors catogorizer**: Load Test Probe Error Categorization - https://gitlab.cee.redhat.com/jhutar/probe-errors-detector/
+- **Konflux Perf&Scale team repository**: Dashboards definitions and tools - https://github.com/konflux-ci/perfscale
+- **Errors categorizer**: Loadtest probe error categorization - https://github.com/konflux-ci/error-pattern-tests
 - **e2e-tests Framework**: Konflux end-to-end testing framework (dependency) - https://github.com/konflux-ci/e2e-tests
 - **Konflux Platform**: https://github.com/konflux-ci
 - **Tekton Pipelines**: https://tekton.dev/

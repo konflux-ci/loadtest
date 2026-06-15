@@ -24,7 +24,6 @@ Verification relies on linting and a successful build as there are no Go unit te
 
 - Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.
 - CSV output files and Python analysis scripts (`evaluate.py`, `errors.py`) are tightly coupled — column names in Go logging must match what Python expects.
-- Error pattern matching rules live in `ci-scripts/probe-errors-detector/` as YAML; these are maintained separately from Go code.
 
 ## CI
 
