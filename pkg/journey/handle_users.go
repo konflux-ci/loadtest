@@ -74,6 +74,28 @@ func HandleNewFrameworkForApp(ctx *types.PerApplicationContext) error {
 	return nil
 }
 
+func HandleNewManagedFrameworkForApp(ctx *types.PerApplicationContext) error {
+	if ctx.ParentContext.Opts.ReleaseManagedNamespace == "" {
+		return nil
+	}
+
+	user := (*ctx.ParentContext.StageUsers)[ctx.ParentContext.UserIndex]
+
+	f, err := framework.NewFrameworkWithTimeout(
+		"managed-release",
+		time.Minute*60,
+		utils.Options{
+			ApiUrl: user.APIURL,
+			Token:  ctx.ParentContext.Opts.ReleaseManagedToken,
+		})
+	if err != nil {
+		return logging.Logger.Fail(13, "Unable to provision managed framework for user %s: %v", ctx.ParentContext.Username, err)
+	}
+
+	ctx.ManagedFramework = f
+	return nil
+}
+
 func HandleNewFrameworkForComp(ctx *types.PerComponentContext) error {
 	var err error
 
@@ -87,5 +109,27 @@ func HandleNewFrameworkForComp(ctx *types.PerComponentContext) error {
 		return logging.Logger.Fail(12, "Unable to provision framework for user %s: %v", ctx.ParentContext.ParentContext.Username, err)
 	}
 
+	return nil
+}
+
+func HandleNewManagedFrameworkForComp(ctx *types.PerComponentContext) error {
+	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace == "" {
+		return nil
+	}
+
+	user := (*ctx.ParentContext.ParentContext.StageUsers)[ctx.ParentContext.ParentContext.UserIndex]
+
+	f, err := framework.NewFrameworkWithTimeout(
+		"managed-release",
+		time.Minute*60,
+		utils.Options{
+			ApiUrl: user.APIURL,
+			Token:  ctx.ParentContext.ParentContext.Opts.ReleaseManagedToken,
+		})
+	if err != nil {
+		return logging.Logger.Fail(14, "Unable to provision managed framework for user %s: %v", ctx.ParentContext.ParentContext.Username, err)
+	}
+
+	ctx.ManagedFramework = f
 	return nil
 }

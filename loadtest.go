@@ -46,6 +46,8 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.ReleasePipelinePath, "release-pipeline-path", "pipelines/managed/e2e/e2e.yaml", "release pipeline file path suitable for git resolver")
 	rootCmd.Flags().StringVar(&opts.ReleaseOciStorage, "release-ociStorage", "quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts-stage", "ociStorage path used in the release pipelinerun")
 	rootCmd.Flags().StringVar(&opts.ReleasePipelineServiceAccount, "release-pipeline-service-account", "release-serviceaccount", "service account to use for release pipeline")
+	rootCmd.Flags().StringVar(&opts.ReleaseManagedNamespace, "release-managed-namespace", "", "managed namespace for release pipeline runs (when set, RPA is created there instead of dev namespace)")
+	rootCmd.Flags().StringVar(&opts.ReleaseManagedToken, "release-managed-token", "", "SA token for accessing the managed release namespace")
 	rootCmd.Flags().BoolVarP(&opts.WaitPipelines, "waitpipelines", "w", false, "if you want to wait for pipelines to finish")
 	rootCmd.Flags().BoolVarP(&opts.WaitIntegrationTestsPipelines, "waitintegrationtestspipelines", "i", false, "if you want to wait for IntegrationTests (Integration Test Scenario) pipelines to finish")
 	rootCmd.Flags().BoolVarP(&opts.WaitRelease, "waitrelease", "r", false, "if you want to wait for Release to finish")
@@ -204,6 +206,17 @@ func perApplicationThread(perApplicationCtx *types.PerApplicationContext) {
 		return
 	}
 
+	// Create managed framework for release namespace access
+	_, err = logging.Measure(
+		perApplicationCtx,
+		journey.HandleNewManagedFrameworkForApp,
+		perApplicationCtx,
+	)
+	if err != nil {
+		logging.Logger.Error("Per application thread failed: %v", err)
+		return
+	}
+
 	// Create application
 	_, err = logging.Measure(
 		perApplicationCtx,
@@ -272,6 +285,17 @@ func perComponentThread(perComponentCtx *types.PerComponentContext) {
 	_, err = logging.Measure(
 		perComponentCtx,
 		journey.HandleNewFrameworkForComp,
+		perComponentCtx,
+	)
+	if err != nil {
+		logging.Logger.Error("Per component thread failed: %v", err)
+		return
+	}
+
+	// Create managed framework for release namespace access
+	_, err = logging.Measure(
+		perComponentCtx,
+		journey.HandleNewManagedFrameworkForComp,
 		perComponentCtx,
 	)
 	if err != nil {

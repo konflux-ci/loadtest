@@ -36,8 +36,8 @@ func validateReleaseCreation(f *framework.Framework, namespace, snapshotName str
 }
 
 // Wait for release pipeline run to be created
-func validateReleasePipelineRunCreation(f *framework.Framework, namespace, releaseName string) error {
-	logging.Logger.Debug("Waiting for release pipeline for release %s in namespace %s to be created", releaseName, namespace)
+func validateReleasePipelineRunCreation(f *framework.Framework, managedNamespace, releaseName, tenantNamespace string) error {
+	logging.Logger.Debug("Waiting for release pipeline for release %s in managed namespace %s (tenant ns %s) to be created", releaseName, managedNamespace, tenantNamespace)
 
 	var pr *pipeline.PipelineRun
 
@@ -45,13 +45,13 @@ func validateReleasePipelineRunCreation(f *framework.Framework, namespace, relea
 	timeout := time.Minute * 5
 
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pr, err = f.AsKubeDeveloper.ReleaseController.GetPipelineRunInNamespace(namespace, releaseName, namespace)
+		pr, err = f.AsKubeDeveloper.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, tenantNamespace)
 		if err != nil {
-			logging.Logger.Debug("Pipelinerun for release %s in namespace %s not created yet: %v\n", releaseName, namespace, err)
+			logging.Logger.Debug("Pipelinerun for release %s in managed namespace %s not created yet: %v\n", releaseName, managedNamespace, err)
 			return false, nil
 		}
 
-		logging.Logger.Debug("Release PipelineRun %s for release %s in namespace %s created", pr.GetName(), releaseName, namespace)
+		logging.Logger.Debug("Release PipelineRun %s for release %s in managed namespace %s created", pr.GetName(), releaseName, managedNamespace)
 		return true, nil
 	}, interval, timeout)
 
@@ -59,16 +59,16 @@ func validateReleasePipelineRunCreation(f *framework.Framework, namespace, relea
 }
 
 // Wait for release pipeline run to succeed
-func validateReleasePipelineRunCondition(f *framework.Framework, namespace, releaseName string) error {
-	logging.Logger.Debug("Waiting for release pipeline for release %s in namespace %s to finish", releaseName, namespace)
+func validateReleasePipelineRunCondition(f *framework.Framework, managedNamespace, releaseName, tenantNamespace string) error {
+	logging.Logger.Debug("Waiting for release pipeline for release %s in managed namespace %s (tenant ns %s) to finish", releaseName, managedNamespace, tenantNamespace)
 
 	interval := time.Second * 10
 	timeout := time.Minute * 10
 
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pipelineRun, err := f.AsKubeDeveloper.ReleaseController.GetPipelineRunInNamespace(namespace, releaseName, namespace)
+		pipelineRun, err := f.AsKubeDeveloper.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, tenantNamespace)
 		if err != nil {
-			logging.Logger.Debug("PipelineRun for release %s in namespace %s not created yet: %v\n", releaseName, namespace, err)
+			logging.Logger.Debug("PipelineRun for release %s in managed namespace %s not created yet: %v\n", releaseName, managedNamespace, err)
 			return false, nil
 		}
 
@@ -147,6 +147,16 @@ func HandleReleaseRun(ctx *types.PerComponentContext) error {
 		return nil
 	}
 
+	// Determine framework/namespace for release PLR monitoring:
+	// defaults to tenant, overridden when managed namespace is configured
+	managedFramework := ctx.Framework
+	managedNamespace := ctx.ParentContext.ParentContext.Namespace
+
+	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		managedFramework = ctx.ManagedFramework
+		managedNamespace = ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace
+	}
+
 	var iface interface{}
 	var ok bool
 	var err error
@@ -170,9 +180,10 @@ func HandleReleaseRun(ctx *types.PerComponentContext) error {
 	_, err = logging.Measure(
 		ctx,
 		validateReleasePipelineRunCreation,
-		ctx.Framework,
-		ctx.ParentContext.ParentContext.Namespace,
+		managedFramework,
+		managedNamespace,
 		ctx.ReleaseName,
+		ctx.ParentContext.ParentContext.Namespace,
 	)
 	if err != nil {
 		return logging.Logger.Fail(92, "Release pipeline run failed creation: %v", err)
@@ -181,9 +192,10 @@ func HandleReleaseRun(ctx *types.PerComponentContext) error {
 	_, err = logging.Measure(
 		ctx,
 		validateReleasePipelineRunCondition,
-		ctx.Framework,
-		ctx.ParentContext.ParentContext.Namespace,
+		managedFramework,
+		managedNamespace,
 		ctx.ReleaseName,
+		ctx.ParentContext.ParentContext.Namespace,
 	)
 	if err != nil {
 		return logging.Logger.Fail(93, "Release pipeline run failed: %v", err)

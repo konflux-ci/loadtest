@@ -10,11 +10,11 @@ import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 // Create ReleasePlan CR
-func createReleasePlan(f *framework.Framework, namespace, appName string) (string, error) {
+func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespace string) (string, error) {
 	name := appName + "-rp"
-	logging.Logger.Debug("Creating release plan %s in namespace %s", name, namespace)
+	logging.Logger.Debug("Creating release plan %s in namespace %s targeting %s", name, namespace, targetNamespace)
 
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlan(name, namespace, appName, namespace, "true", nil, nil, nil)
+	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlan(name, namespace, appName, targetNamespace, "true", nil, nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the releasePlan %s in %s: %v", name, namespace, err)
 	}
@@ -24,11 +24,11 @@ func createReleasePlan(f *framework.Framework, namespace, appName string) (strin
 
 // Create ReleasePlanAdmission CR
 // Assumes enterprise contract policy and service account with required permissions is already there
-func createReleasePlanAdmission(f *framework.Framework, namespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string) (string, error) {
+func createReleasePlanAdmission(f *framework.Framework, namespace, originNamespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string) (string, error) {
 	name := appName + "-rpa"
-	logging.Logger.Debug("Creating release plan admission %s in namespace %s with policy %s and pipeline SA %s", name, namespace, policyName, releasePipelineSAName)
+	logging.Logger.Debug("Creating release plan admission %s in namespace %s with origin %s, policy %s and pipeline SA %s", name, namespace, originNamespace, policyName, releasePipelineSAName)
 
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, namespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, nil)
+	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, nil)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the releasePlanAdmission %s in %s: %v", name, namespace, err)
 	}
@@ -112,6 +112,17 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		return nil
 	}
 
+	// Compute framework/namespace routing for managed namespace mode
+	rpaFramework := ctx.Framework
+	rpaNamespace := ctx.ParentContext.Namespace
+	rpTargetNamespace := ctx.ParentContext.Namespace
+
+	if ctx.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		rpaFramework = ctx.ManagedFramework
+		rpaNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
+		rpTargetNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
+	}
+
 	var iface interface{}
 	var ok bool
 	var err error
@@ -122,6 +133,7 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		ctx.Framework,
 		ctx.ParentContext.Namespace,
 		ctx.ApplicationName,
+		rpTargetNamespace,
 	)
 	if err != nil {
 		return logging.Logger.Fail(91, "Release Plan failed creation: %v", err)
@@ -135,7 +147,8 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	iface, err = logging.Measure(
 		ctx,
 		createReleasePlanAdmission,
-		ctx.Framework,
+		rpaFramework,
+		rpaNamespace,
 		ctx.ParentContext.Namespace,
 		ctx.ApplicationName,
 		ctx.ParentContext.Opts.ReleasePolicy,
@@ -168,15 +181,15 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	_, err = logging.Measure(
 		ctx,
 		validateReleasePlanAdmission,
-		ctx.Framework,
-		ctx.ParentContext.Namespace,
+		rpaFramework,
+		rpaNamespace,
 		ctx.ReleasePlanAdmissionName,
 	)
 	if err != nil {
 		return logging.Logger.Fail(96, "Release Plan Admission failed validation: %v", err)
 	}
 
-	logging.Logger.Info("Configured release %s & %s for application %s in namespace %s", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace)
+	logging.Logger.Info("Configured release %s & %s for application %s in namespace %s (RPA in %s)", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace, rpaNamespace)
 
 	return nil
 }

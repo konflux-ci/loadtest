@@ -88,7 +88,7 @@ func collectPodLogs(f *framework.Framework, dirPath, namespace, application stri
 	return nil
 }
 
-func collectPipelineRunJSONs(f *framework.Framework, dirPath, namespace, application, component, release string) error {
+func collectTenantPipelineRunJSONs(f *framework.Framework, dirPath, namespace, application, component, release string) error {
 	prs, err := f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(component, application, namespace, "", "", "")
 	if err != nil {
 		return fmt.Errorf("failed to list PipelineRuns %s/%s/%s: %v", namespace, application, component, err)
@@ -147,6 +147,49 @@ func collectPipelineRunJSONs(f *framework.Framework, dirPath, namespace, applica
 	return nil
 }
 
+func collectManagedReleasePipelineRun(f *framework.Framework, dirPath, managedNamespace, releaseName, releaseNamespace string) error {
+	pr, err := f.AsKubeDeveloper.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, releaseNamespace)
+	if err != nil {
+		return fmt.Errorf("failed to get release PipelineRun %s from managed namespace %s: %v", releaseName, managedNamespace, err)
+	}
+
+	prJSON, err := json.Marshal(pr)
+	if err != nil {
+		return fmt.Errorf("failed to dump managed release PipelineRun JSON: %v", err)
+	}
+
+	err = writeToFile(dirPath, "collected-pipelinerun-"+pr.Name+".json", prJSON)
+	if err != nil {
+		return fmt.Errorf("failed to write managed release PipelineRun: %v", err)
+	}
+
+	for _, chr := range pr.Status.ChildReferences {
+		tr, err := f.AsKubeDeveloper.TektonController.GetTaskRun(chr.Name, managedNamespace)
+		if err != nil {
+			return fmt.Errorf("failed to get TaskRun %s in managed namespace %s: %v", chr.Name, managedNamespace, err)
+		}
+
+		if tr.Kind == "" {
+			tr.Kind = tr.GetGroupVersionKind().Kind
+		}
+		if tr.Kind == "" {
+			tr.Kind = "TaskRun"
+		}
+
+		trJSON, err := json.Marshal(tr)
+		if err != nil {
+			return fmt.Errorf("failed to dump managed TaskRun JSON: %v", err)
+		}
+
+		err = writeToFile(dirPath, "collected-taskrun-"+tr.Name+".json", trJSON)
+		if err != nil {
+			return fmt.Errorf("failed to write managed TaskRun: %v", err)
+		}
+	}
+
+	return nil
+}
+
 func collectApplicationJSONs(f *framework.Framework, dirPath, namespace, application string) error {
 	appJsonFileName := "collected-application-" + application + ".json"
 	// Only save Application JSON if it has not already been collected (as HandlePerComponentCollection method is called for each component)
@@ -191,7 +234,7 @@ func collectComponentJSONs(f *framework.Framework, dirPath, namespace, component
 	return nil
 }
 
-func collectReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appName, compName, snapName, releasePlanName, releasePlanAdmissionName, relName string) error {
+func collectTenantReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appName, compName, snapName, releasePlanName, releasePlanAdmissionName, relName string) error {
 	// Collect ReleasePlan JSON
 	if releasePlanName != "" {
 		releasePlan, err := f.AsKubeDeveloper.ReleaseController.GetReleasePlan(releasePlanName, namespace)
@@ -331,7 +374,12 @@ func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 		return logging.Logger.Fail(101, "Failed to collect pod logs: %v", err)
 	}
 
-	err = collectPipelineRunJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.ReleaseName)
+	// When using managed namespace, release PLR is there, not in dev namespace
+	releaseName := ctx.ReleaseName
+	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		releaseName = ""
+	}
+	err = collectTenantPipelineRunJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, releaseName)
 	if err != nil {
 		return logging.Logger.Fail(102, "Failed to collect pipeline run JSONs: %v", err)
 	}
@@ -341,9 +389,33 @@ func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 		return logging.Logger.Fail(103, "Failed to collect component JSONs: %v", err)
 	}
 
-	err = collectReleaseRelatedJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.SnapshotName, ctx.ParentContext.ReleasePlanName, ctx.ParentContext.ReleasePlanAdmissionName, ctx.ReleaseName)
+	// When using managed namespace, skip RPA collection from dev namespace (it lives in managed ns)
+	rpaName := ctx.ParentContext.ReleasePlanAdmissionName
+	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		rpaName = ""
+	}
+	err = collectTenantReleaseRelatedJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.SnapshotName, ctx.ParentContext.ReleasePlanName, rpaName, ctx.ReleaseName)
 	if err != nil {
 		return logging.Logger.Fail(104, "Failed to collect release related JSONs: %v", err)
+	}
+
+	// Collect release pipeline run, task runs, and pod logs from managed namespace
+	if ctx.ReleaseName != "" && ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		managedDirPath := getDirName(ctx.ParentContext.ParentContext.Opts.OutputDir, ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace, journeyCounterStr)
+		err = createDir(managedDirPath)
+		if err != nil {
+			return logging.Logger.Fail(110, "Failed to create managed namespace dir: %v", err)
+		}
+
+		err = collectManagedReleasePipelineRun(ctx.ManagedFramework, managedDirPath, ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace, ctx.ReleaseName, ctx.ParentContext.ParentContext.Namespace)
+		if err != nil {
+			logging.Logger.Warning("Failed to collect managed release pipeline run: %v", err)
+		}
+
+		err = collectPodLogs(ctx.ManagedFramework, managedDirPath, ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace, ctx.ParentContext.ApplicationName)
+		if err != nil {
+			logging.Logger.Warning("Failed to collect managed namespace pod logs: %v", err)
+		}
 	}
 
 	return nil

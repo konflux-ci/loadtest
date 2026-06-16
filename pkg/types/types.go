@@ -29,6 +29,7 @@ type PerApplicationContext struct {
 	JourneyRepeatIndex          int
 	StartupPause                time.Duration
 	Framework                   *framework.Framework
+	ManagedFramework            *framework.Framework
 	ParentContext               *PerUserContext
 	ApplicationName             string
 	IntegrationTestScenarioName string
@@ -39,12 +40,13 @@ type PerApplicationContext struct {
 
 // Struct to hold data for thread to process each component
 type PerComponentContext struct {
-	PerComponentWG *sync.WaitGroup
-	ComponentIndex int
-	StartupPause   time.Duration
-	Framework      *framework.Framework
-	ParentContext  *PerApplicationContext
-	ComponentName  string
-	SnapshotName   string
-	ReleaseName    string
+	PerComponentWG   *sync.WaitGroup
+	ComponentIndex   int
+	StartupPause     time.Duration
+	Framework        *framework.Framework
+	ManagedFramework *framework.Framework
+	ParentContext    *PerApplicationContext
+	ComponentName    string
+	SnapshotName     string
+	ReleaseName      string
 }

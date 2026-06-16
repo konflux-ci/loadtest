@@ -28,6 +28,8 @@ type Opts struct {
 	LogInfo                          bool
 	LogTrace                         bool
 	OutputDir                        string
+	ReleaseManagedNamespace          string
+	ReleaseManagedToken              string
 	ReleaseOciStorage                string
 	PipelineImagePullSecrets         []string
 	PipelineMintmakerDisabled        bool
@@ -89,6 +91,14 @@ func (o *Opts) ProcessOptions() error {
 		if o.ForkTarget == "" {
 			return fmt.Errorf("was not able to get fork target")
 		}
+	}
+
+	// Validate managed namespace options
+	if o.ReleaseManagedNamespace != "" && o.ReleaseManagedToken == "" {
+		return fmt.Errorf("--release-managed-token is required when --release-managed-namespace is set")
+	}
+	if o.ReleaseManagedNamespace != "" && !o.Stage {
+		return fmt.Errorf("--release-managed-namespace requires --stage (need APIURL from stageUsers)")
 	}
 
 	// Convert options struct to pretty JSON
