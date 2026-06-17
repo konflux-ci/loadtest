@@ -44,6 +44,8 @@ date -Ins --utc >started
     --release-pipeline-path "${RELEASE_PIPELINE_PATH:-pipelines/managed/e2e/e2e.yaml}" \
     --release-ociStorage "${OCI_STORAGE:-quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts-stage}" \
     --release-pipeline-service-account "${RELEASE_PIPELINE_SERVICE_ACCOUNT:-loadtest-probe-serviceaccount}" \
+    --release-managed-namespace "${RELEASE_MANAGED_NAMESPACE:-}" \
+    --release-managed-token "${RELEASE_MANAGED_TOKEN:-}" \
     --runprefix "${RUN_PREFIX:-${USER_PREFIX:-undef}}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
