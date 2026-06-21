@@ -212,7 +212,7 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github.com/cyphar/filepath-securejoin => github.com/cyphar/filepath-securejoin v0.6.1
+replace github.com/cyphar/filepath-securejoin => github.com/cyphar/filepath-securejoin v0.7.0
 
 replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.8
 
