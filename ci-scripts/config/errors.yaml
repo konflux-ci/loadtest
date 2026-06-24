@@ -19,6 +19,14 @@
   regexp: 'Application failed creation: Unable to create the Application [^ ]+: Operation cannot be fulfilled on resourcequotas [^ ]+: the object has been modified; please apply your changes to the latest version and try again'
   test_dir: []
   type: loadtest
+- caused_by: application-controller
+  id: application_creation_failed_because_webhook_service_had_no_endpoints_available
+  note: ''
+  reason: Application creation failed because webhook service had no endpoints available
+  regexp: 'Application failed creation: unable to create the Application [^ ]+: Internal error occurred: failed calling webhook .mapplication.kb.io.: failed to call webhook: .* no endpoints available for service .application-service-webhook-service.'
+  test_dir:
+  - run-kflux-ocp-p01-2026_06_17T15_50_21_480000000_00_00
+  type: loadtest
 - caused_by: cluster
   id: application_creation_timed_out_waiting_for_quota_evaluation
   note: ''
@@ -401,6 +409,14 @@
   - run-kflux-prd-rh02-2026_02_14T13_25_43_925000000_00_00
   type: logs
 - caused_by: cluster
+  id: component_creation_failed_because_of_resourcequotas_conflict
+  note: ''
+  reason: Component creation failed because of resourcequotas conflict
+  regexp: 'Component failed creation: unable to create the Component [^ ]+: Operation cannot be fulfilled on resourcequotas .konflux.: the object has been modified'
+  test_dir:
+  - run-stone-prd-rh01-2026_06_23T08_01_20_388000000_00_00
+  type: loadtest
+- caused_by: cluster
   id: component_creation_failed_because_resourcequota_object_has_been_modified
   note: ''
   reason: Component creation failed because resourcequota object has been modified
@@ -656,6 +672,14 @@
   test_dir:
   - run-stone-prod-p01-2026_05_15T12_17_18_670000000_00_00
   type: logs
+- caused_by: test
+  id: creation_time_check_failed_because_github_returned_401_bad_credentials
+  note: ''
+  reason: Creation time check failed because GitHub returned 401 Bad credentials
+  regexp: 'Creation time check failed for IR and PR: failed to get PR [0-9]+: GET https://api.github.com/repos/[^ ]+: 401 Bad credentials'
+  test_dir:
+  - run-kflux-prd-rh03-2026_06_18T00_48_20_362000000_00_00
+  type: loadtest
 - caused_by: src.fedoraproject.org
   id: curl_failed_to_download_file_because_src_fedoraproject_org_returned_503
   note: ''
@@ -1784,12 +1808,36 @@
   - run-stone-prd-rh01-2026_03_10T20_01_19_563000000_00_00
   type: logs
 - caused_by: quay.io
+  id: pipeline_failed_ecosystem_cert_preflight_check_failed_due_to_unexpected_eof_extracting_image_tarball
+  note: ''
+  reason: 'Pipeline failed: Ecosystem cert preflight check failed due to unexpected EOF extracting image tarball'
+  regexp: 'target image.*image=.quay\.io/[^ ]+.*failed to extract tarball: failed to drain io reader: unexpected EOF'
+  test_dir:
+  - run-stone-prd-rh01-2026_06_11T12_01_19_741000000_00_00
+  type: logs
+- caused_by: download.eng.brq.redhat.com
+  id: pipeline_failed_mock_build_failed_because_of_download_timeout_from_download_eng_brq_redhat_com
+  note: ''
+  reason: 'Pipeline failed: Mock build failed because of download timeout from download.eng.brq.redhat.com'
+  regexp: ReadTimeoutError.*download\.eng\.brq\.redhat\.com.*Read timed out
+  test_dir:
+  - run-kflux-rhel-p01-2026_06_11T22_39_19_421000000_00_00
+  type: logs
+- caused_by: quay.io
   id: pipeline_failed_quay_io_denied_push_because_system_is_read_only
   note: ''
   reason: 'Pipeline failed: quay.io denied push because system is read-only'
   regexp: 'Error response from registry: denied: System is currently read-only\. Pulls will succeed but all write operations are currently suspended'
   test_dir:
   - run-stone-stage-p01-2026_03_28T13_55_14_476000000_00_00
+  type: logs
+- caused_by: task
+  id: pipeline_failed_rpmautospec_failed_because_spec_file_does_not_exist
+  note: ''
+  reason: 'Pipeline failed: rpmautospec failed because spec file does not exist'
+  regexp: rpmautospec .* Spec file or path .* doesn.t exist
+  test_dir:
+  - run-stone-prd-rh01-2026_06_12T10_44_19_143000000_00_00
   type: logs
 - caused_by: gitlab.com
   id: pipeline_failed_to_get_remote_pipeline_definition_from_gitlab_com_because_403_error
@@ -2239,6 +2287,14 @@
   - run-stone-prd-rh01-2026_04_27T13_20_51_816000000_00_00
   type: logs
 - caused_by: cluster
+  id: release_plan_admission_creation_failed_because_cluster_returned_authentication_error
+  note: ''
+  reason: Release Plan Admission creation failed because cluster returned authentication error
+  regexp: 'Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^ ]+: failed to get server groups: the server has asked for the client to provide credentials'
+  test_dir:
+  - run-stone-stage-p01-2026_06_22T14_11_36_479000000_00_00
+  type: loadtest
+- caused_by: cluster
   id: release_plan_admission_creation_failed_due_to_resource_quota_object_modification_conflict
   note: ''
   reason: Release Plan Admission creation failed due to resource quota object modification conflict
@@ -2270,6 +2326,14 @@
   test_dir:
   - run-stone-prod-p02-2026_05_04T09_00_14_137000000_00_00
   type: loadtest
+- caused_by: quay.io
+  id: remote_build_image_pull_failed_because_quay_io_blob_download_returned_unexpected_eof
+  note: ''
+  reason: Remote build image pull failed because quay.io blob download returned unexpected EOF
+  regexp: 'copying system image from manifest list: writing blob: storing blob to file .* happened during read: unexpected EOF .while reconnecting: Get .https://[^ ]*quay.io/'
+  test_dir:
+  - run-kflux-prd-rh03-2026_06_16T23_45_52_292000000_00_00
+  type: logs
 - caused_by: test
   id: repo_forking_failed_as_gitlab_cee_says_401_unauthorized
   note: ''
@@ -2327,6 +2391,14 @@
   regexp: 'Repo forking failed: error checking repository .*: Get "https://api\.github\.com/.*": dial tcp .*: i/o timeout'
   test_dir:
   - run-kfluxfedorap01-2026_02_26T13_56_19_561000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_forking_failed_because_github_returned_404_when_deleting_existing_repository
+  note: ''
+  reason: Repo forking failed because GitHub returned 404 when deleting existing repository
+  regexp: 'Repo forking failed: error deleting repository [^ ]+: DELETE https://api.github.com/repos/[^ ]+: 404 Not Found'
+  test_dir:
+  - run-kflux-prd-rh03-2026_06_15T15_45_20_464000000_00_00
   type: loadtest
 - caused_by: test
   id: repo_forking_failed_because_github_token_expired
@@ -2484,6 +2556,14 @@
   test_dir:
   - run-kflux-rhel-p01-2026_02_15T02_40_13_111000000_00_00
   type: loadtest
+- caused_by: cluster
+  id: repo_templating_cleanup_failed_because_pipelinerun_deletion_timed_out
+  note: ''
+  reason: Repo templating cleanup failed because PipelineRun deletion timed out
+  regexp: Repo-templating workflow component cleanup failed:.*deletion of PipelineRun .* timed out
+  test_dir:
+  - run-stone-prd-rh01-2026_06_12T12_17_25_986000000_00_00
+  type: loadtest
 - caused_by: github.com
   id: repo_templating_cleanup_failed_due_to_502_server_error_on_github
   note: ''
@@ -2624,6 +2704,14 @@
   regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo .*: stream error: stream ID [0-9]+; CANCEL; received from peer'
   test_dir:
   - run-kflux-prd-rh03-2026_03_25T08_00_31_317000000_00_00
+  type: loadtest
+- caused_by: test
+  id: repo_templating_pr_merging_failed_because_github_returned_401_requires_authentication
+  note: ''
+  reason: Repo templating PR merging failed because GitHub returned 401 Requires authentication
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^ ]+: PUT https://api.github.com/repos/[^ ]+/merge: 401 Requires authentication'
+  test_dir:
+  - run-kflux-prd-rh03-2026_06_10T15_48_19_970000000_00_00
   type: loadtest
 - caused_by: github.com
   id: repo_templating_workflow_component_cleanup_failed_because_github_pr_merge_405_base_branch_was_modified
@@ -3197,6 +3285,14 @@
   regexp: 'npm ERR! enoent ENOENT: no such file or directory, open .C:.*cachi2.*output.*deps.*npm.*\.tgz.'
   test_dir:
   - run-stone-stage-p01-2026_04_20T14_01_27_312000000_00_00
+  type: logs
+- caused_by: mcr.microsoft.com
+  id: windows_container_build_failed_because_mcr_returned_toomanyrequests_rate_limit
+  note: ''
+  reason: Windows container build failed because MCR returned toomanyrequests rate limit
+  regexp: 'mcr.microsoft.com/[^ ]+: toomanyrequests: Too many requests'
+  test_dir:
+  - run-stone-stage-p01-2026_06_15T21_44_20_677000000_00_00
   type: logs
 - caused_by: mcr.microsoft.com
   id: windows_container_image_not_compatible_with_linux_architecture
