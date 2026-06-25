@@ -1431,6 +1431,14 @@
   - run-stone-prd-rh01-2026_04_27T14_48_30_724000000_00_00
   type: logs
 - caused_by: quay.io
+  id: image_index_build_failed_because_quay_io_returned_connection_reset_by_peer
+  note: ''
+  reason: Image index build failed because quay.io returned connection reset by peer
+  regexp: reading info about config blob from .*docker://quay.io/.* connection reset by peer
+  test_dir:
+  - run-stone-stg-rh01-2026_06_24T07_09_27_949000000_00_00
+  type: logs
+- caused_by: quay.io
   id: image_index_build_failed_because_the_downloaded_config_blob_digest_did_not_match_the_expected_one_on_quay_io
   note: ''
   reason: Image index build failed because the downloaded config blob digest did not match the expected one on Quay.io
@@ -2293,6 +2301,14 @@
   regexp: 'Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^ ]+: failed to get server groups: the server has asked for the client to provide credentials'
   test_dir:
   - run-stone-stage-p01-2026_06_22T14_11_36_479000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: release_plan_admission_creation_failed_because_resource_quota_evaluation_timed_out
+  note: ''
+  reason: Release Plan Admission creation failed because resource quota evaluation timed out
+  regexp: 'Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^ ]+: Internal error occurred: resource quota evaluation timed out'
+  test_dir:
+  - run-stone-prod-p02-2026_06_24T08_40_20_689000000_00_00
   type: loadtest
 - caused_by: cluster
   id: release_plan_admission_creation_failed_due_to_resource_quota_object_modification_conflict
