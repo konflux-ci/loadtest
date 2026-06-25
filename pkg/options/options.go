@@ -29,7 +29,7 @@ type Opts struct {
 	LogTrace                         bool
 	OutputDir                        string
 	ReleaseManagedNamespace          string
-	ReleaseManagedToken              string
+	ReleaseManagedToken              string `json:"-"`
 	ReleaseOciStorage                string
 	PipelineImagePullSecrets         []string
 	PipelineMintmakerDisabled        bool
@@ -56,6 +56,21 @@ type Opts struct {
 	WaitIntegrationTestsPipelines    bool
 	WaitPipelines                    bool
 	WaitRelease                      bool
+}
+
+func (o *Opts) Format(f fmt.State, verb rune) {
+	type plain Opts
+	saved := o.ReleaseManagedToken
+	if saved != "" {
+		o.ReleaseManagedToken = "***"
+	}
+	defer func() { o.ReleaseManagedToken = saved }()
+	p := (*plain)(o)
+	if verb == 'v' && f.Flag('+') {
+		_, _ = fmt.Fprintf(f, "%+v", p)
+	} else {
+		_, _ = fmt.Fprintf(f, "%v", p)
+	}
 }
 
 // Pre-process load-test options before running the test
