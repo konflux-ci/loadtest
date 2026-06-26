@@ -43,7 +43,11 @@ update_tokens() {
             log="$(mktemp)"
             echo "Updating loadtest token for $cluster/konflux-perfscale-${n}-tenant in $base_vault_path (log: $log)"
             t="$(oc -n "konflux-perfscale-${n}-tenant" create token serviceaccount-loadtest --duration "$((24*365))h")"
-            vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster/konflux-perfscale-${n}-tenant" "token=$t" &>"$log"
+            if ! vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster/konflux-perfscale-${n}-tenant" "token=$t" &>"$log"; then
+                log="$(mktemp)"
+                echo "Patch failed, creating secret for konflux-perfscale-${n}-tenant on $cluster (log: $log)"
+                vault kv put -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster/konflux-perfscale-${n}-tenant" "token=$t" &>"$log"
+            fi
         done
     fi
 }
