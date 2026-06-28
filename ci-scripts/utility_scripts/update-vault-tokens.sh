@@ -58,7 +58,7 @@ if [ "$UPDATE_STAGING" = true ]; then
 fi
 
 if [ "$UPDATE_PRODUCTION" = true ]; then
-    for c in stone-prod-p01 stone-prod-p02 kflux-ocp-p01 kflux-osp-p01 kflux-prd-rh02 kflux-prd-rh03 kflux-rhel-p01; do
+    for c in stone-prd-rh01 stone-prod-p01 stone-prod-p02 kflux-ocp-p01 kflux-osp-p01 kflux-prd-rh02 kflux-prd-rh03 kflux-rhel-p01; do
         update_tokens "production" "$c"
     done
 fi
