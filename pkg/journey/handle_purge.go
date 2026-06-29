@@ -1,38 +1,40 @@
 package journey
 
 import "fmt"
-import "time"
 
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 
-func purgeStage(f *framework.Framework, namespace string) error {
-	var err error
-
-	err = f.AsKubeDeveloper.HasController.DeleteAllApplicationsInASpecificNamespace(namespace, time.Minute*2)
-	if err != nil {
-		return fmt.Errorf("error when deleting applications in namespace %s: %v", namespace, err)
+func purgeStage(f *framework.Framework, namespace string, appContexts []*types.PerApplicationContext) error {
+	if len(appContexts) == 0 {
+		logging.Logger.Debug("No application contexts to purge in namespace %s, skipping", namespace)
+		return nil
 	}
 
-	err = f.AsKubeDeveloper.HasController.DeleteAllComponentsInASpecificNamespace(namespace, time.Minute*2)
-	if err != nil {
-		return fmt.Errorf("error when deleting components in namespace %s: %v", namespace, err)
-	}
+	for _, appCtx := range appContexts {
+		if appCtx.ApplicationName == "" {
+			continue
+		}
 
-	err = f.AsKubeDeveloper.HasController.DeleteAllImageRepositoriesInASpecificNamespace(namespace, time.Minute*5)
-	if err != nil {
-		return fmt.Errorf("error when deleting image repositories in namespace %s: %v", namespace, err)
-	}
+		logging.Logger.Debug("Purging application %s in namespace %s", appCtx.ApplicationName, namespace)
 
-	err = f.AsKubeDeveloper.TektonController.DeleteAllPipelineRunsInASpecificNamespace(namespace)
-	if err != nil {
-		return fmt.Errorf("error when deleting pipeline runs in namespace %s: %v", namespace, err)
-	}
+		err := f.AsKubeDeveloper.HasController.DeleteApplication(appCtx.ApplicationName, namespace, false)
+		if err != nil {
+			return fmt.Errorf("error when deleting application %s in namespace %s: %v", appCtx.ApplicationName, namespace, err)
+		}
 
-	err = f.AsKubeDeveloper.CommonController.DeleteSecretsByLabel(namespace, "build.appstudio.redhat.com/multi-platform-secret", "true")
-	if err != nil {
-		return fmt.Errorf("error when deleting MPC secrets in namespace %s: %v", namespace, err)
+		for _, compCtx := range appCtx.PerComponentContexts {
+			if compCtx.ComponentName == "" {
+				continue
+			}
+
+			err = f.AsKubeDeveloper.HasController.DeleteComponent(compCtx.ComponentName, namespace, false)
+			if err != nil {
+				return fmt.Errorf("error when deleting component %s in namespace %s: %v", compCtx.ComponentName, namespace, err)
+			}
+		}
 	}
 
 	logging.Logger.Debug("Finished purging namespace %s", namespace)
@@ -58,7 +60,7 @@ func Purge() error {
 
 	for _, ctx := range PerUserContexts {
 		if ctx.Opts.Stage {
-			err := purgeStage(ctx.Framework, ctx.Namespace)
+			err := purgeStage(ctx.Framework, ctx.Namespace, ctx.PerApplicationContexts)
 			if err != nil {
 				logging.Logger.Error("Error when purging Stage: %v", err)
 				errCounter++
