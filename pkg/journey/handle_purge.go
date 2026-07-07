@@ -20,6 +20,15 @@ func purgeStage(f *framework.Framework, namespace string, appContexts []*types.P
 
 		logging.Logger.Debug("Purging application %s in namespace %s", appCtx.ApplicationName, namespace)
 
+		if appCtx.ReleasePlanAdmissionName != "" && appCtx.ManagedFramework != nil {
+			managedNamespace := appCtx.ParentContext.Opts.ReleaseManagedNamespace
+			logging.Logger.Debug("Deleting ReleasePlanAdmission %s in namespace %s", appCtx.ReleasePlanAdmissionName, managedNamespace)
+			err := appCtx.ManagedFramework.AsKubeDeveloper.ReleaseController.DeleteReleasePlanAdmission(appCtx.ReleasePlanAdmissionName, managedNamespace, false)
+			if err != nil {
+				logging.Logger.Error("Error when deleting ReleasePlanAdmission %s in namespace %s: %v", appCtx.ReleasePlanAdmissionName, managedNamespace, err)
+			}
+		}
+
 		err := f.AsKubeDeveloper.HasController.DeleteApplication(appCtx.ApplicationName, namespace, false)
 		if err != nil {
 			return fmt.Errorf("error when deleting application %s in namespace %s: %v", appCtx.ApplicationName, namespace, err)
