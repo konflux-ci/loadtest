@@ -3,7 +3,7 @@ module github.com/konflux-ci/loadtest
 go 1.26.0
 
 require (
-	github.com/konflux-ci/e2e-tests v0.0.0-20260617123807-b324bc88550c
+	github.com/konflux-ci/e2e-tests v0.0.0-20260707100404-eca3dcc01e3c
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.9.2
 	k8s.io/apimachinery v0.36.2
@@ -131,8 +131,8 @@ require (
 	github.com/kevinburke/ssh_config v1.4.0 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/konflux-ci/application-api v0.0.0-20260312190025-5154ad273e17 // indirect
-	github.com/konflux-ci/image-controller v0.0.0-20260410172336-89d8e83c82fc // indirect
+	github.com/konflux-ci/application-api v0.0.0-20260529131129-a9594acdc104 // indirect
+	github.com/konflux-ci/image-controller v0.0.0-20260623200458-d2ed99f6f8a6 // indirect
 	github.com/konflux-ci/integration-service v0.0.0-20260427172031-371664c90b07 // indirect
 	github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 // indirect
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace // indirect
