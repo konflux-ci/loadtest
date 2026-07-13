@@ -29,6 +29,14 @@ func purgeStage(f *framework.Framework, namespace string, appContexts []*types.P
 			}
 		}
 
+		if appCtx.ReleasePlanName != "" {
+			logging.Logger.Debug("Deleting ReleasePlan %s in namespace %s", appCtx.ReleasePlanName, namespace)
+			err := f.AsKubeDeveloper.ReleaseController.DeleteReleasePlan(appCtx.ReleasePlanName, namespace, false)
+			if err != nil {
+				logging.Logger.Error("Error when deleting ReleasePlan %s in namespace %s: %v", appCtx.ReleasePlanName, namespace, err)
+			}
+		}
+
 		err := f.AsKubeDeveloper.HasController.DeleteApplication(appCtx.ApplicationName, namespace, false)
 		if err != nil {
 			return fmt.Errorf("error when deleting application %s in namespace %s: %v", appCtx.ApplicationName, namespace, err)
