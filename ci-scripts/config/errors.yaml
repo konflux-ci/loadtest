@@ -1823,6 +1823,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_06_11T12_01_19_741000000_00_00
   type: logs
+- caused_by: gitlab.cee.redhat.com
+  id: pipeline_failed_git_clone_failed_because_git_fetch_returned_exit_code_128
+  note: ''
+  reason: 'Pipeline failed: Git clone failed because git fetch returned exit code 128'
+  regexp: 'url: https://gitlab.cee.redhat.com/.*level=fatal msg="git fetch failed: git fetch failed with exit code 128: exit status 128"'
+  test_dir:
+  - run-kflux-ocp-p01-2026_07_02T00_50_19_627000000_00_00
+  type: logs
 - caused_by: download.eng.brq.redhat.com
   id: pipeline_failed_mock_build_failed_because_of_download_timeout_from_download_eng_brq_redhat_com
   note: ''
@@ -2094,6 +2102,14 @@
   regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Unauthorized'
   test_dir: []
   type: loadtest
+- caused_by: cluster
+  id: prefetch_dependencies_failed_because_artifact_registry_proxy_connection_failed
+  note: ''
+  reason: Prefetch dependencies failed because artifact-registry-proxy connection failed
+  regexp: 'ERROR FetchError: exception_name: ClientConnectorError, details: Cannot connect to host artifact-registry-proxy\.caching\.svc\.cluster\.local:443'
+  test_dir:
+  - run-stone-stage-p01-2026_07_06T21_48_18_989000000_00_00
+  type: logs
 - caused_by: download.devel.redhat.com
   id: prefetch_dependencies_failed_to_download_from_download_devel_redhat_com_because_of_timeout
   note: ''
@@ -2277,6 +2293,21 @@
   regexp: 'curl -s https://api.github.com/repos/.*/commits/.* parse error: Invalid numeric literal at line [0-9]+, column [0-9]+'
   test_dir:
   - run-stone-prd-rh01-2026_01_15T17_01_45_403000000_00_00
+  type: logs
+- caused_by: SKIP
+  id: release_pipeline_failed_release_pipeline_collect_data_failed_because_releaseplanadmission_not_found
+  note: ''
+  reason: SKIP
+  regexp: 'Error from server \(NotFound\): releaseplanadmissions.appstudio.redhat.com "[^ ]+" not found'
+  test_dir: []
+  type: logs
+- caused_by: test
+  id: release_pipeline_failed_release_pipeline_collect_data_failed_because_service_account_forbidden_to_get_releases
+  note: ''
+  reason: 'Release Pipeline failed: Release pipeline collect-data failed because service account forbidden to get releases'
+  regexp: 'Error from server \(Forbidden\): releases.appstudio.redhat.com "[^ ]+" is forbidden: User "[^ ]+" cannot get resource "releases"'
+  test_dir:
+  - run-kflux-prd-rh02-2026_07_02T21_11_26_744000000_00_00
   type: logs
 - caused_by: pipelines-controller
   id: release_pipeline_run_failed_because_git_clone_authentication_required
