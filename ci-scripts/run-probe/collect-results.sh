@@ -115,7 +115,7 @@ echo "[$(date --utc -Ins)] Creating main status data file"
 STATUS_DATA_FILE="${ARTIFACT_DIR}/load-test.json"
 status_data.py \
     --status-data-file "${STATUS_DATA_FILE}" \
-    --set "name=Konflux loadtest" "started=$time_started" "ended=$time_ended" \
+    --set "name=Konflux cluster probe" "started=$time_started" "ended=$time_ended" \
     --set-subtree-json "parameters.options=${ARTIFACT_DIR}/load-test-options.json" "results.measurements=${ARTIFACT_DIR}/load-test-timings.json" "results.errors=${ARTIFACT_DIR}/load-test-errors.json" "results.durations=${ARTIFACT_DIR}/get-taskruns-durations.json"
 
 echo "[$(date --utc -Ins)] Adding monitoring data"
