@@ -61,6 +61,7 @@ RUN INSTALL_PKGS="git-core jq tar xz" && \
 USER 1001
 RUN python3 -m pip install -U pip && \
     python3 -m pip install "git+https://github.com/redhat-performance/opl.git#egg=opl-rhcloud-perf-team-core&subdirectory=core" && \
+    python3 -m pip install "git+https://github.com/Appservices-perfscale/horreum-data-mirror.git" && \
     python3 -m pip install tabulate matplotlib
 # Install our scripts
 COPY ci-scripts/ \
