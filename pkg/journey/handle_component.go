@@ -416,6 +416,12 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 		return logging.Logger.Fail(62, "Type assertion failed on component name: %+v", iface)
 	}
 
+	// Explicitly create ImageRepository CR for the component
+	err = HandleImageRepository(ctx)
+	if err != nil {
+		return err
+	}
+
 	// Validate component was onboarded
 	_, err = logging.Measure(
 		ctx,

@@ -9482,6 +9482,70 @@
       "filtering": false,
       "metrics": true,
       "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_measurements_createImageRepository_pass_duration_mean",
+      "extractors": [
+        {
+          "name": "__results_measurements_createImageRepository_pass_duration_mean",
+          "jsonpath": "$.results.measurements.createImageRepository.pass.duration.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_measurements_createImageRepository_error_rate",
+      "extractors": [
+        {
+          "name": "__results_measurements_createImageRepository_error_rate",
+          "jsonpath": "$.results.measurements.createImageRepository.error_rate",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_measurements_waitForImageRepositoryReady_pass_duration_mean",
+      "extractors": [
+        {
+          "name": "__results_measurements_waitForImageRepositoryReady_pass_duration_mean",
+          "jsonpath": "$.results.measurements.waitForImageRepositoryReady.pass.duration.mean",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_measurements_waitForImageRepositoryReady_error_rate",
+      "extractors": [
+        {
+          "name": "__results_measurements_waitForImageRepositoryReady_error_rate",
+          "jsonpath": "$.results.measurements.waitForImageRepositoryReady.error_rate",
+          "isarray": false
+        }
+      ],
+      "_function": "",
+      "filtering": false,
+      "metrics": true,
+      "schemaId": 169
     }
   ]
 }

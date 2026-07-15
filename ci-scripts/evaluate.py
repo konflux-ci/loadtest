@@ -28,6 +28,8 @@ METRICS = [
     "validateApplication",
     "createIntegrationTestScenario",
     "createComponent",
+    "createImageRepository",
+    "waitForImageRepositoryReady",
     "getPaCPullNumber",
     "validateComponent",
     "validatePipelineRunCreation",
@@ -84,6 +86,8 @@ METRICS_REUSE_APPLICATIONS = [
 # These metrics will be reused when we are reusing components
 METRICS_REUSE_COMPONENTS = [
     "createComponent",
+    "createImageRepository",
+    "waitForImageRepositoryReady",
     "getPaCPullNumber",
     "validateComponent",
 ]
