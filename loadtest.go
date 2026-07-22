@@ -61,6 +61,8 @@ func init() {
 	rootCmd.Flags().BoolVar(&opts.PipelineRepoTemplating, "pipeline-repo-templating", false, "if we should use in repo template pipelines (merge PaC PR, template repo pipelines and ignore custom pipeline run, e.g. required for multi arch test)")
 	rootCmd.Flags().StringVar(&opts.PipelineRepoTemplatingSource, "pipeline-repo-templating-source", "", "when templating, take template source files from this repository (\"\" means we will get source files from current repo)")
 	rootCmd.Flags().StringVar(&opts.PipelineRepoTemplatingSourceDir, "pipeline-repo-templating-source-dir", "", "when templating from additional repository, take template source files from this directory (\"\" means default \".template/\" will ne used)")
+	rootCmd.Flags().StringVar(&opts.RpmPipelineUrl, "rpm-pipeline-url", "", "URL of the rpmbuild pipeline repo for git resolver pinning")
+	rootCmd.Flags().StringVar(&opts.RpmPipelineRevision, "rpm-pipeline-revision", "", "Pinned commit SHA for rpmbuild pipeline git resolver")
 	rootCmd.Flags().StringArrayVar(&opts.PipelineImagePullSecrets, "pipeline-image-pull-secrets", []string{}, "secret needed to pull task images, can be used multiple times")
 	rootCmd.Flags().StringVarP(&opts.OutputDir, "output-dir", "o", ".", "directory where output files such as load-tests.log or load-tests.json are stored")
 	rootCmd.Flags().StringVar(&opts.BuildPipelineSelectorBundle, "build-pipeline-selector-bundle", "", "BuildPipelineSelector bundle to use when testing with build-definition PR")

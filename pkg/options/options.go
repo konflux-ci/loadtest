@@ -39,6 +39,8 @@ type Opts struct {
 	Purge                            bool
 	PurgeOnly                        bool
 	QuayRepo                         string
+	RpmPipelineUrl                   string
+	RpmPipelineRevision              string
 	ReleasePipelinePath              string
 	ReleasePipelineRevision          string
 	ReleasePipelineServiceAccount    string
