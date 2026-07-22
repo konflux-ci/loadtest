@@ -483,11 +483,11 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 	if ctx.ParentContext.ParentContext.Opts.PipelineRepoTemplating {
 		// Placeholders for template multi-arch PaC pipeline files
 		placeholders := &map[string]string{
-			"NAMESPACE":   ctx.ParentContext.ParentContext.Namespace,
-			"QUAY_REPO":   ctx.ParentContext.ParentContext.Opts.QuayRepo,
-			"APPLICATION": ctx.ParentContext.ApplicationName,
-			"COMPONENT":   ctx.ComponentName,
-			"BRANCH":      ctx.ParentContext.ParentContext.Opts.ComponentRepoRevision,
+			"NAMESPACE":             ctx.ParentContext.ParentContext.Namespace,
+			"QUAY_REPO":             ctx.ParentContext.ParentContext.Opts.QuayRepo,
+			"APPLICATION":           ctx.ParentContext.ApplicationName,
+			"COMPONENT":             ctx.ComponentName,
+			"BRANCH":                ctx.ParentContext.ParentContext.Opts.ComponentRepoRevision,
 			"REPOURL":               ctx.ParentContext.ParentContext.ComponentRepoUrl,
 			"RPM_PIPELINE_URL":      ctx.ParentContext.ParentContext.Opts.RpmPipelineUrl,
 			"RPM_PIPELINE_REVISION": ctx.ParentContext.ParentContext.Opts.RpmPipelineRevision,
