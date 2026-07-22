@@ -35,6 +35,8 @@ date -Ins --utc >started
     --output-dir "${OUTPUT_DIR:-.}" \
     --purge="${PURGE:-true}" \
     --quay-repo "${QUAY_REPO:-redhat-user-workloads-stage}" \
+    --rpm-pipeline-url "${RPM_PIPELINE_URL:-}" \
+    --rpm-pipeline-revision "${RPM_PIPELINE_REVISION:-}" \
     --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
     --test-scenario-path-in-repo "${TEST_SCENARIO_PATH_IN_REPO:-pipelines/integration_resolver_pipeline_pass.yaml}" \
     --test-scenario-revision "${TEST_SCENARIO_REVISION:-main}" \
