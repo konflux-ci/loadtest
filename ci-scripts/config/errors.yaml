@@ -808,6 +808,14 @@
   test_dir:
   - run-kflux-prd-rh03-2026_01_13T23_45_19_660000000_00_00
   type: logs
+- caused_by: MPC
+  id: error_allocating_host_because_ec2_not_authorized_for_ami
+  note: Windows MPC AMI authorization failure on stone_stage_p01_Windows (Jul 15-16 2026)
+  reason: Error allocating host because EC2 is not authorized for AMI
+  regexp: 'Error allocating host: failed to launch EC2 instance for .* operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: .*, api error AuthFailure: Not authorized for images: \[ami-[0-9a-f]+\]'
+  test_dir:
+  - run-stone-stage-p01-2026_07_19T14_44_19_999000000_00_00
+  type: logs
 - caused_by: cluster
   id: error_allocating_host_because_etcd_timeouted
   note: ''
@@ -1574,6 +1582,14 @@
   test_dir:
   - run-stone-stage-p01-2026_06_01T07_44_18_613000000_00_00
   type: logs
+- caused_by: image-controller
+  id: imagerepository_failed_to_become_ready_because_context_deadline_exceeded
+  note: Seen across multiple clusters Jul 15-16 2026 (UNKNOWN dump); distinct from component onboarding timeout
+  reason: ImageRepository failed to become ready because context deadline exceeded
+  regexp: 'FAIL\([0-9]+\): ImageRepository failed to become ready: ImageRepository [^ ]+ in namespace [^ ]+ not ready: context deadline exceeded'
+  test_dir:
+  - run-stone-prod-p02-2026_07_15T14_40_38_389000000_00_00
+  type: loadtest
 - caused_by: test
   id: init_container_prepare_failed_with_code_137
   note: Likely OOMKilled
@@ -2683,6 +2699,14 @@
   regexp: 'Repo-templating workflow component cleanup failed: Merging [0-9]+ failed: .*PUT https://api.github.com/repos/.*/merge: 502 Server Error'
   test_dir:
   - run-stone-prd-rh02-2025_12_20T05_44_30_733000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_failed_when_obtaining_file_from_github_com_because_502
+  note: Mirrors existing GET 503 listing-file-contents rule; PaC cleanup GET 502
+  reason: Repo templating failed when obtaining file from github.com because 502
+  regexp: 'Repo-templating workflow component cleanup failed: [Ee]rror templating PaC files: [Ff]ailed to get file [^ ]+ from repo [^ ]+ revision [^ ]+: error when listing file contents: GET https://api\.github\.com/repos/[^ ]+: 502'
+  test_dir:
+  - run-stone-prod-p02-2026_07_09T20_40_19_291000000_00_00
   type: loadtest
 - caused_by: github.com
   id: repo_templating_failed_when_obtaining_file_from_github_com_because_503
