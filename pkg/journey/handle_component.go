@@ -488,7 +488,9 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 			"APPLICATION": ctx.ParentContext.ApplicationName,
 			"COMPONENT":   ctx.ComponentName,
 			"BRANCH":      ctx.ParentContext.ParentContext.Opts.ComponentRepoRevision,
-			"REPOURL":     ctx.ParentContext.ParentContext.ComponentRepoUrl,
+			"REPOURL":               ctx.ParentContext.ParentContext.ComponentRepoUrl,
+			"RPM_PIPELINE_URL":      ctx.ParentContext.ParentContext.Opts.RpmPipelineUrl,
+			"RPM_PIPELINE_REVISION": ctx.ParentContext.ParentContext.Opts.RpmPipelineRevision,
 		}
 
 		// Skip what we do not care about, merge PR, graft pipeline yamls
