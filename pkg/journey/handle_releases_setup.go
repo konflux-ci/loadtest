@@ -1,6 +1,7 @@
 package journey
 
 import "fmt"
+import "os"
 import "time"
 
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
@@ -8,6 +9,8 @@ import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
+
+import "k8s.io/apimachinery/pkg/runtime"
 
 // Create ReleasePlan CR
 func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespace string) (string, error) {
@@ -24,11 +27,11 @@ func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespa
 
 // Create ReleasePlanAdmission CR
 // Assumes enterprise contract policy and service account with required permissions is already there
-func createReleasePlanAdmission(f *framework.Framework, namespace, originNamespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string) (string, error) {
+func createReleasePlanAdmission(f *framework.Framework, namespace, originNamespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string, data *runtime.RawExtension) (string, error) {
 	name := appName + "-rpa"
 	logging.Logger.Debug("Creating release plan admission %s in namespace %s with origin %s, policy %s and pipeline SA %s", name, namespace, originNamespace, policyName, releasePipelineSAName)
 
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, nil)
+	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, data)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the releasePlanAdmission %s in %s: %v", name, namespace, err)
 	}
@@ -144,6 +147,15 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		return logging.Logger.Fail(92, "Type assertion failed on release plan name: %+v", iface)
 	}
 
+	var rpaData *runtime.RawExtension
+	if ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath != "" {
+		dataBytes, err := os.ReadFile(ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath)
+		if err != nil {
+			return logging.Logger.Fail(97, "Failed to read RPA data file %s: %v", ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath, err)
+		}
+		rpaData = &runtime.RawExtension{Raw: dataBytes}
+	}
+
 	iface, err = logging.Measure(
 		ctx,
 		createReleasePlanAdmission,
@@ -157,6 +169,7 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		ctx.ParentContext.Opts.ReleasePipelineRevision,
 		ctx.ParentContext.Opts.ReleasePipelinePath,
 		ctx.ParentContext.Opts.ReleaseOciStorage,
+		rpaData,
 	)
 	if err != nil {
 		return logging.Logger.Fail(93, "Release Plan Admission failed creation: %v", err)

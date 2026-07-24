@@ -46,6 +46,7 @@ type Opts struct {
 	ReleasePipelineServiceAccount    string
 	ReleasePipelineUrl               string
 	ReleasePolicy                    string
+	ReleasePlanAdmissionDataPath     string
 	RunPrefix                        string
 	SerializeComponentOnboarding     bool
 	SerializeComponentOnboardingLock sync.Mutex

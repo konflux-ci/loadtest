@@ -1,0 +1,19 @@
+{
+  "pushOptions": {
+    "koji_profile": "brew",
+    "download_koji_base_url": "https://brewweb.engineering.redhat.com/brew",
+    "pushKeytab": {
+      "principal": "konflux-probe-auto@IPA.REDHAT.COM",
+      "secret": "brew-rpm-push-secret",
+      "name": "keytab"
+    },
+    "pushPipelineImage": "images.paas.redhat.com/exd-sp-guild-errata/koji-import-utils:draft-push"
+  },
+  "releaseNotes": {
+    "product_name": "Loadtest Placeholder Product",
+    "product_short_name": "loadtest",
+    "product_version": "1.0",
+    "product_id": [0]
+  },
+  "singleComponentMode": true
+}
