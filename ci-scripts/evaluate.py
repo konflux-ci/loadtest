@@ -8,7 +8,6 @@ import re
 import statistics
 import sys
 
-
 # Column indexes in input data
 COLUMN_WHEN = 0
 COLUMN_PER_USER_T = 1
@@ -124,12 +123,12 @@ class SinglePass:
     @staticmethod
     def i_matches(identifier1, identifier2):
         """Check if first provided identifier matches second one. When we have -1 instead of some value(s) in the first identifier, it acts as a wildcard."""
-        if identifier1[3] == -1 or identifier1[3] == identifier2[3]:
-            if identifier1[2] == -1 or identifier1[2] == identifier2[2]:
-                if identifier1[1] == -1 or identifier1[1] == identifier2[1]:
-                    if identifier1[0] == -1 or identifier1[0] == identifier2[0]:
-                        return True
-        return False
+        return (
+            (identifier1[3] == -1 or identifier1[3] == identifier2[3])
+            and (identifier1[2] == -1 or identifier1[2] == identifier2[2])
+            and (identifier1[1] == -1 or identifier1[1] == identifier2[1])
+            and (identifier1[0] == -1 or identifier1[0] == identifier2[0])
+        )
 
     @staticmethod
     def i_complete(identifier):
@@ -337,7 +336,7 @@ def main():
         else:
             stats[m]["error_rate"] = stats[m]["fail"]["duration"]["samples"] / s
 
-    for k, v in stats_passes.items():
+    for v in stats_passes.values():
         if v.complete(expected_metrics):
             kpi_successes += 1
             kpi_mean_data.append(v.total())

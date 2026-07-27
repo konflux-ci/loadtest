@@ -8,16 +8,19 @@ import logging
 import os
 import re
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Pattern
+from re import Pattern
+from typing import Any
 
 import yaml
-
 
 try:
     from yaml import CSafeLoader as Loader
 except ImportError:
     from yaml import SafeLoader as Loader
+
+logger = logging.getLogger(__name__)
 
 # Constants for config file paths relative to this script
 ERRORS_CONFIG = Path("ci-scripts/config/errors.yaml")
@@ -227,10 +230,10 @@ class Analyzer:
                     reasons.append((reason, caused_by))
 
         except Exception as e:
-            logging.exception("Investigating PLR failed")
+            logger.exception("Investigating PLR failed")
             return [(f"SORRY {e}", "UNKNOWN")]
 
-        return sorted(list(set(reasons)))
+        return sorted(set(reasons))
 
 
 class StatsProcessor:
@@ -345,9 +348,8 @@ def process_csv_mode(
         print("No timings file found, strange :-/")
         stats.add("No timings file found", "No timings file found", [])
 
-    if timings.get("KPI", {}).get("mean") == -1:
-        if not stats.error_messages:
-            stats.add("No test run finished", "No test run finished", [])
+    if timings.get("KPI", {}).get("mean") == -1 and not stats.error_messages:
+        stats.add("No test run finished", "No test run finished", [])
 
     stats.dump(output_file)
 

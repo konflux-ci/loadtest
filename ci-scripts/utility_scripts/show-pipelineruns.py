@@ -3,22 +3,23 @@
 import argparse
 import collections
 import copy
+import csv
 import datetime
 import itertools
 import json
 import logging
+
+logger = logging.getLogger(__name__)
 import os
 import os.path
 import re
 import sys
-import yaml
 import time
-import csv
 
-import matplotlib.pyplot
 import matplotlib.colors
-
+import matplotlib.pyplot
 import tabulate
+import yaml
 
 
 def str2date(date_str):
@@ -45,7 +46,7 @@ class DateTimeEncoder(json.JSONEncoder):
 
 class DateTimeDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(*args, object_hook=self.object_hook, **kwargs)
 
     def object_hook(self, o):
         ret = {}
@@ -97,7 +98,7 @@ class Something:
     def _merge_taskruns(self):
         for tr in self.data_taskruns:
             if tr["pipelinerun"] not in self.data_pipelineruns:
-                logging.info(
+                logger.info(
                     f"TaskRun {tr['name']} pipelinerun {tr['pipelinerun']} unknown, skipping."
                 )
                 self.tr_skips += 1
@@ -107,7 +108,7 @@ class Something:
                 self.data_pipelineruns[tr["pipelinerun"]]["taskRuns"] = {}
 
             if tr["task"] in self.data_pipelineruns[tr["pipelinerun"]]["taskRuns"]:
-                logging.info(
+                logger.info(
                     f"TaskRun {tr['name']} task {tr['task']} already in PipelineRun, strange, skipping."
                 )
                 self.tr_skips += 1
@@ -126,7 +127,7 @@ class Something:
     def _merge_pods(self):
         for pod in self.data_pods:
             if pod["pipelinerun"] not in self.data_pipelineruns:
-                logging.info(
+                logger.info(
                     f"Pod {pod['name']} pipelinerun {pod['pipelinerun']} unknown, skipping."
                 )
                 self.pod_skips += 1
@@ -136,7 +137,7 @@ class Something:
                 pod["task"]
                 not in self.data_pipelineruns[pod["pipelinerun"]]["taskRuns"]
             ):
-                logging.info(f"Pod {pod['name']} task {pod['task']} unknown, skipping.")
+                logger.info(f"Pod {pod['name']} task {pod['task']} unknown, skipping.")
                 self.pod_skips += 1
                 continue
 
@@ -146,7 +147,7 @@ class Something:
                     "podName"
                 ]
             ):
-                logging.info(
+                logger.info(
                     f"Pod {pod['name']} task labels does not match TaskRun podName, skipping."
                 )
                 self.pod_skips += 1
@@ -174,14 +175,14 @@ class Something:
                 datafile = os.path.join(currentpath, datafile)
 
                 start = time.time()
-                if datafile.endswith(".yaml") or datafile.endswith(".yml"):
+                if datafile.endswith((".yaml", ".yml")):
                     with open(datafile, "r") as fd:
                         data = yaml.safe_load(fd)
                 elif datafile.endswith(".json"):
                     try:
                         data = self._load_json(datafile)
                     except json.decoder.JSONDecodeError:
-                        logging.warning(f"File {datafile} is malfrmed, skipping it")
+                        logger.warning(f"File {datafile} is malfrmed, skipping it")
                         continue
                 else:
                     continue
@@ -190,9 +191,7 @@ class Something:
 
                 if "kind" in data and data["kind"] == "List":
                     if "items" not in data:
-                        logging.info(
-                            f"Skipping {datafile} as it does not contain items"
-                        )
+                        logger.info(f"Skipping {datafile} as it does not contain items")
                         continue
 
                     for i in data["items"]:
@@ -202,7 +201,7 @@ class Something:
 
     def _populate_add_one(self, something):
         if "kind" not in something:
-            logging.info("Skipping item because it does not have kind")
+            logger.info("Skipping item because it does not have kind")
             return
 
         if something["kind"] == "PipelineRun":
@@ -212,7 +211,7 @@ class Something:
         elif something["kind"] == "Pod":
             self._populate_pod(something)
         else:
-            logging.info(
+            logger.info(
                 f"Skipping item because it has unexpeted kind {something['kind']}"
             )
             return
@@ -222,16 +221,14 @@ class Something:
         try:
             pr_name = pr["metadata"]["name"]
         except KeyError as e:
-            logging.info(
-                f"PipelineRun '{str(pr)[:200]}...' missing name, skipping: {e}"
-            )
+            logger.info(f"PipelineRun '{str(pr)[:200]}...' missing name, skipping: {e}")
             self.pr_skips += 1
             return
 
         try:
             pr_conditions = pr["status"]["conditions"]
         except KeyError as e:
-            logging.info(f"PipelineRun {pr_name} missing conditions, skipping: {e}")
+            logger.info(f"PipelineRun {pr_name} missing conditions, skipping: {e}")
             self.pr_conditions["Missing conditions"] += 1
             self.pr_skips += 1
             return
@@ -250,7 +247,7 @@ class Something:
         else:
             self.pr_conditions["Missing type"] += 1
         ###if not pr_condition_ok:
-        ###    logging.info(
+        ###    logger.info(
         ###        f"PipelineRun {pr_name} is not in right condition, skipping: {pr_conditions}"
         ###    )
         ###    self.pr_skips += 1
@@ -261,7 +258,7 @@ class Something:
             pr_completionTime = str2date(pr["status"]["completionTime"])
             pr_startTime = str2date(pr["status"]["startTime"])
         except KeyError as e:
-            logging.info(f"PipelineRun {pr_name} missing some fields, skipping: {e}")
+            logger.info(f"PipelineRun {pr_name} missing some fields, skipping: {e}")
             self.pr_skips += 1
             return
 
@@ -278,7 +275,7 @@ class Something:
         try:
             tr_name = tr["metadata"]["name"]
         except KeyError as e:
-            logging.info(f"TaskRun missing name, skipping: {e}, {str(tr)[:200]}")
+            logger.info(f"TaskRun missing name, skipping: {e}, {str(tr)[:200]}")
             self.tr_skips += 1
             return
 
@@ -295,16 +292,14 @@ class Something:
                 tr_task = tr["metadata"]["labels"]["tekton.dev/pipelineTask"]
             tr_pipelinerun = tr["metadata"]["labels"]["tekton.dev/pipelineRun"]
         except KeyError as e:
-            logging.info(
-                f"TaskRun {tr_name} missing task or pipelinerun, skipping: {e}"
-            )
+            logger.info(f"TaskRun {tr_name} missing task or pipelinerun, skipping: {e}")
             self.tr_skips += 1
             return
 
         try:
             tr_conditions = tr["status"]["conditions"]
         except KeyError as e:
-            logging.info(f"TaskRun {tr_name} missing conditions, skipping: {e}")
+            logger.info(f"TaskRun {tr_name} missing conditions, skipping: {e}")
             self.tr_conditions["Missing conditions"] += 1
             self.tr_skips += 1
             return
@@ -322,7 +317,7 @@ class Something:
         else:
             self.tr_conditions["Missing type"] += 1
         ###if not tr_condition_ok:
-        ###    logging.info(f"TaskRun {tr_name} in wrong condition, skipping: {c}")
+        ###    logger.info(f"TaskRun {tr_name} in wrong condition, skipping: {c}")
         ###    self.tr_skips += 1
         ###    return
 
@@ -338,7 +333,7 @@ class Something:
             tr_podName = tr["status"]["podName"]
             tr_namespace = tr["metadata"]["namespace"]
         except KeyError as e:
-            logging.info(f"TaskRun {tr_name} missing some fields, skipping: {e}")
+            logger.info(f"TaskRun {tr_name} missing some fields, skipping: {e}")
             self.tr_skips += 1
             return
 
@@ -361,7 +356,7 @@ class Something:
         try:
             pod_name = pod["metadata"]["name"]
         except KeyError as e:
-            logging.info(f"Pod missing name, skipping: {e}, {str(pod)[:200]}")
+            logger.info(f"Pod missing name, skipping: {e}, {str(pod)[:200]}")
             self.pod_skips += 1
             return
 
@@ -378,40 +373,42 @@ class Something:
             else:
                 pod_task = pod["metadata"]["labels"]["tekton.dev/pipelineTask"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing pipelinerun or task, skipping: {e}")
+            logger.info(f"Pod {pod_name} missing pipelinerun or task, skipping: {e}")
             self.pod_skips += 1
             return
 
         try:
             pod_node_name = pod["spec"]["nodeName"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing node name filed, skipping: {e}")
+            logger.info(f"Pod {pod_name} missing node name filed, skipping: {e}")
             self.pod_skips += 1
             return
 
         try:
             pod_creation_timestamp = pod["metadata"]["creationTimestamp"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing creationTimestamp, skipping: {e}")
+            logger.info(f"Pod {pod_name} missing creationTimestamp, skipping: {e}")
             self.pod_skips += 1
             return
 
         try:
             pod_start_time = pod["status"]["startTime"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing startTime, skipping: {e}")
+            logger.info(f"Pod {pod_name} missing startTime, skipping: {e}")
             self.pod_skips += 1
             return
 
         try:
             pod_finished_time = None
             for container in pod["status"]["containerStatuses"]:
-                if pod_finished_time is None:
-                    pod_finished_time = container["state"]["terminated"]["finishedAt"]
-                elif pod_finished_time < container["state"]["terminated"]["finishedAt"]:
+                if (
+                    pod_finished_time is None
+                    or pod_finished_time
+                    < container["state"]["terminated"]["finishedAt"]
+                ):
                     pod_finished_time = container["state"]["terminated"]["finishedAt"]
         except KeyError as e:
-            logging.info(
+            logger.info(
                 f"Pod {pod_name} missing finishedAt timestamp for container, skipping: {e}"
             )
             self.pod_skips += 1
@@ -420,7 +417,7 @@ class Something:
         try:
             pod_conditions = pod["status"]["conditions"]
         except KeyError as e:
-            logging.info(f"Pod {pod_name} missing conditions, skipping: {e}")
+            logger.info(f"Pod {pod_name} missing conditions, skipping: {e}")
             self.pod_skips += 1
             return
 
@@ -439,7 +436,7 @@ class Something:
         for condition in pod_conditions:
             c_type = condition["type"]
             c_status = condition["status"]
-            c_reason = condition["reason"] if "reason" in condition else None
+            c_reason = condition.get("reason", None)
             self.pod_conditions[f"{c_type} / {c_status} / {c_reason}"] += 1
 
     def _dump_json(self, data, path):
@@ -466,7 +463,7 @@ class Something:
         def fits_into_lane(entity, lane):
             start = "creationTimestamp"
             end = "completionTime"
-            logging.debug(
+            logger.debug(
                 f"Checking if entity ({entity[start]} - {entity[end]}) fits into lane with {len(lane)} members"
             )
             for member in lane:
@@ -475,11 +472,11 @@ class Something:
                     or member[start] <= entity[end] <= member[end]
                     or entity[start] <= member[start] <= entity[end]
                 ):
-                    logging.debug(
+                    logger.debug(
                         f"Entity ({entity[start]} - {entity[end]}) does not fit because of lane member ({member[start]} - {member[end]})"
                     )
                     return False
-            logging.debug(f"Entity ({entity[start]} - {entity[end]}) fits")
+            logger.debug(f"Entity ({entity[start]} - {entity[end]}) fits")
             return True
 
         for pr_name, pr_times in self.data_pipelineruns.items():
@@ -537,19 +534,17 @@ class Something:
 
                 # If start is inside existing interval, but end is outside of it,
                 # we extend existing interval
-                if t[start] <= new[start] <= t[end]:
-                    if new[end] > t[end]:
-                        t[end] = new[end]
-                        processed = True
-                        continue
+                if t[start] <= new[start] <= t[end] and new[end] > t[end]:
+                    t[end] = new[end]
+                    processed = True
+                    continue
 
                 # If end is inside existing interval, but start is outside of it,
                 # we extend existing interval
-                if t[start] <= new[end] <= t[end]:
-                    if new[start] < t[start]:
-                        t[start] = new[start]
-                        processed = True
-                        continue
+                if t[start] <= new[end] <= t[end] and new[start] < t[start]:
+                    t[start] = new[start]
+                    processed = True
+                    continue
 
             if not processed:
                 existing.append(new)
@@ -569,13 +564,13 @@ class Something:
         )
         tr_without_pod_times = 0
 
-        for pr_name, pr_times in self.data_pipelineruns.items():
+        for pr_times in self.data_pipelineruns.values():
             pr_duration = pr_times[end] - pr_times[start]
             self.pr_duration += pr_duration
 
             # Combine TaskRuns so they do not overlap
             trs = []
-            for tr_name, tr_times in pr_times["taskRuns"].items():
+            for tr_times in pr_times["taskRuns"].values():
                 self.tr_duration += tr_times[end] - tr_times[start]
                 add_time_interval(trs, tr_times)
                 if (
@@ -637,14 +632,12 @@ class Something:
         Based on loaded data, compute how many TaskRuns run on what nodes.
         """
         nodes = {}
-        for pr_name, pr_data in self.data_pipelineruns.items():
+        for pr_data in self.data_pipelineruns.values():
             for tr_name, tr_data in pr_data["taskRuns"].items():
                 try:
                     node_name = tr_data["node_name"]
                 except KeyError:
-                    logging.info(
-                        f"TaskRun {tr_name} missing node_name field, skipping."
-                    )
+                    logger.info(f"TaskRun {tr_name} missing node_name field, skipping.")
                     continue
                 if node_name not in nodes:
                     nodes[node_name] = 1
@@ -667,17 +660,15 @@ class Something:
                 try:
                     node_name = tr_data["node_name"]
                 except KeyError:
-                    logging.info(
-                        f"TaskRun {tr_name} missing node_name field, skipping."
-                    )
+                    logger.info(f"TaskRun {tr_name} missing node_name field, skipping.")
                     continue
                 table.append([pr_name, tr_name, node_name])
                 pr_tr_nodes[tr_name] = node_name
 
             # Compile stats of whoch tasks ran on same node (in one PR) most often
-            for tr1 in pr_tr_nodes:
-                for tr2 in pr_tr_nodes:
-                    if pr_tr_nodes[tr1] == pr_tr_nodes[tr2]:
+            for tr1, node1 in pr_tr_nodes.items():
+                for tr2, node2 in pr_tr_nodes.items():
+                    if node1 == node2:
                         if tr1 not in stats:
                             stats[tr1] = {}
                         if tr2 not in stats[tr1]:
@@ -685,7 +676,7 @@ class Something:
                         stats[tr1][tr2] += 1
 
         # Transform the stats to the form tabulate can handle
-        table_keys = sorted(list(stats.keys()))
+        table_keys = sorted(stats.keys())
         table_data = []
         for tr1 in table_keys:
             table_row = []
@@ -693,7 +684,7 @@ class Something:
                 try:
                     table_row.append(stats[tr1][tr2])
                 except KeyError as e:
-                    logging.warning(f"Failed to transform stats: {e}")
+                    logger.warning(f"Failed to transform stats: {e}")
             table_data.append([tr1] + table_row)
 
         # print("\nWhich PipelineRuns and TaskRuns ran on which node:")
@@ -780,7 +771,7 @@ class Something:
 
         size = max(5, self.pr_count / 2)
         size = min(size, 100)
-        fig, ax = matplotlib.pyplot.subplots(figsize=(size, size))
+        _fig, ax = matplotlib.pyplot.subplots(figsize=(size, size))
 
         fig_x_min = sys.maxsize
         fig_x_max = 0
@@ -936,7 +927,7 @@ def main():
     else:
         logging.basicConfig(format=fmt)
 
-    logging.debug(f"Args: {args}")
+    logger.debug(f"Args: {args}")
 
     return doit(args)
 

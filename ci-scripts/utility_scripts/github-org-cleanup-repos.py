@@ -2,10 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 import argparse
-import re
-import github  # install "PyGithub"
-import os
 import datetime
+import os
+import re
+
+import github  # install "PyGithub"
 
 
 def iso_date(s: str) -> datetime.datetime:
@@ -13,7 +14,9 @@ def iso_date(s: str) -> datetime.datetime:
         dt = datetime.datetime.fromisoformat(s)
     except ValueError:
         try:
-            dt = datetime.datetime.strptime(s, "%Y-%m-%d")
+            dt = datetime.datetime.strptime(s, "%Y-%m-%d").replace(
+                tzinfo=datetime.timezone.utc
+            )
         except ValueError:
             raise argparse.ArgumentTypeError(f"Not a valid ISO date: '{s}'.")
 
@@ -55,7 +58,7 @@ def list_and_delete_repos(
         if delete_repos:
             try:
                 repo.delete()
-            except Exception as e:
+            except github.GithubException as e:
                 print(f"{repo.name} - Error deleting repository: {e}")
             finally:
                 print(f"{repo.name} - deleted")

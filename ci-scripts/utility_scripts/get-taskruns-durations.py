@@ -5,13 +5,16 @@ import csv
 import datetime
 import json
 import logging
+
+logger = logging.getLogger(__name__)
 import os
 import os.path
-import sys
-import yaml
-import time
-import statistics
 import re
+import statistics
+import sys
+import time
+
+import yaml
 
 
 def str2date(date_str):
@@ -31,7 +34,7 @@ def str2date(date_str):
 
 class DateTimeDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(*args, object_hook=self.object_hook, **kwargs)
 
     def object_hook(self, o):
         ret = {}
@@ -70,29 +73,27 @@ class Something:
                 datafile = os.path.join(currentpath, datafile)
 
                 start = time.time()
-                if datafile.endswith(".yaml") or datafile.endswith(".yml"):
+                if datafile.endswith((".yaml", ".yml")):
                     with open(datafile, "r") as fd:
                         data = yaml.safe_load(fd)
                 elif datafile.endswith(".json"):
                     try:
                         data = self._load_json(datafile)
                     except json.decoder.JSONDecodeError:
-                        logging.warning(f"File {datafile} is malfrmed, skipping it")
+                        logger.warning(f"File {datafile} is malfrmed, skipping it")
                         continue
                 else:
                     continue
                 end = time.time()
-                logging.debug(f"Loaded {datafile} in {(end - start):.2f} seconds")
+                logger.debug(f"Loaded {datafile} in {(end - start):.2f} seconds")
 
                 if "kind" not in data:
-                    logging.info(f"Skipping {datafile} as it does not contain kind")
+                    logger.info(f"Skipping {datafile} as it does not contain kind")
                     continue
 
                 if data["kind"] == "List":
                     if "items" not in data:
-                        logging.info(
-                            f"Skipping {datafile} as it does not contain items"
-                        )
+                        logger.info(f"Skipping {datafile} as it does not contain items")
                         continue
 
                     for i in data["items"]:
@@ -102,7 +103,7 @@ class Something:
 
     def _populate_add_one(self, data):
         if "kind" not in data:
-            logging.info("Skipping item because it does not have kind")
+            logger.info("Skipping item because it does not have kind")
             return
 
         if data["kind"] == "PipelineRun":
@@ -110,9 +111,7 @@ class Something:
         elif data["kind"] == "TaskRun":
             self._populate_taskrun(data)
         else:
-            logging.debug(
-                f"Skipping item because it has unexpected kind {data['kind']}"
-            )
+            logger.debug(f"Skipping item because it has unexpected kind {data['kind']}")
             return
 
     def _populate_pipelinerun(self, pr):
@@ -138,7 +137,7 @@ class Something:
                 if t["kind"] == "TaskRun"
             ]
         except KeyError as e:
-            logging.info(f"PipelineRun incomplete, skipping: {e}, {str(pr)[:200]}")
+            logger.info(f"PipelineRun incomplete, skipping: {e}, {str(pr)[:200]}")
             self.pr_skips += 1
             return
 
@@ -209,11 +208,11 @@ class Something:
                         "result": s_result,
                     }
                 except KeyError as e:
-                    logging.info(f"Step incomplete, skipping: {e}, {str(s)[:200]}")
+                    logger.info(f"Step incomplete, skipping: {e}, {str(s)[:200]}")
                     self.step_skips += 1
 
         except KeyError as e:
-            logging.warning(f"TaskRun incomplete, skipping: {e}, {str(tr)[:200]}")
+            logger.warning(f"TaskRun incomplete, skipping: {e}, {str(tr)[:200]}")
             self.tr_skips += 1
             return
 
@@ -270,36 +269,34 @@ class Something:
         for t in existing:
             # If both ends are inside of existing interval, we ignore it
             if t[start] <= new[start] <= t[end] and t[start] <= new[end] <= t[end]:
-                logging.info(
+                logger.info(
                     f"Interval {self._format_interval(new)} is inside of member {self._format_interval(t)}, no action needed"
                 )
                 return existing  # no more processing needed
 
             # If start is inside existing interval, but end is outside of it,
             # we extend existing interval
-            if t[start] <= new[start] <= t[end]:
-                if new[end] > t[end]:
-                    logging.info(
-                        f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to right of it and need to recompute"
-                    )
-                    existing.remove(t)
-                    t[end] = new[end]
-                    return self._merge_time_interval(t, existing)
+            if t[start] <= new[start] <= t[end] and new[end] > t[end]:
+                logger.info(
+                    f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to right of it and need to recompute"
+                )
+                existing.remove(t)
+                t[end] = new[end]
+                return self._merge_time_interval(t, existing)
 
             # If end is inside existing interval, but start is outside of it,
             # we extend existing interval
-            if t[start] <= new[end] <= t[end]:
-                if new[start] < t[start]:
-                    logging.info(
-                        f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to left of it and need to recompute"
-                    )
-                    existing.remove(t)
-                    t[start] = new[start]
-                    return self._merge_time_interval(t, existing)
+            if t[start] <= new[end] <= t[end] and new[start] < t[start]:
+                logger.info(
+                    f"Interval {self._format_interval(new)} extends member {self._format_interval(t)}, so adding to left of it and need to recompute"
+                )
+                existing.remove(t)
+                t[start] = new[start]
+                return self._merge_time_interval(t, existing)
 
         # If new interval did not collided with none of existing ones,
         # just add it to the list
-        logging.info(
+        logger.info(
             f"Interval {self._format_interval(new)} does not collide with any member, adding it"
         )
         return existing + [new]
@@ -324,7 +321,7 @@ class Something:
         for tr in self.data_taskruns:
             # Check if TR's PR was correctly loaded
             if tr["pipelinerun"] not in data:
-                logging.warning(
+                logger.warning(
                     f"TaskRuns {tr['name']} pipelinerun {tr['pipelinerun']} was not loaded, skipping it"
                 )
                 self.pr_skips += 1
@@ -332,7 +329,7 @@ class Something:
 
             # Check if TR's task is expected by TR's PR
             if tr["name"] not in data[tr["pipelinerun"]]["tasks"]:
-                logging.error(
+                logger.error(
                     f"TaskRuns {tr['name']} ({tr['task']}) missing in pipelinerun {tr['pipelinerun']}, this is strange"
                 )
                 sys.exit(1)  # If this happened, it is very strange
@@ -350,9 +347,9 @@ class Something:
         # Check if we have all TRs for all the PRs
         for pr_name, pr_data in data.items():
             expected_trs = set(pr_data["tasks"])
-            current_trs = set(list(pr_data["taskruns"].keys()))
+            current_trs = set(pr_data["taskruns"].keys())
             if expected_trs != current_trs:
-                logging.warning(
+                logger.warning(
                     f"Not all pipelinerun {pr_name} task runs were loaded: {expected_trs - current_trs}"
                 )
                 self.tr_skips += len(expected_trs) - len(current_trs)
@@ -366,7 +363,7 @@ class Something:
         }
         for pr_name, pr_data in data.items():
             pr_id = pr_data["type"]
-            logging.debug(f"Working on PipelineRun {pr_id}")
+            logger.debug(f"Working on PipelineRun {pr_id}")
 
             if pr_id not in result["pipelineruns"]:
                 result["pipelineruns"][pr_id] = {
@@ -386,7 +383,7 @@ class Something:
 
             # Composing list of TRs intervals to get idle time later
             pr_tr_intervals = []
-            for tr_name, tr_data in pr_data["taskruns"].items():
+            for tr_data in pr_data["taskruns"].values():
                 pr_tr_intervals = self._merge_time_interval(
                     [tr_data["creation"], tr_data["completion"]], pr_tr_intervals
                 )
@@ -404,10 +401,10 @@ class Something:
             result["pipelineruns"][pr_id][pr_result]["scheduled"].append(pr_scheduled)
             result["pipelineruns"][pr_id][pr_result]["idle"].append(pr_idle)
 
-            for tr_name, tr_data in pr_data["taskruns"].items():
+            for tr_data in pr_data["taskruns"].values():
                 tr_id = f"{pr_id}/{tr_data['task']}"
                 ptr_id = f"{pr_id}/{tr_data['task']}-{tr_data['platform']}"
-                logging.debug(f"Working on TaskRun {tr_id}")
+                logger.debug(f"Working on TaskRun {tr_id}")
 
                 if tr_id not in result["taskruns"]:
                     result["taskruns"][tr_id] = {
@@ -476,7 +473,7 @@ class Something:
 
                 for s_name, s_data in tr_data["steps"].items():
                     s_id = f"{tr_id}/{s_name}"
-                    logging.debug(f"Working on Step {s_id}")
+                    logger.debug(f"Working on Step {s_id}")
 
                     if s_id not in result["steps"]:
                         result["steps"][s_id] = {
@@ -495,8 +492,8 @@ class Something:
 
         # Compute statistical data
         for e in ("pipelineruns", "taskruns", "platformtaskruns", "steps"):
-            for my_id, my_data1 in result[e].items():
-                for my_result, my_data2 in my_data1.items():
+            for my_data1 in result[e].values():
+                for my_data2 in my_data1.values():
                     for my_stat, my_data3 in my_data2.items():
                         if len(my_data3) == 0:
                             my_data2[my_stat] = {
@@ -580,7 +577,7 @@ def main():
     else:
         logging.basicConfig(format=fmt)
 
-    logging.debug(f"Args: {args}")
+    logger.debug(f"Args: {args}")
 
     return doit(args)
 

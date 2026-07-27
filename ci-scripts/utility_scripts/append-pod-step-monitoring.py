@@ -6,6 +6,7 @@ cluster_read_config.yaml from get-pod-step-names.json.
 
 import argparse
 import json
+import sys
 
 
 def main():
@@ -52,4 +53,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
