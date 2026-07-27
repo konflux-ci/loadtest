@@ -48,6 +48,7 @@ date -Ins --utc >started
     --release-pipeline-service-account "${RELEASE_PIPELINE_SERVICE_ACCOUNT:-loadtest-probe-serviceaccount}" \
     --release-managed-namespace "${RELEASE_MANAGED_NAMESPACE:-}" \
     --release-managed-token "${RELEASE_MANAGED_TOKEN:-}" \
+    --release-plan-admission-data "${RELEASE_PLAN_ADMISSION_DATA:-}" \
     --runprefix "${RUN_PREFIX:-${USER_PREFIX:-undef}}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
