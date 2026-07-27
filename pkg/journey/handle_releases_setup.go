@@ -1,5 +1,6 @@
 package journey
 
+import "encoding/json"
 import "fmt"
 import "os"
 import "time"
@@ -152,6 +153,23 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		dataBytes, err := os.ReadFile(ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath)
 		if err != nil {
 			return logging.Logger.Fail(97, "Failed to read RPA data file %s: %v", ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath, err)
+		}
+		var dataMap map[string]interface{}
+		if err := json.Unmarshal(dataBytes, &dataMap); err != nil {
+			return logging.Logger.Fail(98, "Failed to parse RPA data JSON: %v", err)
+		}
+		componentNames := make([]map[string]string, ctx.ParentContext.Opts.ComponentsCount)
+		for i := 0; i < ctx.ParentContext.Opts.ComponentsCount; i++ {
+			componentNames[i] = map[string]string{"name": fmt.Sprintf("%s-comp-%d", ctx.ApplicationName, i)}
+		}
+		if mapping, ok := dataMap["mapping"].(map[string]interface{}); ok {
+			mapping["components"] = componentNames
+		} else {
+			dataMap["mapping"] = map[string]interface{}{"components": componentNames}
+		}
+		dataBytes, err = json.Marshal(dataMap)
+		if err != nil {
+			return logging.Logger.Fail(99, "Failed to marshal RPA data: %v", err)
 		}
 		rpaData = &runtime.RawExtension{Raw: dataBytes}
 	}
