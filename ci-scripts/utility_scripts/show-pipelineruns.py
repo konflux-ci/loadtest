@@ -8,8 +8,6 @@ import datetime
 import itertools
 import json
 import logging
-
-logger = logging.getLogger(__name__)
 import os
 import os.path
 import re
@@ -20,6 +18,8 @@ import matplotlib.colors
 import matplotlib.pyplot
 import tabulate
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 def str2date(date_str):

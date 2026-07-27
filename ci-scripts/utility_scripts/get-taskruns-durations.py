@@ -5,8 +5,6 @@ import csv
 import datetime
 import json
 import logging
-
-logger = logging.getLogger(__name__)
 import os
 import os.path
 import re
@@ -15,6 +13,8 @@ import sys
 import time
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 def str2date(date_str):
