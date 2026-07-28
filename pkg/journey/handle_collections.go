@@ -234,7 +234,37 @@ func collectComponentJSONs(f *framework.Framework, dirPath, namespace, component
 	return nil
 }
 
-func collectTenantReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appName, compName, snapName, releasePlanName, releasePlanAdmissionName, relName string) error {
+// Collect ReleasePlanAdmission JSON. Takes its own framework/namespace/dirPath
+// since the ReleasePlanAdmission lives in the managed namespace (not the
+// tenant namespace the ReleasePlan and other resources live in) whenever a
+// managed namespace is configured.
+func collectReleasePlanAdmissionJSON(f *framework.Framework, dirPath, namespace, releasePlanAdmissionName string) error {
+	if releasePlanAdmissionName == "" {
+		return nil
+	}
+
+	releasePlanAdmission, err := f.AsKubeDeveloper.ReleaseController.GetReleasePlanAdmission(releasePlanAdmissionName, namespace)
+	if err != nil {
+		if !k8s_api_errors.IsNotFound(err) {
+			return fmt.Errorf("failed to get Release Plan Admission %s in namespace %s: %v", releasePlanAdmissionName, namespace, err)
+		}
+		return nil
+	}
+
+	releasePlanAdmissionJSON, err := json.Marshal(releasePlanAdmission)
+	if err != nil {
+		return fmt.Errorf("failed to dump Release Plan Admission JSON: %v", err)
+	}
+
+	err = writeToFile(dirPath, "collected-releaseplanadmission-"+releasePlanAdmissionName+".json", releasePlanAdmissionJSON)
+	if err != nil {
+		return fmt.Errorf("failed to write Release Plan Admission: %v", err)
+	}
+
+	return nil
+}
+
+func collectTenantReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace, appName, compName, snapName, releasePlanName, relName string) error {
 	// Collect ReleasePlan JSON
 	if releasePlanName != "" {
 		releasePlan, err := f.AsKubeDeveloper.ReleaseController.GetReleasePlan(releasePlanName, namespace)
@@ -253,28 +283,6 @@ func collectTenantReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace
 			err = writeToFile(dirPath, "collected-releaseplan-"+releasePlanName+".json", releasePlanJSON)
 			if err != nil {
 				return fmt.Errorf("failed to write Release Plan: %v", err)
-			}
-		}
-	}
-
-	// Collect ReleasePlanAdmission JSON
-	if releasePlanAdmissionName != "" {
-		releasePlanAdmission, err := f.AsKubeDeveloper.ReleaseController.GetReleasePlanAdmission(releasePlanAdmissionName, namespace)
-		if err != nil {
-			if !k8s_api_errors.IsNotFound(err) {
-				return fmt.Errorf("failed to get Release Plan Admission %s: %v", releasePlanAdmissionName, err)
-			}
-		}
-
-		if err == nil {
-			releasePlanAdmissionJSON, err := json.Marshal(releasePlanAdmission)
-			if err != nil {
-				return fmt.Errorf("failed to dump Release Plan Admission JSON: %v", err)
-			}
-
-			err = writeToFile(dirPath, "collected-releaseplanadmission-"+releasePlanAdmissionName+".json", releasePlanAdmissionJSON)
-			if err != nil {
-				return fmt.Errorf("failed to write Release Plan Admission: %v", err)
 			}
 		}
 	}
@@ -389,14 +397,30 @@ func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 		return logging.Logger.Fail(103, "Failed to collect component JSONs: %v", err)
 	}
 
-	// When using managed namespace, skip RPA collection from dev namespace (it lives in managed ns)
-	rpaName := ctx.ParentContext.ReleasePlanAdmissionName
-	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
-		rpaName = ""
-	}
-	err = collectTenantReleaseRelatedJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.SnapshotName, ctx.ParentContext.ReleasePlanName, rpaName, ctx.ReleaseName)
+	err = collectTenantReleaseRelatedJSONs(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ApplicationName, ctx.ComponentName, ctx.SnapshotName, ctx.ParentContext.ReleasePlanName, ctx.ReleaseName)
 	if err != nil {
 		return logging.Logger.Fail(104, "Failed to collect release related JSONs: %v", err)
+	}
+
+	// ReleasePlanAdmission lives in the managed namespace when one is
+	// configured, otherwise alongside the ReleasePlan in the tenant namespace
+	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		managedNamespace := ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace
+		managedDirPath := getDirName(ctx.ParentContext.ParentContext.Opts.OutputDir, managedNamespace, journeyCounterStr)
+		err = createDir(managedDirPath)
+		if err != nil {
+			return logging.Logger.Fail(111, "Failed to create managed namespace dir: %v", err)
+		}
+
+		err = collectReleasePlanAdmissionJSON(ctx.ManagedFramework, managedDirPath, managedNamespace, ctx.ParentContext.ReleasePlanAdmissionName)
+		if err != nil {
+			return logging.Logger.Fail(112, "Failed to collect managed release plan admission JSON: %v", err)
+		}
+	} else {
+		err = collectReleasePlanAdmissionJSON(ctx.Framework, dirPath, ctx.ParentContext.ParentContext.Namespace, ctx.ParentContext.ReleasePlanAdmissionName)
+		if err != nil {
+			return logging.Logger.Fail(104, "Failed to collect release plan admission JSON: %v", err)
+		}
 	}
 
 	// Collect release pipeline run, task runs, and pod logs from managed namespace
