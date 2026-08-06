@@ -12,11 +12,11 @@ RUN ./bin/loadtest --help
 
 
 
-# Builder for oc
+# Builder for oc and yq
 # (this is to avoid installing tar to our runner image)
 FROM registry.access.redhat.com/ubi10/ubi:latest AS builder_oc
 ARG TARGETARCH
-# Download and install it, try multiple times as this is error prone
+# Download and install oc, try multiple times as this is error prone
 RUN attempt=1; \
     if [ "$TARGETARCH" = "arm64" ]; then \
         ARCH_SUFFIX="-arm64"; \
@@ -37,6 +37,23 @@ RUN attempt=1; \
     done
 # Test it was installed correctly
 RUN oc version --client
+# Download yq (https://github.com/mikefarah/yq)
+RUN attempt=1; \
+    YQ_ARCH="${TARGETARCH:-amd64}"; \
+    while true; do \
+        echo "Attempt $attempt"; \
+        curl -v -L "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}" -o /usr/bin/yq && \
+            chmod +x /usr/bin/yq && \
+            break; \
+        if [[ $attempt -ge 5 ]]; then \
+            echo "All attempts failed, giving up" >&2; \
+            exit 1; \
+        fi; \
+        sleep 1; \
+        let attempt+=1; \
+    done
+# Test it was installed correctly
+RUN yq --version
 
 
 
@@ -46,9 +63,10 @@ FROM registry.access.redhat.com/ubi10/python-312-minimal:latest
 COPY LICENSE /licenses/LICENSE
 # Copy loadtest binary from builder container
 COPY --from=builder_go /opt/app-root/src/bin/loadtest /usr/bin/
-# Copy OpenShift CLI binary from builder container
+# Copy OpenShift CLI and yq binaries from builder container
 COPY --from=builder_oc /usr/bin/oc /usr/bin/
 COPY --from=builder_oc /usr/bin/kubectl /usr/bin/
+COPY --from=builder_oc /usr/bin/yq /usr/bin/
 # Install internal CA certificate
 COPY ci-scripts/config/2022-IT-Root-CA.pem \
      /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
@@ -62,7 +80,10 @@ USER 1001
 RUN python3 -m pip install -U pip && \
     python3 -m pip install "git+https://github.com/redhat-performance/opl.git#egg=opl-rhcloud-perf-team-core&subdirectory=core" && \
     python3 -m pip install "git+https://github.com/Appservices-perfscale/horreum-data-mirror.git" && \
-    python3 -m pip install tabulate matplotlib
+    python3 -m pip install tabulate matplotlib \
+                           opentelemetry-api \
+                           opentelemetry-sdk \
+                           opentelemetry-exporter-otlp-proto-http
 # Install our scripts
 COPY ci-scripts/ \
      ./ci-scripts/
