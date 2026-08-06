@@ -148,6 +148,39 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		return logging.Logger.Fail(92, "Type assertion failed on release plan name: %+v", iface)
 	}
 
+	// Read-only mode: reuse a pre-existing, releng-owned RPA instead of
+	// creating/deleting one per run. Validate both RP and RPA the same way
+	// the normal path does, just without ever creating or patching the RPA.
+	if ctx.ParentContext.Opts.ReleaseManagedReadOnly {
+		ctx.ReleasePlanAdmissionName = ctx.ParentContext.Opts.ReleaseManagedReleasePlanAdmissionName
+
+		_, err = logging.Measure(
+			ctx,
+			validateReleasePlan,
+			ctx.Framework,
+			ctx.ParentContext.Namespace,
+			ctx.ReleasePlanName,
+		)
+		if err != nil {
+			return logging.Logger.Fail(120, "Release Plan failed validation: %v", err)
+		}
+
+		_, err = logging.Measure(
+			ctx,
+			validateReleasePlanAdmission,
+			rpaFramework,
+			rpaNamespace,
+			ctx.ReleasePlanAdmissionName,
+		)
+		if err != nil {
+			return logging.Logger.Fail(121, "Pre-existing Release Plan Admission %s in read-only managed namespace %s failed validation: %v", ctx.ReleasePlanAdmissionName, rpaNamespace, err)
+		}
+
+		logging.Logger.Info("Configured release %s & pre-existing %s for application %s in namespace %s (RPA in %s)", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace, rpaNamespace)
+
+		return nil
+	}
+
 	var rpaData *runtime.RawExtension
 	if ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath != "" {
 		dataBytes, err := os.ReadFile(ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath)
