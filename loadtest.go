@@ -48,6 +48,8 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.ReleasePipelineServiceAccount, "release-pipeline-service-account", "release-serviceaccount", "service account to use for release pipeline")
 	rootCmd.Flags().StringVar(&opts.ReleaseManagedNamespace, "release-managed-namespace", "", "managed namespace for release pipeline runs (when set, RPA is created there instead of dev namespace)")
 	rootCmd.Flags().StringVar(&opts.ReleaseManagedToken, "release-managed-token", "", "SA token for accessing the managed release namespace")
+	rootCmd.Flags().BoolVar(&opts.ReleaseManagedReadOnly, "release-managed-readonly", false, "reuse a pre-existing ReleasePlanAdmission in the managed namespace via a read-only SA, instead of creating/deleting one per run (requires --release-managed-namespace, --release-managed-release-plan-admission-name and --concurrency 1)")
+	rootCmd.Flags().StringVar(&opts.ReleaseManagedReleasePlanAdmissionName, "release-managed-release-plan-admission-name", "", "name of the pre-existing ReleasePlanAdmission to reuse when --release-managed-readonly is set")
 	rootCmd.Flags().StringVar(&opts.ReleasePlanAdmissionDataPath, "release-plan-admission-data", "", "path to JSON file with RPA data (pushOptions, releaseNotes, etc.)")
 	rootCmd.Flags().BoolVarP(&opts.WaitPipelines, "waitpipelines", "w", false, "if you want to wait for pipelines to finish")
 	rootCmd.Flags().BoolVarP(&opts.WaitIntegrationTestsPipelines, "waitintegrationtestspipelines", "i", false, "if you want to wait for IntegrationTests (Integration Test Scenario) pipelines to finish")
