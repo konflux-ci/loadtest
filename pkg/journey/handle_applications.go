@@ -1,8 +1,6 @@
 package journey
 
-import "crypto/rand"
 import "fmt"
-import "math/big"
 import "time"
 
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
@@ -11,18 +9,8 @@ import types "github.com/konflux-ci/loadtest/pkg/types"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
-func generateRandomString(n int) string {
-	const letters = "abcdefghijklmnopqrstuvwxyz"
-	b := make([]byte, n)
-	for i := range b {
-		idx, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
-		b[i] = letters[idx.Int64()]
-	}
-	return string(b)
-}
-
-func createApplication(f *framework.Framework, namespace string, runPrefix string) (string, error) {
-	name := fmt.Sprintf("%s-app-%s", runPrefix, generateRandomString(5))
+func createApplication(f *framework.Framework, namespace string, runPrefix string, applicationIndex int) (string, error) {
+	name := fmt.Sprintf("%s-app-%d", runPrefix, applicationIndex)
 
 	logging.Logger.Debug("Creating application %s in namespace %s", name, namespace)
 
@@ -95,6 +83,7 @@ func HandleApplication(ctx *types.PerApplicationContext) error {
 		ctx.Framework,
 		ctx.ParentContext.Namespace,
 		ctx.ParentContext.Opts.RunPrefix,
+		ctx.ApplicationIndex,
 	)
 	if err != nil {
 		return logging.Logger.Fail(30, "Application failed creation: %v", err)
