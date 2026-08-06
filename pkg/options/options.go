@@ -9,54 +9,56 @@ import "sync"
 
 // Struct to hold command line options
 type Opts struct {
-	ApplicationsCount                int
-	BuildPipelineSelectorBundle      string
-	ComponentContainerContext        string
-	ComponentContainerFile           string
-	ComponentRepoRevision            string
-	ComponentRepoUrl                 string
-	ComponentsCount                  int
-	Concurrency                      int
-	FailFast                         bool
-	ForkTarget                       string
-	JourneyDuration                  string
-	JourneyRepeats                   int
-	JourneyUntil                     time.Time
-	JourneyReuseApplications         bool
-	JourneyReuseComponents           bool
-	LogDebug                         bool
-	LogInfo                          bool
-	LogTrace                         bool
-	OutputDir                        string
-	ReleaseManagedNamespace          string
-	ReleaseManagedToken              string `json:"-"`
-	ReleaseOciStorage                string
-	PipelineImagePullSecrets         []string
-	PipelineMintmakerDisabled        bool
-	PipelineRepoTemplating           bool
-	PipelineRepoTemplatingSourceDir  string
-	PipelineRepoTemplatingSource     string
-	Purge                            bool
-	PurgeOnly                        bool
-	QuayRepo                         string
-	ReleasePipelinePath              string
-	ReleasePipelineRevision          string
-	ReleasePipelineServiceAccount    string
-	ReleasePipelineUrl               string
-	ReleasePolicy                    string
-	ReleasePlanAdmissionDataPath     string
-	RunPrefix                        string
-	SerializeComponentOnboarding     bool
-	SerializeComponentOnboardingLock sync.Mutex
-	Stage                            bool
-	StartupDelay                     time.Duration
-	StartupJitter                    time.Duration
-	TestScenarioGitURL               string
-	TestScenarioPathInRepo           string
-	TestScenarioRevision             string
-	WaitIntegrationTestsPipelines    bool
-	WaitPipelines                    bool
-	WaitRelease                      bool
+	ApplicationsCount                      int
+	BuildPipelineSelectorBundle            string
+	ComponentContainerContext              string
+	ComponentContainerFile                 string
+	ComponentRepoRevision                  string
+	ComponentRepoUrl                       string
+	ComponentsCount                        int
+	Concurrency                            int
+	FailFast                               bool
+	ForkTarget                             string
+	JourneyDuration                        string
+	JourneyRepeats                         int
+	JourneyUntil                           time.Time
+	JourneyReuseApplications               bool
+	JourneyReuseComponents                 bool
+	LogDebug                               bool
+	LogInfo                                bool
+	LogTrace                               bool
+	OutputDir                              string
+	ReleaseManagedNamespace                string
+	ReleaseManagedReadOnly                 bool
+	ReleaseManagedReleasePlanAdmissionName string
+	ReleaseManagedToken                    string `json:"-"`
+	ReleaseOciStorage                      string
+	PipelineImagePullSecrets               []string
+	PipelineMintmakerDisabled              bool
+	PipelineRepoTemplating                 bool
+	PipelineRepoTemplatingSourceDir        string
+	PipelineRepoTemplatingSource           string
+	Purge                                  bool
+	PurgeOnly                              bool
+	QuayRepo                               string
+	ReleasePipelinePath                    string
+	ReleasePipelineRevision                string
+	ReleasePipelineServiceAccount          string
+	ReleasePipelineUrl                     string
+	ReleasePolicy                          string
+	ReleasePlanAdmissionDataPath           string
+	RunPrefix                              string
+	SerializeComponentOnboarding           bool
+	SerializeComponentOnboardingLock       sync.Mutex
+	Stage                                  bool
+	StartupDelay                           time.Duration
+	StartupJitter                          time.Duration
+	TestScenarioGitURL                     string
+	TestScenarioPathInRepo                 string
+	TestScenarioRevision                   string
+	WaitIntegrationTestsPipelines          bool
+	WaitPipelines                          bool
+	WaitRelease                            bool
 }
 
 func (o *Opts) Format(f fmt.State, verb rune) {
@@ -115,6 +117,22 @@ func (o *Opts) ProcessOptions() error {
 	}
 	if o.ReleaseManagedNamespace != "" && !o.Stage {
 		return fmt.Errorf("--release-managed-namespace requires --stage (need APIURL from stageUsers)")
+	}
+
+	// Validate read-only managed namespace options
+	if o.ReleaseManagedReadOnly {
+		if o.ReleaseManagedNamespace == "" {
+			return fmt.Errorf("--release-managed-readonly requires --release-managed-namespace")
+		}
+		if o.ReleaseManagedReleasePlanAdmissionName == "" {
+			return fmt.Errorf("--release-managed-readonly requires --release-managed-release-plan-admission-name")
+		}
+		if o.ReleasePlanAdmissionDataPath != "" {
+			return fmt.Errorf("--release-plan-admission-data cannot be used with --release-managed-readonly (RPA is not created/patched in read-only mode)")
+		}
+		if o.Concurrency > 1 {
+			return fmt.Errorf("--release-managed-readonly only supports --concurrency 1 (a single static RPA has one spec.origin)")
+		}
 	}
 
 	// Convert options struct to pretty JSON
