@@ -25,8 +25,9 @@ RUN attempt=1; \
     fi; \
     while true; do \
         echo "Attempt $attempt"; \
-        curl -v -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux${ARCH_SUFFIX}.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
+        curl -fSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux${ARCH_SUFFIX}.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
             tar zxvf /tmp/openshift-client-linux.tar.gz -C /usr/bin/ && \
+            oc version --client && \
             break; \
         if [[ $attempt -ge 5 ]]; then \
             echo "All attempts failed, giving up" >&2; \
@@ -35,15 +36,14 @@ RUN attempt=1; \
         sleep 1; \
         let attempt+=1; \
     done
-# Test it was installed correctly
-RUN oc version --client
 # Download yq (https://github.com/mikefarah/yq)
 RUN attempt=1; \
     YQ_ARCH="${TARGETARCH:-amd64}"; \
     while true; do \
         echo "Attempt $attempt"; \
-        curl -v -L "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}" -o /usr/bin/yq && \
+        curl -fSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}" -o /usr/bin/yq && \
             chmod +x /usr/bin/yq && \
+            yq --version && \
             break; \
         if [[ $attempt -ge 5 ]]; then \
             echo "All attempts failed, giving up" >&2; \
@@ -52,8 +52,6 @@ RUN attempt=1; \
         sleep 1; \
         let attempt+=1; \
     done
-# Test it was installed correctly
-RUN yq --version
 
 
 
