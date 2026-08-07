@@ -45,6 +45,8 @@ date -Ins --utc >started
     --release-ociStorage "${OCI_STORAGE:-quay.io/rhtap-perf-test/perf-release-service-trusted-artifacts-stage}" \
     --release-pipeline-service-account "${RELEASE_PIPELINE_SERVICE_ACCOUNT:-loadtest-probe-serviceaccount}" \
     --release-managed-namespace "${RELEASE_MANAGED_NAMESPACE:-}" \
+    --release-managed-readonly="${RELEASE_MANAGED_READONLY:-false}" \
+    --release-managed-release-plan-admission-name "${RELEASE_MANAGED_RELEASE_PLAN_ADMISSION_NAME:-}" \
     --release-managed-token "${RELEASE_MANAGED_TOKEN:-}" \
     --release-plan-admission-data "${RELEASE_PLAN_ADMISSION_DATA:-}" \
     --runprefix "${RUN_PREFIX:-${USER_PREFIX:-undef}}" \
