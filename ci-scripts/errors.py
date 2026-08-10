@@ -8,12 +8,11 @@ import logging
 import os
 import re
 import sys
-from collections.abc import Generator
 from pathlib import Path
-from re import Pattern
-from typing import Any
+from typing import Any, Generator, Pattern
 
 import yaml
+
 
 try:
     from yaml import CSafeLoader as Loader
@@ -80,7 +79,7 @@ class Analyzer:
 
         raw_config_data = []
         with open(full_path, "r", encoding="utf-8") as f:
-            raw_config_data = yaml.load(f, Loader=Loader) or []
+            raw_config_data = yaml.load(f, Loader=Loader) or []  # nosec B506
 
         self.plr_matcher = ErrorMatcher(raw_config_data, "logs")
         self.tr_matcher = ErrorMatcher(raw_config_data, "condition")
@@ -263,7 +262,7 @@ class StatsProcessor:
 
         causes = caused_by if isinstance(caused_by, list) else [caused_by]
         for cause in causes:
-            if cause and cause != "SKIP":
+            if cause and reason != "SKIP":
                 self.caused_by_list.append(cause)
 
     def dump(self, output_path: Path) -> None:
@@ -278,7 +277,7 @@ class StatsProcessor:
             ),
             "error_messages": self.error_messages,
             "error_caused_by": self.caused_by_list,
-            "error_caused_by_simple": ", ".join(set(self.caused_by_list)),
+            "error_caused_by_simple": ", ".join(sorted(set(self.caused_by_list))),
         }
 
         print(f"Errors detected: {len(self.error_messages)}")
@@ -348,8 +347,9 @@ def process_csv_mode(
         print("No timings file found, strange :-/")
         stats.add("No timings file found", "No timings file found", [])
 
-    if timings.get("KPI", {}).get("mean") == -1 and not stats.error_messages:
-        stats.add("No test run finished", "No test run finished", [])
+    if timings.get("KPI", {}).get("mean") == -1:
+        if not stats.error_messages:
+            stats.add("No test run finished", "No test run finished", [])
 
     stats.dump(output_file)
 
