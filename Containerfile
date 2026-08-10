@@ -16,6 +16,9 @@ RUN ./bin/loadtest --help
 # (this is to avoid installing tar to our runner image)
 FROM registry.access.redhat.com/ubi10/ubi:latest AS builder_oc
 ARG TARGETARCH
+# Pinned versions to avoid pulling unreviewed code from "stable"/"latest" channels
+ARG OC_VERSION=4.22.8
+ARG YQ_VERSION=v4.53.3
 # Download and install oc, try multiple times as this is error prone
 RUN attempt=1; \
     if [ "$TARGETARCH" = "arm64" ]; then \
@@ -25,7 +28,7 @@ RUN attempt=1; \
     fi; \
     while true; do \
         echo "Attempt $attempt"; \
-        curl -fSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux${ARCH_SUFFIX}.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
+        curl -fSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OC_VERSION}/openshift-client-linux${ARCH_SUFFIX}.tar.gz -o /tmp/openshift-client-linux.tar.gz && \
             tar zxvf /tmp/openshift-client-linux.tar.gz -C /usr/bin/ && \
             oc version --client && \
             break; \
@@ -41,7 +44,7 @@ RUN attempt=1; \
     YQ_ARCH="${TARGETARCH:-amd64}"; \
     while true; do \
         echo "Attempt $attempt"; \
-        curl -fSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}" -o /usr/bin/yq && \
+        curl -fSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}" -o /usr/bin/yq && \
             chmod +x /usr/bin/yq && \
             yq --version && \
             break; \
@@ -68,6 +71,7 @@ COPY --from=builder_oc /usr/bin/yq /usr/bin/
 # Install internal CA certificate
 COPY ci-scripts/config/2022-IT-Root-CA.pem \
      /etc/pki/ca-trust/source/anchors/2022-IT-Root-CA.pem
+COPY requirements.txt requirements.txt
 USER 0
 RUN update-ca-trust
 # Install dependencies for our python scripts
@@ -76,12 +80,7 @@ RUN INSTALL_PKGS="git-core jq tar xz" && \
     microdnf -y clean all --enablerepo='*'
 USER 1001
 RUN python3 -m pip install -U pip && \
-    python3 -m pip install "git+https://github.com/redhat-performance/opl.git#egg=opl-rhcloud-perf-team-core&subdirectory=core" && \
-    python3 -m pip install "git+https://github.com/Appservices-perfscale/horreum-data-mirror.git" && \
-    python3 -m pip install tabulate matplotlib \
-                           opentelemetry-api \
-                           opentelemetry-sdk \
-                           opentelemetry-exporter-otlp-proto-http
+    python3 -m pip install -r requirements.txt
 # Install our scripts
 COPY ci-scripts/ \
      ./ci-scripts/

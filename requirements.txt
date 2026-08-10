@@ -1,0 +1,7 @@
+git+https://github.com/redhat-performance/opl.git@6bd2dadf76a84dd6c0cf880eb4387cba4edcb738#egg=opl-rhcloud-perf-team-core&subdirectory=core
+git+https://github.com/Appservices-perfscale/horreum-data-mirror.git@805ab8e30afefd9acb485310594263c3cd407e75
+tabulate==0.10.0
+matplotlib==3.11.1
+opentelemetry-api==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-exporter-otlp-proto-http==1.44.0
