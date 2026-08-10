@@ -31,8 +31,9 @@
   id: application_creation_timed_out_waiting_for_quota_evaluation
   note: ''
   reason: Application creation timed out waiting for quota evaluation
-  regexp: 'Application failed creation: Unable to create the Application .*: Internal error occurred: resource quota evaluation timed out'
-  test_dir: []
+  regexp: 'Application failed creation: [Uu]nable to create the Application .*: Internal error occurred: resource quota evaluation timed out'
+  test_dir:
+  - run-stone-prod-p02-2026_08_05T16_40_17_745000000_00_00
   type: loadtest
 - caused_by: task
   id: apply_tags_task_failed_because_no_image_found_in_manifest_list_for_amd64_architecture
@@ -107,9 +108,10 @@
   id: build_container_failed_because_dockerfile_was_not_found
   note: https://issues.redhat.com/browse/KONFLUX-12423
   reason: Build container failed because Dockerfile was not found
-  regexp: Prepare Dockerfile Cannot find Dockerfile Dockerfile
+  regexp: Cannot find Dockerfile Dockerfile
   test_dir:
   - run-stone-prod-p02-2026_03_05T04_29_27_804000000_00_00
+  - run-kflux-rhel-p01-2026_07_23T10_42_10_374000000_00_00
   type: logs
 - caused_by: test
   id: build_failed_because_ssh_secret_provisioning_failed
@@ -207,6 +209,14 @@
   test_dir:
   - run-kflux-rhel-p01-2026_01_25T15_58_55_139000000_00_00
   type: logs
+- caused_by: MPC
+  id: build_images_task_failed_because_docker_is_not_installed_on_windows_remote_mpc_build_host
+  note: ''
+  reason: Build images task failed because docker is not installed on remote MPC build host
+  regexp: '''docker'' is not recognized as an internal or external command'
+  test_dir:
+  - run-stone-stage-p01-2026_07_08T23_44_19_384000000_00_00
+  type: logs
 - caused_by: task
   id: build_images_task_failed_because_docker_workdir_path_is_invalid_on_windows
   note: ''
@@ -248,6 +258,14 @@
   - run-stone-stage-p01-2026_04_22T10_49_08_748000000_00_00
   type: logs
 - caused_by: quay.io
+  id: build_images_task_failed_to_push_windows_image_to_quay_io_because_unauthorized_authentication_required
+  note: ''
+  reason: 'Build images task failed to push image to quay.io because unauthorized: authentication required'
+  regexp: 'The push refers to repository \[quay\.io/[^]]+\].*unauthorized: authentication required'
+  test_dir:
+  - run-stone-stage-p01-2026_07_05T13_44_18_682000000_00_00
+  type: logs
+- caused_by: quay.io
   id: build_images_task_push_to_quay_failed_because_access_to_the_requested_resource_is_not_authorized
   note: ''
   reason: Build images task push to Quay failed because access to the requested resource is not authorized
@@ -263,6 +281,22 @@
   test_dir:
   - run-stone-prod-p02-2026_05_13T07_20_20_178000000_00_00
   type: loadtest
+- caused_by: test
+  id: build_pipeline_failed_to_retrieve_remote_pipeline_definition_because_pipeline_file_does_not_exist
+  note: ''
+  reason: Build pipeline failed to retrieve remote pipeline definition because pipeline file does not exist
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component .* failed: .* Reason:CouldntGetPipeline Message:Error retrieving pipeline for pipelinerun .*: resolver failed to get Pipeline : error requesting remote resource: error getting .*Git.*: error opening file .*pipeline/build-(rhel|rpm)-package\.yaml.*: file does not exist'
+  test_dir:
+  - run-stone-prod-p02-2026_07_21T07_20_20_293000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: build_pipeline_run_failed_because_clair_scan_task_bundle_resolver_reference_is_missing_required_pathinrepo_param
+  note: ''
+  reason: Build Pipeline Run failed because clair-scan Task bundle resolver reference is missing required pathInRepo param
+  regexp: 'Reason:CouldntGetTask Message:Pipeline [^ ]+ can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .resolver type bundles.*name = clair-scan.*: error requesting remote resource: invalid resource request .[^ ]+.: missing required git resolver params: pathInRepo'
+  test_dir:
+  - run-stone-prod-p02-2026_07_16T13_40_24_092000000_00_00
+  type: loadtest
 - caused_by: quay.io
   id: build_pipeline_run_failed_because_couldn_t_get_task_from_quay_io_due_to_unauthorized
   note: ''
@@ -270,6 +304,14 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetTask Message:Pipeline .* can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .*: error requesting remote resource: error getting .bundleresolver. .[^.]+.: cannot retrieve the oci image: GET https://quay\.io/v2/auth\?.* UNAUTHORIZED: Access to the requested resource is not authorized'
   test_dir:
   - run-kflux-ocp-p01-2026_03_21T13_15_26_660000000_00_00
+  type: loadtest
+- caused_by: gitlab.com
+  id: build_pipeline_run_failed_because_git_resolver_clone_from_gitlab_com_failed_due_to_http_2_stream_error
+  note: ''
+  reason: Build Pipeline Run failed because git resolver clone from gitlab.com failed due to HTTP/2 stream error
+  regexp: 'Reason:CouldntGetTask Message:.*Couldn.t retrieve Task .resolver type git.*url = https://gitlab\.com/[^ ]+\.git.*error resolving repository: git clone error: Cloning into .*error: RPC failed; curl 92 HTTP/2 stream [0-9]+ was not closed cleanly before end of the underlying stream fatal: expected .packfile.: exit status 128'
+  test_dir:
+  - run-kflux-fedora-01-2026_07_28T14_11_22_154000000_00_00
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: build_pipeline_run_failed_because_gitlab_cee_redhat_com_returned_500_when_fetching_pipeline_task
@@ -294,6 +336,13 @@
   regexp: 'Build Pipeline Run failed starting: context deadline exceeded'
   test_dir:
   - run-stone-stg-rh01-2026_02_26T15_57_12_684000000_00_00
+  type: loadtest
+- caused_by: test
+  id: build_pipeline_run_failed_to_retrieve_pipeline_due_to_invalid_git_repository_url_template_placeholder
+  note: ''
+  reason: Build Pipeline Run failed to retrieve pipeline due to invalid git repository URL template placeholder
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component .* failed: \{Type:Succeeded Status:False Severity: LastTransitionTime:\{Inner:.*\} Reason:CouldntGetPipeline Message:Error retrieving pipeline for pipelinerun .*: resolver failed to get Pipeline : error requesting remote resource: invalid resource request "[^"]+": invalid git repository url: (RPM_PIPELINE_URL|\{\{ (RPM_PIPELINE_URL)? \}\})\}'
+  test_dir: []
   type: loadtest
 - caused_by: pipelines-controller
   id: build_pipeline_run_was_cancelled
@@ -400,6 +449,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_02_24T09_12_54_500000000_00_00
   type: logs
+- caused_by: task
+  id: clair_scan_step_conftest_vulnerabilities_failed_with_255
+  note: Script errored at conftest command with code 255
+  reason: Clair scan step conftest-vulnerabilities failed with exit code 255
+  regexp: '"message": .*step-conftest-vulnerabilities.* exited with code 255'
+  test_dir:
+  - run-kflux-ocp-p01-2026_07_28T09_50_20_402000000_00_00
+  type: condition
 - caused_by: quay.io
   id: clamav_scan_upload_failed_because_quay_io_401_unauthorized
   note: ''
@@ -1632,7 +1689,7 @@
   id: loadtest_probe_failed_to_create_application_because_service_account_permissions_forbidden
   note: Happening on Staging clusters since 2026-01-08
   reason: Loadtest probe failed to create Application because service account permissions forbidden
-  regexp: 'FAIL\(30\): Application failed creation: Unable to create the Application [^:]+: applications.appstudio.redhat.com is forbidden: User "system:serviceaccount:[^:]+:loadtest-probe-serviceaccount" cannot create resource "applications" in API group "appstudio.redhat.com" in the namespace "[^"]+"'
+  regexp: 'FAIL\(30\): Application failed creation: [uU]nable to create the Application [^:]+: applications.appstudio.redhat.com is forbidden: User "system:serviceaccount:[^:]+:[^"]+" cannot create resource "applications" in API group "appstudio.redhat.com" in the namespace "[^"]+"'
   test_dir:
   - run-stone-stg-rh01-2026_01_11T09_09_18_354000000_00_00
   type: loadtest
@@ -1763,6 +1820,14 @@
   - run-stone-stage-p01-2026_03_12T08_48_19_565000000_00_00
   type: logs
 - caused_by: MPC
+  id: multi_platform_build_ssh_connection_failed_because_mpc_otp_server_rejected_one_time_credential_with_http_400
+  note: ''
+  reason: Multi-platform build SSH connection failed because MPC OTP server rejected one-time credential with HTTP 400
+  regexp: 'curl: \(22\) The requested URL returned error: 400 +Failed to retrieve SSH key from the OTP server\. This can happen when the PipelineRun retry option re-runs a task whose one-time credential was already consumed\.'
+  test_dir:
+  - run-stone-stage-p01-2026_08_03T09_48_20_463000000_00_00
+  type: logs
+- caused_by: MPC
   id: no_podman_installed_on_a_mpc_vm
   note: ''
   reason: No podman installed on a MPC VM
@@ -1847,6 +1912,14 @@
   test_dir:
   - run-kflux-ocp-p01-2026_07_02T00_50_19_627000000_00_00
   type: logs
+- caused_by: github.com
+  id: pipeline_failed_git_clone_failed_because_git_fetch_returned_exit_code_128_0
+  note: ''
+  reason: 'Pipeline failed: Git clone failed because git fetch returned exit code 128'
+  regexp: 'url: https://github\.com/.*level=fatal msg="git fetch failed: git fetch failed with exit code 128: exit status 128"'
+  test_dir:
+  - run-kflux-prd-rh03-2026_08_03T08_45_28_175000000_00_00
+  type: logs
 - caused_by: download.eng.brq.redhat.com
   id: pipeline_failed_mock_build_failed_because_of_download_timeout_from_download_eng_brq_redhat_com
   note: ''
@@ -1859,9 +1932,10 @@
   id: pipeline_failed_quay_io_denied_push_because_system_is_read_only
   note: ''
   reason: 'Pipeline failed: quay.io denied push because system is read-only'
-  regexp: 'Error response from registry: denied: System is currently read-only\. Pulls will succeed but all write operations are currently suspended'
+  regexp: 'quay\.io.*denied: System is currently read-only\. Pulls will succeed but all write operations are currently suspended'
   test_dir:
   - run-stone-stage-p01-2026_03_28T13_55_14_476000000_00_00
+  - run-kflux-prd-rh02-2026_08_08T13_11_19_091000000_00_00
   type: logs
 - caused_by: task
   id: pipeline_failed_rpmautospec_failed_because_spec_file_does_not_exist
@@ -2048,7 +2122,7 @@
 - caused_by: SKIP
   id: pod_creation_failed_with_reason_error
   note: ''
-  reason: Pod creation failed with reason error
+  reason: SKIP
   regexp: '\"message\": \".* exited with code 2: Error\"'
   test_dir: []
   type: condition
@@ -2075,34 +2149,33 @@
   test_dir:
   - run-kflux-prd-rh02-2026_04_25T12_11_20_066000000_00_00
   type: condition
-- caused_by: test
+- caused_by: SKIP
   id: post_test_data_collection_failed
   note: ''
-  reason: Post-test data collection failed
+  reason: SKIP
   regexp: Failed to collect release related JSONs
   test_dir: []
   type: loadtest
-- caused_by: test
+- caused_by: SKIP
   id: post_test_data_collection_failed_0
   note: ''
-  reason: Post-test data collection failed
+  reason: SKIP
   regexp: Failed to collect application JSONs
   test_dir: []
   type: loadtest
 - caused_by: SKIP
   id: post_test_data_collection_failed_1
   note: ''
-  reason: Post-test data collection failed
+  reason: SKIP
   regexp: Failed to collect pipeline run JSONs
   test_dir: []
   type: loadtest
-- caused_by: test
+- caused_by: SKIP
   id: post_test_data_collection_failed_because_component_resource_was_not_found
   note: ''
-  reason: Post-test data collection failed because component resource was not found
+  reason: SKIP
   regexp: 'FAIL\(103\): Failed to collect component JSONs: failed to get Component [a-z0-9-]+: components\.appstudio\.redhat\.com "[a-z0-9-]+" not found'
-  test_dir:
-  - run-stone-stg-rh01-2026_04_29T03_59_21_329000000_00_00
+  test_dir: []
   type: loadtest
 - caused_by: SKIP
   id: post_test_event_collection_failed_due_to_unauthorized_api_access
@@ -2463,6 +2536,22 @@
   test_dir:
   - run-kflux-prd-rh03-2026_06_15T15_45_20_464000000_00_00
   type: loadtest
+- caused_by: github.com
+  id: repo_forking_failed_because_github_returned_503_no_server_is_currently_available_while_deleting_repository
+  note: ''
+  reason: Repo forking failed because GitHub returned 503 No server is currently available while deleting repository
+  regexp: 'Repo forking failed: error deleting repository [^ ]+: DELETE https://api\.github\.com/repos/[^ ]+: 503 No server is currently available to service your request'
+  test_dir:
+  - run-stone-stg-rh01-2026_07_20T00_39_20_887000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_forking_failed_because_github_returned_an_empty_body_503_while_checking_repository
+  note: ''
+  reason: Repo forking failed because GitHub returned an empty-body 503 while checking repository
+  regexp: 'Repo forking failed: error checking repository [^ ]+: GET https://api\.github\.com/repos/[^ ]+: 503  \[\]'
+  test_dir:
+  - run-stone-stg-rh01-2026_07_16T22_39_27_285000000_00_00
+  type: loadtest
 - caused_by: test
   id: repo_forking_failed_because_github_token_expired
   note: ''
@@ -2676,6 +2765,22 @@
   test_dir:
   - run-stone-stg-rh01-2026_04_16T05_59_22_186000000_00_00
   type: loadtest
+- caused_by: github.com
+  id: repo_templating_failed_because_github_returned_400_bad_request_when_listing_file_contents
+  note: ''
+  reason: Repo-templating failed because GitHub returned 400 Bad Request when listing file contents
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to get file [^ ]+ from repo [^ ]+ revision [^:]+: error when listing file contents: GET https://api\.github\.com/repos/[^ ]+: 400 '
+  test_dir:
+  - run-stone-prod-p02-2026_07_16T18_40_20_707000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_failed_because_github_returned_401_bad_credentials_when_listing_file_contents
+  note: ''
+  reason: Repo-templating failed because GitHub returned 401 Bad credentials when listing file contents
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to get file [^ ]+ from repo [^ ]+ revision [^:]+: error when listing file contents: GET https://api\.github\.com/repos/[^ ]+: 401 Bad credentials'
+  test_dir:
+  - run-kflux-fedora-01-2026_07_06T12_52_20_273000000_00_00
+  type: loadtest
 - caused_by: test
   id: repo_templating_failed_because_token_expired
   note: ''
@@ -2809,6 +2914,14 @@
   - run-stone-prod-p01-2026_02_21T13_42_18_772000000_00_00
   type: loadtest
 - caused_by: github.com
+  id: repo_templating_workflow_failed_to_update_a_file_on_github_because_409_repository_rule_validation_timed_out
+  note: ''
+  reason: Repo-templating workflow failed to update a file on GitHub because 409 repository rule validation timed out
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file \.tekton/[^ ]+ in repo [^ ]+ revision main: error when updating a file on github: PUT https://api\.github\.com/repos/[^/]+/[^/]+/contents/\.tekton/[^ ]+: 409 Repository rule violations found.*Timed out validating rule'
+  test_dir:
+  - run-stone-prd-rh01-2026_08_04T21_01_22_384000000_00_00
+  type: loadtest
+- caused_by: github.com
   id: repo_templating_workflow_failed_to_update_a_file_on_github_due_to_a_409_conflict_error
   note: ''
   reason: Repo-templating workflow failed to update a file on GitHub due to a 409 conflict error.
@@ -2855,6 +2968,22 @@
   regexp: 'error: .bool. cannot be defined via .typedef..*error: Bad exit status from /var/tmp/rpm-tmp..* ..build.'
   test_dir: []
   type: logs
+- caused_by: task
+  id: rpm_calculate_deps_dnf5_repoquery_failed_because_fedora_repo_metadata_checksum_mismatch_left_packages_unresolved
+  note: ''
+  reason: RPM calculate-deps DNF5 repoquery failed because Fedora repo metadata checksum mismatch left packages unresolved
+  regexp: 'Solvfile.s repomd checksum doesn.t match, read: "[a-f0-9]+" vs\. expected repomd checksum: "[a-f0-9]+" for: [^ ]+/solv/fedora\.solv.*INFO DNF5 finished\s*\+ false'
+  test_dir:
+  - run-stone-prd-rh01-2026_08_03T11_44_19_298000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: rpm_mock_build_failed_because_registry_access_redhat_com_returned_502_bad_gateway
+  note: ''
+  reason: RPM mock build failed because registry.access.redhat.com returned 502 Bad Gateway
+  regexp: 'pinging container registry registry.access.redhat.com: received unexpected HTTP status: 502 Bad Gateway'
+  test_dir:
+  - run-kflux-rhel-p01-2026_07_23T14_39_20_792000000_00_00
+  type: logs
 - caused_by: registry.access.redhat.com
   id: rpm_mock_build_failed_because_registry_access_redhat_com_returned_504_gateway_timeout
   note: ''
@@ -2862,6 +2991,14 @@
   regexp: 'pinging container registry registry.access.redhat.com: received unexpected HTTP status: 504 Gateway Time-out'
   test_dir:
   - run-stone-prod-p02-2026_05_15T19_22_44_154000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: rpm_signature_scan_failed_due_to_quay_500_internal_server_error
+  note: ''
+  reason: RPM signature scan failed due to Quay 500 Internal Server Error
+  regexp: 'error: unable to parse image quay\.io/.*: cannot retrieve image configuration for manifest .* received unexpected HTTP status: 500 Internal Server Error'
+  test_dir:
+  - run-stone-prod-p01-2026_07_05T02_42_19_588000000_00_00
   type: logs
 - caused_by: quay.io
   id: rpm_signature_scan_failed_due_to_quay_503_service_unavailable
@@ -2953,6 +3090,22 @@
   reason: Script mock-hermetic-repo failed because pull from registry.access.redhat.com failed
   regexp: 'Error: internal error: unable to copy from source docker://registry.access.redhat.com/[^ ]+: determining manifest MIME type for docker://registry.access.redhat.com/[^ ]+: Manifest does not match provided manifest digest [^ ]+.*/usr/bin/mock-hermetic-repo.*subprocess.CalledProcessError.*Command ...podman....pull.* returned non-zero exit status 125'
   test_dir: []
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: script_mock_hermetic_repo_failed_because_skopeo_sync_could_not_read_container_signature_from_access_redhat_com_sigstore_due_to_500_internal_server_error
+  note: ''
+  reason: Script mock-hermetic-repo failed because skopeo sync could not read container signature from access.redhat.com sigstore due to 500 Internal Server Error
+  regexp: 'Error copying ref "docker://registry\.access\.redhat\.com/[^"]+": reading signatures: reading signature from https://access\.redhat\.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
+  test_dir:
+  - run-kflux-rhel-p01-2026_08_09T10_39_18_545000000_00_00
+  type: logs
+- caused_by: registry.fedoraproject.org
+  id: script_mock_hermetic_repo_failed_because_skopeo_sync_from_registry_fedoraproject_org_failed
+  note: ''
+  reason: Script mock-hermetic-repo failed because skopeo sync from registry.fedoraproject.org failed
+  regexp: Command '\[.skopeo., .sync., .--src., .docker., .--dest., .dir., .--scoped., .--preserve-digests., .--override-arch., .[a-z0-9]+., .registry\.fedoraproject\.org/fedora@sha256:[a-f0-9]+., ./results/buildroot_repo.\]. returned non-zero exit status 1\.
+  test_dir:
+  - run-stone-prd-rh01-2026_08_09T18_44_17_737000000_00_00
   type: logs
 - caused_by: task
   id: script_opm_failed_because_catalog_is_missing
