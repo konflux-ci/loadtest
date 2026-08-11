@@ -30,6 +30,14 @@ func waitForImageRepositoryReady(f *framework.Framework, namespace, imageRepoNam
 	return nil
 }
 
+func deleteImageRepository(f *framework.Framework, namespace, imageRepoName string) error {
+	if err := f.AsKubeDeveloper.ImageController.DeleteImageRepositoryCR(imageRepoName, namespace); err != nil {
+		return fmt.Errorf("failed to delete ImageRepository %s in namespace %s: %v", imageRepoName, namespace, err)
+	}
+	logging.Logger.Debug("Deleted ImageRepository %s in namespace %s", imageRepoName, namespace)
+	return nil
+}
+
 func HandleImageRepository(ctx *types.PerComponentContext) error {
 	var iface interface{}
 	var ok bool
