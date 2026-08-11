@@ -343,10 +343,21 @@ def main():
         else:
             kpi_errors += 1
 
+    # Determine phase (metric) of the earliest failure across whole run, so
+    # e.g. probe runs (concurrency 1) can report exactly which step failed
+    failed_phase = ""
+    failed_phase_when = None
+    for m in expected_metrics:
+        fails = stats_raw[m]["fail"]["when"]
+        if fails and (failed_phase_when is None or min(fails) < failed_phase_when):
+            failed_phase_when = min(fails)
+            failed_phase = m
+
     stats["KPI"] = {}
     stats["KPI"] = count_stats(kpi_mean_data)
     stats["KPI"]["successes"] = kpi_successes
     stats["KPI"]["errors"] = kpi_errors
+    stats["KPI"]["failed_phase"] = failed_phase
 
     # print("Final stats:")
     # print(json.dumps(stats, indent=4))
@@ -354,6 +365,7 @@ def main():
     print(f"KPI mean: {stats['KPI']['mean']}")
     print(f"KPI successes: {stats['KPI']['successes']}")
     print(f"KPI errors: {stats['KPI']['errors']}")
+    print(f"KPI failed phase: {stats['KPI']['failed_phase']}")
 
     with open(output_file, "w") as fp:
         json.dump(stats, fp, indent=4)

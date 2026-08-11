@@ -132,6 +132,8 @@ Where metric_durations includes:
 KPI_errors = COUNT(journeys_with_errors)
 ```
 
+**KPI failed_phase** (failure diagnostics): name of the metric/phase (e.g. `validatePipelineRunCondition`) where the earliest failure in the run occurred, empty string `""` when no failures happened. Especially useful for probe runs (concurrency 1), where it pinpoints exactly which journey step broke.
+
 ### CSV Output Format
 
 **load-test-timings.csv:**
