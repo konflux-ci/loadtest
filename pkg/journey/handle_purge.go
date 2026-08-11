@@ -47,6 +47,11 @@ func purgeStage(f *framework.Framework, namespace string, appContexts []*types.P
 				continue
 			}
 
+			imageRepoName := compCtx.ComponentName + "-image"
+			if err = deleteImageRepository(f, namespace, imageRepoName); err != nil {
+				logging.Logger.Error("Error when deleting ImageRepository %s in namespace %s: %v", imageRepoName, namespace, err)
+			}
+
 			err = f.AsKubeDeveloper.HasController.DeleteComponent(compCtx.ComponentName, namespace, false)
 			if err != nil {
 				return fmt.Errorf("error when deleting component %s in namespace %s: %v", compCtx.ComponentName, namespace, err)
