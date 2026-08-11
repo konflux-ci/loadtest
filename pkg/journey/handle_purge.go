@@ -42,20 +42,25 @@ func purgeStage(f *framework.Framework, namespace string, appContexts []*types.P
 			return fmt.Errorf("error when deleting application %s in namespace %s: %v", appCtx.ApplicationName, namespace, err)
 		}
 
+		var irErrors []string
 		for _, compCtx := range appCtx.PerComponentContexts {
 			if compCtx.ComponentName == "" {
 				continue
 			}
 
-			imageRepoName := compCtx.ComponentName + "-image"
+			imageRepoName := imageRepositoryNameForComponent(compCtx.ComponentName)
 			if err = deleteImageRepository(f, namespace, imageRepoName); err != nil {
 				logging.Logger.Error("Error when deleting ImageRepository %s in namespace %s: %v", imageRepoName, namespace, err)
+				irErrors = append(irErrors, err.Error())
 			}
 
 			err = f.AsKubeDeveloper.HasController.DeleteComponent(compCtx.ComponentName, namespace, false)
 			if err != nil {
 				return fmt.Errorf("error when deleting component %s in namespace %s: %v", compCtx.ComponentName, namespace, err)
 			}
+		}
+		if len(irErrors) > 0 {
+			return fmt.Errorf("failed to delete %d ImageRepository(-ies) in namespace %s: %v", len(irErrors), namespace, irErrors)
 		}
 	}
 

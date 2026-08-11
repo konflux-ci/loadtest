@@ -6,9 +6,14 @@ import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
+import k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
+
+func imageRepositoryNameForComponent(compName string) string {
+	return compName + "-image"
+}
 
 func createImageRepository(f *framework.Framework, namespace, appName, compName string) (string, error) {
-	imageRepoName := compName + "-image"
+	imageRepoName := imageRepositoryNameForComponent(compName)
 	logging.Logger.Debug("Creating ImageRepository %s in namespace %s", imageRepoName, namespace)
 
 	_, err := f.AsKubeDeveloper.ImageController.CreateImageRepositoryCR(imageRepoName, namespace, "public", "", appName, compName, true)
@@ -32,7 +37,11 @@ func waitForImageRepositoryReady(f *framework.Framework, namespace, imageRepoNam
 
 func deleteImageRepository(f *framework.Framework, namespace, imageRepoName string) error {
 	if err := f.AsKubeDeveloper.ImageController.DeleteImageRepositoryCR(imageRepoName, namespace); err != nil {
-		return fmt.Errorf("failed to delete ImageRepository %s in namespace %s: %v", imageRepoName, namespace, err)
+		if k8s_api_errors.IsNotFound(err) {
+			logging.Logger.Debug("ImageRepository %s not found in namespace %s, skipping", imageRepoName, namespace)
+			return nil
+		}
+		return fmt.Errorf("failed to delete ImageRepository %s in namespace %s: %w", imageRepoName, namespace, err)
 	}
 	logging.Logger.Debug("Deleted ImageRepository %s in namespace %s", imageRepoName, namespace)
 	return nil
