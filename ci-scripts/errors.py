@@ -8,11 +8,12 @@ import logging
 import os
 import re
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Pattern
+from re import Pattern
+from typing import Any
 
 import yaml
-
 
 try:
     from yaml import CSafeLoader as Loader
@@ -347,9 +348,8 @@ def process_csv_mode(
         print("No timings file found, strange :-/")
         stats.add("No timings file found", "No timings file found", [])
 
-    if timings.get("KPI", {}).get("mean") == -1:
-        if not stats.error_messages:
-            stats.add("No test run finished", "No test run finished", [])
+    if timings.get("KPI", {}).get("mean") == -1 and not stats.error_messages:
+        stats.add("No test run finished", "No test run finished", [])
 
     stats.dump(output_file)
 
