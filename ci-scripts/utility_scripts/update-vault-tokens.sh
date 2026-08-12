@@ -28,14 +28,22 @@ update_tokens() {
         log="$(mktemp)"
         echo "Updating prometheus_token for $cluster in $base_vault_path (log: $log)"
         p="$(oc -n perf-team-prometheus-reader create token perf-team-prometheus-reader-cluster-sa --duration "$((24*365))h")"
-        vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "prometheus_token=$p" &>"$log"
+        if ! vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "prometheus_token=$p" &>"$log"; then
+            log="$(mktemp)"
+            echo "Patch failed, creating secret for prometheus on $cluster (log: $log)"
+            vault kv put -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "prometheus_token=$p" &>"$log"
+        fi
     fi
 
     if [ "$UPDATE_MANAGED" = true ]; then
         log="$(mktemp)"
         echo "Updating managed_sa_token for $cluster in $base_vault_path (log: $log)"
         m="$(oc -n managed-konflux-perfscale-tenant create token managed-konflux-perfscale-sa --duration "$((24*365))h")"
-        vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "managed_sa_token=$m" &>"$log"
+        if ! vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "managed_sa_token=$m" &>"$log"; then
+            log="$(mktemp)"
+            echo "Patch failed, creating secret for managed SA on $cluster (log: $log)"
+            vault kv put -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "managed_sa_token=$m" &>"$log"
+        fi
     fi
 
     if [ "$UPDATE_LOADTEST" = true ]; then
@@ -55,6 +63,7 @@ update_tokens() {
 if [ "$UPDATE_STAGING" = true ]; then
     update_tokens "staging" "stone-stg-rh01"
     update_tokens "staging" "stone-stage-p01"
+    update_tokens "staging" "lightwell-dev"
 fi
 
 if [ "$UPDATE_PRODUCTION" = true ]; then
