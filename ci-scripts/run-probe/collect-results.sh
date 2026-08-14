@@ -55,8 +55,13 @@ mkdir -p "${ARTIFACT_DIR}"
 pushd "${OPTION_TESTS_DIR}"
 
 # Construct $PROMETHEUS_HOST by extracting BASE_URL from $MEMBER_CLUSTER
-BASE_URL=$(echo "$MEMBER_CLUSTER" | grep -oP 'https://api\.\K[^:]+')
-PROMETHEUS_HOST="thanos-querier-openshift-monitoring.apps.$BASE_URL"
+if [[ "$MEMBER_CLUSTER" == *"c111-e.us-east.containers.cloud.ibm.com"* ]]; then
+  # Workaround: lightwell-dev cluster does not follow standard apps.$BASE_URL convention
+  PROMETHEUS_HOST="thanos-querier-openshift-monitoring.lightwell-dev-3d9eec70183348a345ccd3ce3bdd95b9-0000.us-east.containers.appdomain.cloud"
+else
+  BASE_URL=$(echo "$MEMBER_CLUSTER" | grep -oP 'https://api\.\K[^:]+')
+  PROMETHEUS_HOST="thanos-querier-openshift-monitoring.apps.$BASE_URL"
+fi
 TOKEN=${OCP_PROMETHEUS_TOKEN}
 
 {
