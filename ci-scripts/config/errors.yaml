@@ -330,6 +330,14 @@
   - run-stone-stg-rh01-2026_02_19T17_09_20_248000000_00_00
   type: loadtest
 - caused_by: cluster
+  id: build_pipeline_run_failed_because_kueue_missing_platform_annotation
+  note: ''
+  reason: Build Pipeline Run failed because kueue missing platform annotation
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .*ValidatingAdmissionPolicy .no-skip\.kueue\.konflux-ci\.dev. .*denied request: TaskRun with PLATFORM param set to [a-z0-9-]+ must have the annotation .kueue\.konflux-ci\.dev/requests-[a-z0-9-]+.'
+  test_dir:
+  - run-stone-stage-p01-2026_08_11T18_44_28_176000000_00_00
+  type: loadtest
+- caused_by: cluster
   id: build_pipeline_run_failed_starting_because_cluster_context_deadline_exceeded
   note: ''
   reason: Build Pipeline Run failed starting because cluster context deadline exceeded
@@ -351,6 +359,14 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun for component .* in namespace .* failed: .* Reason:Cancelled.*Message:PipelineRun .* was cancelled'
   test_dir: []
   type: loadtest
+- caused_by: cluster
+  id: build_pod_creation_forbidden_because_scc_restricted_v2_does_not_allow_container_runasuser_0
+  note: ''
+  reason: Build pod creation forbidden because SCC restricted-v2 does not allow container runAsUser 0
+  regexp: 'is forbidden: unable to validate against any security context constraint:.*provider restricted-v2: \.containers\[0\]\.runAsUser: Invalid value: 0: must be in the ranges:.*.reason.: .PodAdmissionFailed.'
+  test_dir:
+  - run-lightwell-dev-2026_08_14T12_18_03_997000000_00_00
+  type: condition
 - caused_by: MPC
   id: build_step_failed_because_mpc_rsync_connection_broken_pipe
   note: ''
@@ -417,6 +433,14 @@
   reason: buildah failed to pull image from Quay.io because unauthorized
   regexp: 'Executing: unshare .* buildah pull .* Trying to pull quay.io/[^ ]+ Error: internal error: unable to copy from source docker://quay.io/[^ ]+: initializing source docker://quay.io/[^ ]+: reading manifest [^ ]+ in quay.io/[^ ]+: unauthorized: access to the requested resource is not authorized warning: Command failed and will retry, 1 try error: Unauthorized error, wrong registry credentials provided, won''t retry Failed to pull base image quay.io/[^ ]+'
   test_dir: []
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: buildah_pre_pull_of_base_image_failed_because_registry_access_redhat_com_returned_unauthorized
+  note: ''
+  reason: Buildah pre-pull of base image failed because registry.access.redhat.com returned unauthorized
+  regexp: 'buildah \[stderr\] Error: unable to copy from source docker://registry\.access\.redhat\.com/[^ ]+: initializing source docker://registry\.access\.redhat\.com/[^ ]+:.*unable to retrieve auth token: invalid username/password: unauthorized: Please login to the Red Hat Registry using your Customer Portal credentials\..*pre-pulling image \{[^}]+\}: exit status 125'
+  test_dir:
+  - run-stone-prod-p02-2026_08_12T20_40_21_592000000_00_00
   type: logs
 - caused_by: task
   id: can_not_find_chroot_scan_tar_gz_file
@@ -2976,6 +3000,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_08_03T11_44_19_298000000_00_00
   type: logs
+- caused_by: MPC
+  id: rpm_mock_build_failed_because_mpc_could_not_allocate_remote_build_host_due_to_aws_ec2_vcpulimitexceeded
+  note: ''
+  reason: RPM mock build failed because MPC could not allocate remote build host due to AWS EC2 VcpuLimitExceeded
+  regexp: 'Error allocating host: failed to launch EC2 instance for [^ ]+: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: [a-f0-9-]+, api error VcpuLimitExceeded: You have requested more vCPU capacity than your current vCPU limit of [0-9]+ allows for the instance bucket that the specified instance type belongs to\.'
+  test_dir:
+  - run-stone-prod-p02-2026_08_13T11_20_18_910000000_00_00
+  type: logs
 - caused_by: registry.access.redhat.com
   id: rpm_mock_build_failed_because_registry_access_redhat_com_returned_502_bad_gateway
   note: ''
@@ -3098,6 +3130,14 @@
   regexp: 'Error copying ref "docker://registry\.access\.redhat\.com/[^"]+": reading signatures: reading signature from https://access\.redhat\.com/webassets/docker/content/sigstore/[^ ]+: received unexpected HTTP status: 500 Internal Server Error'
   test_dir:
   - run-kflux-rhel-p01-2026_08_09T10_39_18_545000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
+  id: script_mock_hermetic_repo_failed_because_skopeo_sync_from_registry_access_redhat_com_returned_unauthorized
+  note: ''
+  reason: Script mock-hermetic-repo failed because skopeo sync from registry.access.redhat.com returned unauthorized
+  regexp: 'Error copying ref .docker://registry\.access\.redhat\.com/[^ ]+.: initializing source docker://registry\.access\.redhat\.com/[^ ]+: unable to retrieve auth token: invalid username/password: unauthorized: Please login to the Red Hat Registry using your Customer Portal credentials\..*mock-hermetic-repo.*subprocess\.CalledProcessError.*Command .\[.skopeo., .sync.,.*registry\.access\.redhat\.com/[^,]+,.*\]. returned non-zero exit status 1\.'
+  test_dir:
+  - run-kflux-rhel-p01-2026_08_13T15_39_20_289000000_00_00
   type: logs
 - caused_by: registry.fedoraproject.org
   id: script_mock_hermetic_repo_failed_because_skopeo_sync_from_registry_fedoraproject_org_failed
