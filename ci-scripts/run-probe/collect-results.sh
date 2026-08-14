@@ -54,6 +54,10 @@ SOURCE_DIR=${SOURCE_DIR:-.}
 mkdir -p "${ARTIFACT_DIR}"
 pushd "${OPTION_TESTS_DIR}"
 
+# DEBUG
+echo "DEBUG: MEMBER_CLUSTER: $MEMBER_CLUSTER"
+echo "DEBUG: OCP_PROMETHEUS_TOKEN#: ${#OCP_PROMETHEUS_TOKEN}"
+
 # Construct $PROMETHEUS_HOST by extracting BASE_URL from $MEMBER_CLUSTER
 if [[ "$MEMBER_CLUSTER" == *"c111-e.us-east.containers.cloud.ibm.com"* ]]; then
   # Workaround: lightwell-dev cluster does not follow standard apps.$BASE_URL convention
