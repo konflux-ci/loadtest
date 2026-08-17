@@ -5,3 +5,4 @@ matplotlib==3.11.1
 opentelemetry-api==1.44.0
 opentelemetry-sdk==1.44.0
 opentelemetry-exporter-otlp-proto-http==1.44.0
+boto3==1.43.72
