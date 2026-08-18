@@ -84,4 +84,6 @@ RUN python3 -m pip install -U pip && \
 # Install our scripts
 COPY ci-scripts/ \
      ./ci-scripts/
+# Test s3-artifacts script is OK
+RUN python3 ci-scripts/s3-artifacts.py --help
 CMD ["sleep", "5d"]
