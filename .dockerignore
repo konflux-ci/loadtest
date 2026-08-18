@@ -13,10 +13,10 @@ venv/
 users*.json
 
 # Temp data
-tmp/
-bin/
-OLD/
-run-*/
+/tmp/
+/bin/
+/OLD/
+/run-*/
 
 # Installed agent skills (restored via: npx skills@latest experimental_install)
 .agents/skills/grill-with-docs/

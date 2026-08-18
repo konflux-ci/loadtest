@@ -76,12 +76,12 @@ repos:
         name: lint AGENTS.md size
         entry: bash -c 'lines=$(wc -l < AGENTS.md); if [ "$lines" -ge 60 ]; then echo "AGENTS.md must be under 60 lines (currently $lines)"; exit 1; fi'
         language: system
-        files: ^AGENTS\.md$
+        files: AGENTS\.md$
         pass_filenames: false
 
       - id: sync-gitignore-dockerignore
         name: sync .gitignore and .dockerignore
         entry: diff .gitignore .dockerignore
         language: system
-        files: ^(\.gitignore|\.dockerignore)$
+        ####files: (\.gitignore|\.dockerignore)$   # this does not work, no ide why
         pass_filenames: false
