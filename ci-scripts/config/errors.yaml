@@ -1077,6 +1077,14 @@
   regexp: 'Failed to configure pipeline imagePullSecrets: Unable to add secret .* to service account build-pipeline-.*: context deadline exceeded'
   test_dir: []
   type: loadtest
+- caused_by: cluster
+  id: failed_to_add_imagepullsecrets_to_build_sa_because_kube_apiserver_connection_was_reset_by_peer
+  note: ''
+  reason: Failed to add imagePullSecrets to build SA because kube-apiserver connection was reset by peer
+  regexp: 'Failed to configure pipeline imagePullSecrets: unable to add secret .* to service account .*: unexpected error when reading response body\. Please retry\. Original error: read tcp [^ ]+: read: connection reset by peer'
+  test_dir:
+  - run-lightwell-dev-2026_08_19T05_47_23_178000000_00_00
+  type: loadtest
 - caused_by: task
   id: failed_to_compile_with_clang
   note: ''
@@ -1771,12 +1779,28 @@
   - run-stone-prd-rh01-2026_02_10T12_44_33_768000000_00_00
   type: logs
 - caused_by: MPC
+  id: mpc_failed_to_provision_a_remote_build_host_because_no_hosts_were_configured_for_the_requested_platform
+  note: ''
+  reason: MPC failed to provision a remote build host because no hosts were configured for the requested platform
+  regexp: 'Error allocating host: no hosts configured'
+  test_dir:
+  - run-lightwell-dev-2026_08_14T14_31_21_549000000_00_00
+  type: logs
+- caused_by: MPC
   id: mpc_remote_build_failed_because_network_connection_lost_during_rsync_back
   note: ''
   reason: MPC remote build failed because network connection was lost when copying results back
   regexp: 'Rsync back Read from remote host [0-9.]+: No route to host.*rsync: connection unexpectedly closed.*rsync error: error in rsync protocol data stream'
   test_dir:
   - run-kflux-ocp-p01-2026_04_29T18_50_17_734000000_00_00
+  type: logs
+- caused_by: MPC
+  id: mpc_remote_build_failed_because_script_build_sh_was_executed_with_a_wrong_platform_image_causing_exec_format_error
+  note: ''
+  reason: MPC remote build failed because script-build.sh was executed with a wrong-platform image, causing Exec format error
+  regexp: 'WARNING: image platform \(linux/amd64\) does not match the expected platform \(linux/[a-z0-9]+\).*Exec format error'
+  test_dir:
+  - run-kflux-rhel-p01-2026_08_19T09_45_03_140000000_00_00
   type: logs
 - caused_by: MPC
   id: mpc_remote_build_failed_because_ssh_connection_to_build_vm_timed_out
@@ -2880,6 +2904,14 @@
   regexp: 'FAIL\(68\): Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^:]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 405 Merge already in progress'
   test_dir:
   - run-stone-prd-rh01-2026_03_19T16_07_14_555000000_00_00
+  type: loadtest
+- caused_by: gitlab.cee.redhat.com
+  id: repo_templating_pac_file_update_failed_because_gitlab_cee_account_was_blocked_403_forbidden
+  note: ''
+  reason: Repo templating PaC file update failed because GitLab CEE account was blocked (403 Forbidden)
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file .* revision main: failed to update/create file: PUT https://gitlab\.cee\.redhat\.com/api/v4/projects/[^ ]+: 403 .message: 403 Forbidden - Your account has been blocked\.'
+  test_dir:
+  - run-kflux-rhel-p01-2026_08_17T12_45_19_566000000_00_00
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: repo_templating_pac_file_update_failed_because_gitlab_cee_returned_error_400
