@@ -102,51 +102,46 @@ func validateReleasePlanAdmission(f *framework.Framework, namespace, name string
 	return err
 }
 
-func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
-	if ctx.ReleasePlanName != "" {
-		if ctx.ReleasePlanAdmissionName == "" {
-			return logging.Logger.Fail(90, "We are supposed to reuse RPA, but it was not configured")
-		}
-		logging.Logger.Debug("Skipping setting up releases because reusing release plan %s and release plan admission %s in namespace %s", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ParentContext.Namespace)
-		return nil
+// Validate a pre-existing, releng-owned ReleasePlanAdmission instead of
+// creating one. Used when --release-managed-readonly is set.
+func setupReadOnlyReleasePlanAdmission(ctx *types.PerApplicationContext, rpaFramework *framework.Framework, rpaNamespace string) error {
+	var err error
+
+	ctx.ReleasePlanAdmissionName = ctx.ParentContext.Opts.ReleaseManagedReleasePlanAdmissionName
+
+	_, err = logging.Measure(
+		ctx,
+		validateReleasePlan,
+		ctx.Framework,
+		ctx.ParentContext.Namespace,
+		ctx.ReleasePlanName,
+	)
+	if err != nil {
+		return logging.Logger.Fail(120, "Release Plan failed validation: %v", err)
 	}
 
-	if ctx.ParentContext.Opts.ReleasePolicy == "" {
-		logging.Logger.Info("Skipping setting up releases because policy was not provided")
-		return nil
+	_, err = logging.Measure(
+		ctx,
+		validateReleasePlanAdmission,
+		rpaFramework,
+		rpaNamespace,
+		ctx.ReleasePlanAdmissionName,
+	)
+	if err != nil {
+		return logging.Logger.Fail(121, "Pre-existing Release Plan Admission %s in read-only managed namespace %s failed validation: %v", ctx.ReleasePlanAdmissionName, rpaNamespace, err)
 	}
 
-	// Compute framework/namespace routing for managed namespace mode
-	rpaFramework := ctx.Framework
-	rpaNamespace := ctx.ParentContext.Namespace
-	rpTargetNamespace := ctx.ParentContext.Namespace
+	logging.Logger.Info("Configured release %s & pre-existing %s for application %s in namespace %s (RPA in %s)", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace, rpaNamespace)
 
-	if ctx.ParentContext.Opts.ReleaseManagedNamespace != "" {
-		rpaFramework = ctx.ManagedFramework
-		rpaNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
-		rpTargetNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
-	}
+	return nil
+}
 
+// Create, and validate a ReleasePlanAdmission owned by this run. This is the
+// default behavior (i.e. --release-managed-readonly is not set).
+func setupReadWriteReleasePlanAdmission(ctx *types.PerApplicationContext, rpaFramework *framework.Framework, rpaNamespace string) error {
 	var iface interface{}
 	var ok bool
 	var err error
-
-	iface, err = logging.Measure(
-		ctx,
-		createReleasePlan,
-		ctx.Framework,
-		ctx.ParentContext.Namespace,
-		ctx.ApplicationName,
-		rpTargetNamespace,
-	)
-	if err != nil {
-		return logging.Logger.Fail(91, "Release Plan failed creation: %v", err)
-	}
-
-	ctx.ReleasePlanName, ok = iface.(string)
-	if !ok {
-		return logging.Logger.Fail(92, "Type assertion failed on release plan name: %+v", iface)
-	}
 
 	var rpaData *runtime.RawExtension
 	if ctx.ParentContext.Opts.ReleasePlanAdmissionDataPath != "" {
@@ -223,4 +218,53 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	logging.Logger.Info("Configured release %s & %s for application %s in namespace %s (RPA in %s)", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ApplicationName, ctx.ParentContext.Namespace, rpaNamespace)
 
 	return nil
+}
+
+func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
+	if ctx.ReleasePlanName != "" {
+		if ctx.ReleasePlanAdmissionName == "" {
+			return logging.Logger.Fail(90, "We are supposed to reuse RPA, but it was not configured")
+		}
+		logging.Logger.Debug("Skipping setting up releases because reusing release plan %s and release plan admission %s in namespace %s", ctx.ReleasePlanName, ctx.ReleasePlanAdmissionName, ctx.ParentContext.Namespace)
+		return nil
+	}
+
+	if ctx.ParentContext.Opts.ReleasePolicy == "" {
+		logging.Logger.Info("Skipping setting up releases because policy was not provided")
+		return nil
+	}
+
+	// Compute framework/namespace routing for managed namespace mode
+	rpaFramework := ctx.Framework
+	rpaNamespace := ctx.ParentContext.Namespace
+	rpTargetNamespace := ctx.ParentContext.Namespace
+
+	if ctx.ParentContext.Opts.ReleaseManagedNamespace != "" {
+		rpaFramework = ctx.ManagedFramework
+		rpaNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
+		rpTargetNamespace = ctx.ParentContext.Opts.ReleaseManagedNamespace
+	}
+
+	iface, err := logging.Measure(
+		ctx,
+		createReleasePlan,
+		ctx.Framework,
+		ctx.ParentContext.Namespace,
+		ctx.ApplicationName,
+		rpTargetNamespace,
+	)
+	if err != nil {
+		return logging.Logger.Fail(91, "Release Plan failed creation: %v", err)
+	}
+
+	ok := false
+	ctx.ReleasePlanName, ok = iface.(string)
+	if !ok {
+		return logging.Logger.Fail(92, "Type assertion failed on release plan name: %+v", iface)
+	}
+
+	if ctx.ParentContext.Opts.ReleaseManagedReadOnly {
+		return setupReadOnlyReleasePlanAdmission(ctx, rpaFramework, rpaNamespace)
+	}
+	return setupReadWriteReleasePlanAdmission(ctx, rpaFramework, rpaNamespace)
 }

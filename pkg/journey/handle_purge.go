@@ -22,10 +22,14 @@ func purgeStage(f *framework.Framework, namespace string, appContexts []*types.P
 
 		if appCtx.ReleasePlanAdmissionName != "" && appCtx.ManagedFramework != nil {
 			managedNamespace := appCtx.ParentContext.Opts.ReleaseManagedNamespace
-			logging.Logger.Debug("Deleting ReleasePlanAdmission %s in namespace %s", appCtx.ReleasePlanAdmissionName, managedNamespace)
-			err := appCtx.ManagedFramework.AsKubeDeveloper.ReleaseController.DeleteReleasePlanAdmission(appCtx.ReleasePlanAdmissionName, managedNamespace, false)
-			if err != nil {
-				logging.Logger.Error("Error when deleting ReleasePlanAdmission %s in namespace %s: %v", appCtx.ReleasePlanAdmissionName, managedNamespace, err)
+			if appCtx.ParentContext.Opts.ReleaseManagedReadOnly {
+				logging.Logger.Debug("Skipping deletion of ReleasePlanAdmission %s in namespace %s: it is releng-owned (read-only managed namespace mode)", appCtx.ReleasePlanAdmissionName, managedNamespace)
+			} else {
+				logging.Logger.Debug("Deleting ReleasePlanAdmission %s in namespace %s", appCtx.ReleasePlanAdmissionName, managedNamespace)
+				err := appCtx.ManagedFramework.AsKubeDeveloper.ReleaseController.DeleteReleasePlanAdmission(appCtx.ReleasePlanAdmissionName, managedNamespace, false)
+				if err != nil {
+					logging.Logger.Error("Error when deleting ReleasePlanAdmission %s in namespace %s: %v", appCtx.ReleasePlanAdmissionName, managedNamespace, err)
+				}
 			}
 		}
 
