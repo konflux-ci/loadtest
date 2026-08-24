@@ -1,0 +1,6 @@
+# Go project layout: library code in pkg/, CLI entry point at loadtest.go,
+# tests alongside source in *_test.go files. This matches Go conventions;
+# agentready's standard_layout check is Python-centric (src/, tests/) and also
+# penalizes root loadtest.go vs cmd/ or main.go without adding value here.
+excluded_attributes:
+  - standard_layout
