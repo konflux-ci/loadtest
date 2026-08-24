@@ -20,6 +20,14 @@ make check-all
 
 Verification relies on linting and a successful build as there are no Go unit tests.
 
+Single-file checks (under 5s; use after editing one file instead of `make check-all`):
+```bash
+ruff check ci-scripts/evaluate.py
+golangci-lint run loadtest.go
+go vet loadtest.go
+shellcheck ci-scripts/run-ci/run.sh
+```
+
 ## Key Conventions
 
 - Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.
