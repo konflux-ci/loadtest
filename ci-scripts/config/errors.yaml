@@ -3041,6 +3041,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_02_27T04_44_19_051000000_00_00
   type: loadtest
+- caused_by: cluster
+  id: roxctl_scan_exchange_service_account_token_step_failed_because_acs_central_returned_401_service_account_token_issuer_is_not_configured
+  note: 'See KONFLUX-15652 (kflux-fedora-01) and KONFLUX-15653 (lightwell-dev / us-east): roxctl-scan central m2m exchange rejected, shared ACS central acs-d4dgfbkto15c73biblcg.acs.rhcloud.com lacks OIDC SSO for cluster Service Account token issuer'
+  reason: 'roxctl-scan exchange-service-account-token step failed because ACS central returned 401: Service Account token issuer is not configured'
+  regexp: 'exchange request failed: expected status code 200, but received 401\. Response Body: .*issuer .* is not configured'
+  test_dir:
+  - run-kflux-fedora-01-2026_08_28T07_19_03_377000000_00_00
+  type: logs
 - caused_by: task
   id: roxctl_scan_exchange_service_account_token_step_failed_because_cred_copy_could_not_create_docker_due_to_permission_denied
   note: ''
@@ -3051,7 +3059,7 @@
   type: logs
 - caused_by: task
   id: roxctl_scan_proccess_output_step_failed_because_jq_could_not_iterate_over_null_rox_output_json
-  note: ''
+  note: 'See KONFLUX-15651: jq cannot iterate over null rox-output JSON in roxctl-scan proccess-output step (MultiArch probes). Data-parse bug, not infra/creds. Failing file/arch varies but always at line 378 of source JSON.'
   reason: roxctl-scan proccess-output step failed because jq could not iterate over null rox-output JSON
   regexp: 'jq: error \(at /tekton/home/rox-output-[a-zA-Z0-9-]+\.json:[0-9]+\): Cannot iterate over null \(null\)'
   test_dir:
