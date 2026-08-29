@@ -1,3 +1,11 @@
+- caused_by: cluster
+  id: application_creation_failed_because_cluster_api_server_connection_timed_out
+  note: ''
+  reason: Application creation failed because cluster API server connection timed out
+  regexp: 'Application failed creation: unable to create the Application [^ ]+: failed to get server groups: Get .*: dial tcp [0-9.]+:[0-9]+: connect: connection timed out'
+  test_dir:
+  - run-lightwell-dev-2026_08_29T09_31_02_746000000_00_00
+  type: loadtest
 - caused_by: application-controller
   id: application_creation_failed_because_it_already_exists
   note: ''
@@ -488,6 +496,14 @@
   regexp: 'Error response from registry:.*https://quay.io/.* response status code 401: Unauthorized'
   test_dir:
   - run-kflux-prd-rh02-2026_02_14T13_25_43_925000000_00_00
+  type: logs
+- caused_by: gitlab.cee.redhat.com
+  id: clone_repository_failed_because_gitlab_cee_redhat_com_could_not_be_resolved
+  note: ''
+  reason: Clone repository failed because gitlab.cee.redhat.com could not be resolved
+  regexp: 'fatal: unable to access .https://gitlab\.cee\.redhat\.com[^ ]+.: Could not resolve host: gitlab\.cee\.redhat\.com'
+  test_dir:
+  - run-stone-prod-p02-2026_08_27T14_55_02_949000000_00_00
   type: logs
 - caused_by: cluster
   id: component_creation_failed_because_client_rate_limiter_wait_returned_context_deadline_exceeded
@@ -2510,6 +2526,14 @@
   test_dir:
   - run-stone-stage-p01-2026_06_22T14_11_36_479000000_00_00
   type: loadtest
+- caused_by: release-controller
+  id: release_plan_admission_creation_failed_because_releaseplanadmission_already_exists
+  note: ''
+  reason: Release Plan Admission creation failed because ReleasePlanAdmission already exists
+  regexp: 'Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^ ]+: releaseplanadmissions\.appstudio\.redhat\.com .* already exists'
+  test_dir:
+  - run-stone-prod-p01-2026_08_29T09_17_02_908000000_00_00
+  type: loadtest
 - caused_by: cluster
   id: release_plan_admission_creation_failed_because_resource_quota_evaluation_timed_out
   note: ''
@@ -3697,9 +3721,10 @@
   id: windows_container_image_not_compatible_with_linux_architecture
   note: ''
   reason: Windows container image not compatible with Linux architecture
-  regexp: 'choosing an image from manifest list docker://mcr\.microsoft\.com/windows/[^:]+:[^ ]+: no image found in manifest list for architecture "amd64", variant "", OS "linux"'
+  regexp: 'choosing an image from manifest list docker://mcr\.microsoft\.com/windows/[^:]+:[^ ]+: no image found in manifest list for architecture .+, variant .+, OS .+linux'
   test_dir:
   - run-stone-stage-p01-2026_04_22T11_44_45_128000000_00_00
+  - run-stone-stage-p01-2026_08_26T14_44_02_927000000_00_00
   type: logs
 - caused_by: github.com
   id: windows_image_build_failed_because_c_dockerfile_is_missing
