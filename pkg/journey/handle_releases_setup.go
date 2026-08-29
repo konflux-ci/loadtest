@@ -11,6 +11,7 @@ import types "github.com/konflux-ci/loadtest/pkg/types"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
+import k8serrors "k8s.io/apimachinery/pkg/api/errors"
 import "k8s.io/apimachinery/pkg/runtime"
 
 // Create ReleasePlan CR
@@ -26,15 +27,66 @@ func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespa
 	return name, nil
 }
 
+// Delete an existing ReleasePlanAdmission with the given name (if any) and wait until it is fully removed,
+// so a subsequent create with the same name cannot fail with AlreadyExists.
+func deleteReleasePlanAdmissionIfPresent(f *framework.Framework, name, namespace string) error {
+	logging.Logger.Debug("Checking whether release plan admission %s in namespace %s already exists", name, namespace)
+
+	existing, err := f.AsKubeDeveloper.ReleaseController.GetReleasePlanAdmission(name, namespace)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return fmt.Errorf("unable to get the releasePlanAdmission %s in %s: %v", name, namespace, err)
+	}
+
+	if existing.DeletionTimestamp == nil {
+		logging.Logger.Info("Deleting existing release plan admission %s in namespace %s before creating a fresh one", name, namespace)
+		err = f.AsKubeDeveloper.ReleaseController.DeleteReleasePlanAdmission(name, namespace, false)
+		if err != nil {
+			return fmt.Errorf("unable to delete the releasePlanAdmission %s in %s: %v", name, namespace, err)
+		}
+	}
+
+	// Wait for the object to be gone so the subsequent create cannot race with the deletion
+	err = utils.WaitUntilWithInterval(func() (done bool, err error) {
+		_, err = f.AsKubeDeveloper.ReleaseController.GetReleasePlanAdmission(name, namespace)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return true, nil
+		}
+		return false, nil
+	}, time.Second*2, time.Minute*2)
+	if err != nil {
+		return fmt.Errorf("timed out waiting for releasePlanAdmission %s in %s to be deleted: %v", name, namespace, err)
+	}
+
+	return nil
+}
+
 // Create ReleasePlanAdmission CR
 // Assumes enterprise contract policy and service account with required permissions is already there
+// Idempotent: if an RPA with the same name already exists, delete it first and create a fresh one
 func createReleasePlanAdmission(f *framework.Framework, namespace, originNamespace, appName, policyName, releasePipelineSAName, releasePipelineUrl, releasePipelineRevision, releasePipelinePath string, releaseOciStorage string, data *runtime.RawExtension) (string, error) {
 	name := appName + "-rpa"
 	logging.Logger.Debug("Creating release plan admission %s in namespace %s with origin %s, policy %s and pipeline SA %s", name, namespace, originNamespace, policyName, releasePipelineSAName)
 
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, data)
+	err := deleteReleasePlanAdmissionIfPresent(f, name, namespace)
 	if err != nil {
-		return "", fmt.Errorf("unable to create the releasePlanAdmission %s in %s: %v", name, namespace, err)
+		return "", err
+	}
+
+	_, err = f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, data)
+	if err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			// Raced with another creation attempt: delete and try to create again
+			if delErr := deleteReleasePlanAdmissionIfPresent(f, name, namespace); delErr != nil {
+				return "", delErr
+			}
+			_, err = f.AsKubeDeveloper.ReleaseController.CreateReleasePlanAdmissionWithGitPipeline(name, namespace, originNamespace, policyName, releasePipelineSAName, []string{appName}, true, releasePipelineUrl, releasePipelineRevision, releasePipelinePath, releaseOciStorage, data)
+		}
+		if err != nil {
+			return "", fmt.Errorf("unable to create the releasePlanAdmission %s in %s: %v", name, namespace, err)
+		}
 	}
 
 	return name, nil
