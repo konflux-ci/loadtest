@@ -20,12 +20,10 @@ make check-all
 
 Verification relies on linting and a successful build as there are no Go unit tests.
 
-Single-file checks (under 5s; use after editing one file instead of `make check-all`):
+After editing files, run checks before pushing:
 ```bash
-ruff check ci-scripts/evaluate.py
-golangci-lint run loadtest.go
-go vet loadtest.go
-shellcheck ci-scripts/run-ci/run.sh
+make check      # staged changes only
+make check-all  # all files
 ```
 
 ## Key Conventions
