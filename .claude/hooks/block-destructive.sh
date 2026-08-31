@@ -11,7 +11,7 @@ if [[ -z "$COMMAND" ]]; then
   exit 0
 fi
 
-if echo "$COMMAND" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*f[[:space:]]+(/|~|\$HOME|[*])'; then
+if echo "$COMMAND" | grep -qE 'rm[[:space:]]+-[a-zA-Z]*f[[:space:]]+(/|~|[$]HOME|[*])'; then
   echo "BLOCKED: destructive rm -rf on system or broad paths."
   exit 2
 fi
