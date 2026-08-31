@@ -23,6 +23,12 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Run checks
         run: make check-all
+      - name: Type-check Go code
+        run: go vet ./...
+      - name: Run tests
+        run: |
+          go test ./...
+          go run loadtest.go -h
       - name: Run Gosec Security Scanner
         uses: securego/gosec@deb54465fea23d19a77f037e11e6589021f8501d # v2.29.0
         with:
