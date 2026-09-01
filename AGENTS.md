@@ -25,6 +25,13 @@ Verification relies on linting and a successful build as there are no Go unit te
 - Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.
 - CSV output files and Python analysis scripts (`evaluate.py`, `errors.py`) are tightly coupled — column names in Go logging must match what Python expects.
 
+## Pattern References
+
+- New journey stage: see `pkg/journey/handle_pipeline.go` for a reference implementation and `loadtest.go` for wiring into the journey
+- New CLI flag: see `loadtest.go` and `pkg/options/options.go` for flag registration and options struct fields
+- New error pattern: see `ci-scripts/config/errors.yaml` for YAML entry format
+- CSV logging field: see `pkg/logging/time_and_log.go` for column names consumed by `evaluate.py`
+
 ## CI
 
 Pull requests are validated by Konflux Tekton pipelines (`.tekton/`) and GitHub Actions (`.github/workflows/`).
