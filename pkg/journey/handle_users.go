@@ -36,6 +36,7 @@ func provisionFramework(stageUsers []loadtestutils.User, threadIndex int, userna
 	return f, f.UserNamespace, nil
 }
 
+// HandleUser provisions the test framework and namespace for a simulated user.
 func HandleUser(ctx *types.PerUserContext) error {
 	var err error
 
@@ -58,6 +59,7 @@ func HandleUser(ctx *types.PerUserContext) error {
 	return nil
 }
 
+// HandleNewFrameworkForApp creates a new framework instance for an application context.
 func HandleNewFrameworkForApp(ctx *types.PerApplicationContext) error {
 	var err error
 
@@ -74,6 +76,7 @@ func HandleNewFrameworkForApp(ctx *types.PerApplicationContext) error {
 	return nil
 }
 
+// HandleNewManagedFrameworkForApp creates a managed framework for release testing.
 func HandleNewManagedFrameworkForApp(ctx *types.PerApplicationContext) error {
 	if ctx.ParentContext.Opts.ReleaseManagedNamespace == "" {
 		return nil
@@ -96,6 +99,7 @@ func HandleNewManagedFrameworkForApp(ctx *types.PerApplicationContext) error {
 	return nil
 }
 
+// HandleNewFrameworkForComp creates a new framework instance for a component context.
 func HandleNewFrameworkForComp(ctx *types.PerComponentContext) error {
 	var err error
 
@@ -112,6 +116,7 @@ func HandleNewFrameworkForComp(ctx *types.PerComponentContext) error {
 	return nil
 }
 
+// HandleNewManagedFrameworkForComp creates a managed framework for component release testing.
 func HandleNewManagedFrameworkForComp(ctx *types.PerComponentContext) error {
 	if ctx.ParentContext.ParentContext.Opts.ReleaseManagedNamespace == "" {
 		return nil

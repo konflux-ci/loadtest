@@ -96,6 +96,7 @@ func validateTestPipelineRunCondition(f *framework.Framework, namespace, itsName
 	return err
 }
 
+// HandleTest creates an IntegrationTestScenario CR and waits for test pipelines.
 func HandleTest(ctx *types.PerComponentContext) error {
 	if !ctx.ParentContext.ParentContext.Opts.WaitPipelines || !ctx.ParentContext.ParentContext.Opts.WaitIntegrationTestsPipelines {
 		return nil
