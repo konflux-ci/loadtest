@@ -61,6 +61,7 @@ type Opts struct {
 	WaitRelease                            bool
 }
 
+// Format implements fmt.Formatter, redacting ReleaseManagedToken for safe output.
 func (o *Opts) Format(f fmt.State, verb rune) {
 	type plain Opts
 	saved := o.ReleaseManagedToken

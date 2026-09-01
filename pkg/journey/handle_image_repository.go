@@ -47,6 +47,7 @@ func deleteImageRepository(f *framework.Framework, namespace, imageRepoName stri
 	return nil
 }
 
+// HandleImageRepository creates or reuses an ImageRepository CR for a component.
 func HandleImageRepository(ctx *types.PerComponentContext) error {
 	var iface interface{}
 	var ok bool

@@ -334,6 +334,7 @@ func collectTenantReleaseRelatedJSONs(f *framework.Framework, dirPath, namespace
 	return nil
 }
 
+// HandlePerApplicationCollection gathers pod logs and application JSON for an application.
 func HandlePerApplicationCollection(ctx *types.PerApplicationContext) error {
 	if ctx.ApplicationName == "" {
 		logging.Logger.Debug("Application name not populated, so skipping per-application collections in %s", ctx.ParentContext.Namespace)
@@ -362,6 +363,7 @@ func HandlePerApplicationCollection(ctx *types.PerApplicationContext) error {
 	return nil
 }
 
+// HandlePerComponentCollection gathers pod logs and component JSON for a component.
 func HandlePerComponentCollection(ctx *types.PerComponentContext) error {
 	if ctx.ComponentName == "" {
 		logging.Logger.Debug("Component name not populated, so skipping per-component collections in %s", ctx.ParentContext.ParentContext.Namespace)
@@ -464,6 +466,7 @@ func collectEvents(f *framework.Framework, dirPath, namespace string) error {
 	return nil
 }
 
+// HandlePerUserCollection gathers namespace-level resources and logs for a user.
 func HandlePerUserCollection(ctx *types.PerUserContext) error {
 	if ctx.Namespace == "" {
 		logging.Logger.Debug("Namespace not populated, so skipping per-user collections")

@@ -130,6 +130,7 @@ func validatePipelineRunSignature(f *framework.Framework, namespace, appName, co
 	return err
 }
 
+// HandlePipelineRun triggers a build pipeline and optionally waits for completion.
 func HandlePipelineRun(ctx *types.PerComponentContext) error {
 	if !ctx.ParentContext.ParentContext.Opts.WaitPipelines {
 		return nil
