@@ -1,4 +1,12 @@
 - caused_by: cluster
+  id: application_creation_failed_because_client_rate_limiter_wait_returned_context_deadline_exceeded
+  note: ''
+  reason: Application creation failed because client rate limiter Wait returned context deadline exceeded
+  regexp: 'Application failed creation: unable to create the Application [^ ]+: client rate limiter Wait returned an error: context deadline exceeded'
+  test_dir:
+  - run-lightwell-dev-2026_08_30T09_31_02_475000000_00_00
+  type: loadtest
+- caused_by: cluster
   id: application_creation_failed_because_cluster_api_server_connection_timed_out
   note: ''
   reason: Application creation failed because cluster API server connection timed out
@@ -399,6 +407,14 @@
   test_dir:
   - run-kflux-prd-rh03-2026_03_08T16_45_21_155000000_00_00
   type: logs
+- caused_by: task
+  id: build_task_failed_to_pre_pull_base_image_because_buildah_could_not_unpack_layer_fallback_to_chroot_operation_not_permitted
+  note: ''
+  reason: 'Build task failed to pre-pull base image because buildah could not unpack layer (fallback to chroot: operation not permitted)'
+  regexp: 'unable to copy from source docker://[^ ]+: copying system image from manifest list: writing blob: adding layer with blob .*: unpacking failed \(error: exit status 1; output: after fallback to chroot: operation not permitted\)'
+  test_dir:
+  - run-lightwell-dev-2026_09_02T08_31_02_726000000_00_00
+  type: logs
 - caused_by: SKIP
   id: build_task_failed_with_code_125
   note: ''
@@ -496,6 +512,14 @@
   regexp: 'Error response from registry:.*https://quay.io/.* response status code 401: Unauthorized'
   test_dir:
   - run-kflux-prd-rh02-2026_02_14T13_25_43_925000000_00_00
+  type: logs
+- caused_by: github.com
+  id: clone_repository_failed_because_github_com_returned_403_forbidden
+  note: ''
+  reason: Clone repository failed because github.com returned 403 Forbidden
+  regexp: 'fatal: unable to access .https://github\.com/[^'']+.: The requested URL returned error: 403'
+  test_dir:
+  - run-stone-prd-rh01-2026_08_30T01_01_02_258000000_00_00
   type: logs
 - caused_by: gitlab.cee.redhat.com
   id: clone_repository_failed_because_gitlab_cee_redhat_com_could_not_be_resolved
@@ -1675,9 +1699,10 @@
   id: image_pull_failed_due_to_quay_cdn_tls_internal_error_during_image_config_parsing
   note: ''
   reason: Image pull failed due to Quay CDN TLS internal error during image config parsing
-  regexp: 'Error: copying system image from manifest list: parsing image configuration: Get .https://cdn[0-9]+\.quay\.io/[^ ]+.: remote error: tls: internal error'
+  regexp: 'Error: (unable to copy from source docker://[^ ]+: )?copying system image from manifest list: parsing image configuration: Get .https://cdn[0-9]+\.quay\.io/[^ ]+.: remote error: tls: internal error'
   test_dir:
   - run-kflux-ocp-p01-2026_05_25T14_50_19_412000000_00_00
+  - run-stone-stg-rh01-2026_09_03T04_09_02_778000000_00_00
   type: logs
 - caused_by: quay.io
   id: image_push_failed_because_quay_io_returned_413_request_entity_too_large
@@ -1921,6 +1946,14 @@
   regexp: '.message.: .pod status ..PodScheduled..:..False..; message: ..[0-9/]+ nodes are available: .*: [0-9]+ Preemption is not helpful for scheduling.'
   test_dir: []
   type: condition
+- caused_by: quay.io
+  id: oci_artifact_push_failed_because_quay_io_returned_unauthorized_access_error
+  note: ''
+  reason: OCI artifact push failed because quay.io returned unauthorized access error
+  regexp: 'Error response from registry: unauthorized: access to the requested resource is not authorized.*Failed to push OCI artifact quay\.io/[^ ]+ to registry'
+  test_dir:
+  - run-lightwell-dev-2026_09_01T17_44_04_976000000_00_00
+  type: logs
 - caused_by: quay.io
   id: oras_failed_to_fetch_blob_from_quay_io_because_it_was_terminated
   note: ''
@@ -2917,6 +2950,14 @@
   test_dir:
   - run-kflux-ocp-p01-2026_01_09T15_50_15_335000000_00_00
   type: loadtest
+- caused_by: cluster
+  id: repo_templating_failed_to_list_file_contents_because_dns_resolution_for_api_github_com_failed_server_misbehaving
+  note: ''
+  reason: Repo-templating failed to list file contents because DNS resolution for api.github.com failed (server misbehaving)
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to get file [^ ]+ from repo [^ ]+ revision [^:]+: error when listing file contents: Get .https://api\.github\.com/[^ ]+.: dial tcp: lookup api\.github\.com on [0-9.]+:53: server misbehaving'
+  test_dir:
+  - run-stone-stage-p01-2026_09_02T21_33_03_546000000_00_00
+  type: loadtest
 - caused_by: github.com
   id: repo_templating_failed_when_merging_pr_on_api_github_com_because_500_error
   note: Merging failed on GitHub side with 500
@@ -3515,9 +3556,10 @@
   id: taskrunimagepullfailed_because_cluster_could_not_pull_rpmbuild_pipeline_environment_container
   note: ''
   reason: TaskRunImagePullFailed because cluster could not pull rpmbuild-pipeline-environment-container
-  regexp: '.message.: .the step .* in TaskRun .* failed to pull the image .* The pod errored with the message: .*Back-off pulling image .*images.paas.redhat.com/brew/rpmbuild-pipeline-environment-container:latest@sha256:[a-f0-9]+.*'
+  regexp: '.message.: .the step .* in TaskRun .* failed to pull the image .* The pod errored with the message: .*Back-off pulling image .*images.paas.redhat.com/brew/rpmbuild-pipeline-environment-container:[^@]+@sha256:[a-f0-9]+.*'
   test_dir:
   - run-kflux-rhel-p01-2026_03_09T17_59_19_774000000_00_00
+  - run-kflux-rhel-p01-2026_09_01T11_39_02_937000000_00_00
   type: condition
 - caused_by: quay.io
   id: tekton_bundle_resolver_failed_to_retrieve_task_from_quay_io_due_to_401_unauthorized
