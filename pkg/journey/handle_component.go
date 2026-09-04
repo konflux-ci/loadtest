@@ -317,6 +317,14 @@ func utilityRepoTemplatingComponentCleanup(f *framework.Framework, namespace, ap
 	}
 	logging.Logger.Debug("Repo-templating workflow: Cleaned up (third cleanup) for %s/%s/%s", namespace, appName, compName)
 
+	// PaC on lightwell-dev has remember-ok-to-test=false, so authorization from the
+	// onboarding PR merge does not cover the new template commits. Post /ok-to-test
+	// for the LWPython push commit so the on-push PipelineRun is allowed to start.
+	pushCommitSHA := (*shaMap)["COMPONENT-push.yaml"]
+	if err = ensurePaCOkToTest(f, repoUrl, mergeReqNum, pushCommitSHA); err != nil {
+		return fmt.Errorf("failed to authorize PaC pipeline with %s: %w", pacOkToTestComment, err)
+	}
+
 	return nil
 }
 

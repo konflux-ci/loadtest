@@ -3,9 +3,11 @@ module github.com/konflux-ci/loadtest
 go 1.26.0
 
 require (
+	github.com/google/go-github/v66 v66.0.0
 	github.com/konflux-ci/e2e-tests v0.0.0-20260821080257-c5838f7e6aea
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.9.2
+	golang.org/x/oauth2 v0.36.0
 	k8s.io/apimachinery v0.37.0
 	k8s.io/klog/v2 v2.140.0
 	sigs.k8s.io/controller-runtime v0.24.1
@@ -113,7 +115,6 @@ require (
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.21.0 // indirect
-	github.com/google/go-github/v66 v66.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/gofuzz v1.2.1-0.20221018181003-5dfa3b7056d4 // indirect
 	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
@@ -182,7 +183,6 @@ require (
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/mod v0.37.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
-	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
