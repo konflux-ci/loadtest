@@ -57,3 +57,9 @@ Issues are tracked in Jira at redhat.atlassian.net, project KONFLUX, component "
 ### Domain docs
 
 Single-context layout (one `CONTEXT.md` at repo root). See `docs/agents/domain.md`.
+
+### Design docs
+
+Architectural intent (preconditions, invariants, rationale) lives in `docs/design/`.
+When changing journey concurrency, measurement/CSV columns, or the results/Horreum
+pipeline, review and update the corresponding design doc. See `docs/design/README.md`.
