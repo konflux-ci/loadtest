@@ -34,14 +34,14 @@ make check-all  # all files
 ## Pattern References
 
 - New journey stage: see `pkg/journey/handle_pipeline.go` for a reference implementation and `loadtest.go` for wiring into the journey
-- Resource create/delete lifecycle: create the resource in a journey handler under                                                                                                     
-  `pkg/journey/` (e.g. `handle_releases_setup.go`, `handle_image_repository.go`) and mirror                                                                                                
-  the teardown in `handle_purge.go` `Purge()` so cleanup stays idempotent.                                                                                                                 
-- Probe run scripts: shell logic lives in `ci-scripts/run-probe/` (`run.sh`,                                                                                                           
-  `collect-results.sh`, `cluster_read_config.yaml`); mirror changes in the `run-ci/` /                                                                                                     
-  `run-cluster/` variants.                                                                                                                                                                 
-- Horreum data scripts: scripts in `ci-scripts/utility_scripts/` (e.g.                                                                                                                 
-  `postgresql-backfill.sh`, `runs-to-csv.sh`) paired with schemas in                                                                                                                       
+- Resource create/delete lifecycle: create the resource in a journey handler under
+  `pkg/journey/` (e.g. `handle_releases_setup.go`, `handle_image_repository.go`) and mirror
+  the teardown in `handle_purge.go` `Purge()` so cleanup stays idempotent.
+- Probe run scripts: shell logic lives in `ci-scripts/run-probe/` (`run.sh`,
+  `collect-results.sh`, `cluster_read_config.yaml`); mirror changes in the `run-ci/` /
+  `run-cluster/` variants.
+- Horreum data scripts: scripts in `ci-scripts/utility_scripts/` (e.g.
+  `postgresql-backfill.sh`, `runs-to-csv.sh`) paired with schemas in
   `ci-scripts/config/horreum-*.json`.
 
 ## CI
