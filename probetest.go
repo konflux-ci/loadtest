@@ -3,10 +3,12 @@
 package main
 
 import "fmt"
+import "strings"
 
 import journey "github.com/konflux-ci/loadtest/pkg/journey"
 import options "github.com/konflux-ci/loadtest/pkg/options"
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import loadtestutils "github.com/konflux-ci/loadtest/pkg/loadtestutils"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import cobra "github.com/spf13/cobra"
@@ -42,6 +44,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&opts.LogInfo, "log-info", "v", false, "log messages with info level and above")
 	rootCmd.Flags().BoolVarP(&opts.LogDebug, "log-debug", "d", false, "log messages with debug level and above")
 	rootCmd.Flags().BoolVarP(&opts.LogTrace, "log-trace", "t", false, "log messages with trace level and above (i.e. everything)")
+	rootCmd.Flags().BoolVarP(&opts.Stage, "stage", "s", false, "use the first user's token/APIURL from users.json instead of the local kubeconfig")
 }
 
 func main() {
@@ -87,10 +90,24 @@ func main() {
 	logging.MeasurementsStart(opts.OutputDir)
 	defer logging.MeasurementsStop()
 
-	// Provision the framework. With E2E_APPLICATIONS_NAMESPACE set, this targets the existing fixed
-	// tenant namespace instead of creating a new one; the username argument is thus irrelevant.
-	// The probe never uses --stage, so isStage is always false.
-	f, namespace, err := journey.ProvisionFramework(nil, 0, "probe", false)
+	// Provision the framework.
+	//
+	// With --stage, the first user from users.json provides the APIURL/token used to authenticate
+	// against a remote Konflux cluster (same as loadtest.go); the username is derived from that
+	// user's namespace. Without --stage, we fall back to the local kubeconfig and target the existing
+	// fixed tenant namespace through the E2E_APPLICATIONS_NAMESPACE env var, in which case the
+	// username argument is irrelevant.
+	var stageUsers []loadtestutils.User
+	username := "probe"
+	if opts.Stage {
+		stageUsers, err = loadtestutils.LoadStageUsers("users.json")
+		if err != nil {
+			logging.Logger.Fatal("Failed to load Stage users: %v", err)
+		}
+		username = strings.TrimSuffix(stageUsers[0].Namespace, "-tenant")
+	}
+
+	f, namespace, err := journey.ProvisionFramework(stageUsers, 0, username, opts.Stage)
 	if err != nil {
 		logging.Logger.Fatal("Unable to provision framework: %v", err)
 	}
