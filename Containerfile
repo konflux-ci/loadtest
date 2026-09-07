@@ -7,8 +7,9 @@ RUN go mod download -x
 # Copy rest of the source code and build it
 COPY . .
 RUN make build
-# Test executable is OK
+# Test executables are OK
 RUN ./bin/loadtest --help
+RUN ./bin/probetest --help
 
 
 
@@ -64,6 +65,7 @@ FROM registry.access.redhat.com/ubi10/python-312-minimal:latest
 COPY LICENSE /licenses/LICENSE
 # Copy loadtest binary from builder container
 COPY --from=builder_go /opt/app-root/src/bin/loadtest /usr/bin/
+COPY --from=builder_go /opt/app-root/src/bin/probetest /usr/bin/
 # Copy OpenShift CLI and yq binaries from builder container
 COPY --from=builder_oc /usr/bin/oc /usr/bin/
 COPY --from=builder_oc /usr/bin/kubectl /usr/bin/

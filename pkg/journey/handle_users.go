@@ -36,6 +36,13 @@ func provisionFramework(stageUsers []loadtestutils.User, threadIndex int, userna
 	return f, f.UserNamespace, nil
 }
 
+// ProvisionFramework provisions the test framework and namespace for a simulated user. It is an
+// exported wrapper around the unexported provisionFramework, so the probe binary can reuse the same
+// non-stage framework provisioning logic.
+func ProvisionFramework(stageUsers []loadtestutils.User, threadIndex int, username string, isStage bool) (*framework.Framework, string, error) {
+	return provisionFramework(stageUsers, threadIndex, username, isStage)
+}
+
 // HandleUser provisions the test framework and namespace for a simulated user.
 func HandleUser(ctx *types.PerUserContext) error {
 	var err error
