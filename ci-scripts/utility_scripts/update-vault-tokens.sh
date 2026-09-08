@@ -63,12 +63,11 @@ update_tokens() {
 if [ "$UPDATE_STAGING" = true ]; then
     update_tokens "staging" "stone-stg-rh01"
     update_tokens "staging" "stone-stage-p01"
-    update_tokens "staging" "kflux-stg-es01"
     update_tokens "staging" "lightwell-dev"
 fi
 
 if [ "$UPDATE_PRODUCTION" = true ]; then
-    for c in stone-prd-rh01 stone-prod-p01 stone-prod-p02 kflux-ocp-p01 kflux-osp-p01 kflux-prd-rh02 kflux-prd-rh03 kflux-rhel-p01; do
+    for c in stone-prd-rh01 stone-prod-p01 stone-prod-p02 kflux-ocp-p01 kflux-osp-p01 kflux-prd-rh02 kflux-prd-rh03 kflux-rhel-p01 kflux-lw-p01; do
         update_tokens "production" "$c"
     done
 fi

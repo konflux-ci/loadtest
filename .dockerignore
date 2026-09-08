@@ -1,11 +1,28 @@
 # Dependency directories
 /vendor/
 /venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.env
+
+# Go build artifacts
+*.exe
+*.test
+*.out
+cover.out
+coverage.txt
 
 # User tools dirs
 .*.swp
+*.swo
 /.DS_Store
 /.vscode/
+/.idea/
 /.agentready/
 /.ruff_cache/
 

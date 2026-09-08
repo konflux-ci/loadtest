@@ -16,6 +16,8 @@
 
 - **Journey** -- one full cycle: create Application, create Component, build (PipelineRun), test (IntegrationTestScenario pipeline), release, collect artifacts. Controlled by `--journey-repeats` (count) and `--journey-duration` (timeout); whichever limit is reached first stops the loop.
 
+- **Adopted Application/Component** -- a fixed, pre-onboarded Application and Component CR that the KONFLUX-15732 probe (`probetest.go`) targets. Unlike a `Journey` (which creates and may reuse its resources), the probe treats them as permanent fixtures: it requires them to already exist, validates them, and never creates or deletes them. The app/component are set up once out-of-band (e.g. a single run of the full `loadtest`); the probe only adopts their names and waits on the resulting build / integration test / release PipelineRuns.
+
 - **Purge** -- cleanup phase: delete Application, Component, ReleasePlan, and (in read-write mode) ReleasePlanAdmission. Runs after all journeys complete. Controlled by `--purge` (enable) and `--purge-only` (skip journeys, just clean up; implies `--purge`).
 
 - **ReleasePlan (RP)** -- CR in tenant namespace, created by loadtest via `createReleasePlan()`, targeting the managed namespace (or the tenant namespace itself when no managed namespace is configured). Name pattern: `{appName}-rp`.

@@ -20,6 +20,12 @@ make check-all
 
 Verification relies on linting and a successful build as there are no Go unit tests.
 
+After editing files, run checks before pushing:
+```bash
+make check      # staged changes only
+make check-all  # all files
+```
+
 ## Key Conventions
 
 - Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.

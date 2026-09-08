@@ -9,10 +9,12 @@ import "sync"
 
 // Struct to hold command line options
 type Opts struct {
+	ApplicationName                        string
 	ApplicationsCount                      int
 	BuildPipelineSelectorBundle            string
 	ComponentContainerContext              string
 	ComponentContainerFile                 string
+	ComponentName                          string
 	ComponentRepoRevision                  string
 	ComponentRepoUrl                       string
 	ComponentsCount                        int
@@ -61,6 +63,7 @@ type Opts struct {
 	WaitRelease                            bool
 }
 
+// Format implements fmt.Formatter, redacting ReleaseManagedToken for safe output.
 func (o *Opts) Format(f fmt.State, verb rune) {
 	type plain Opts
 	saved := o.ReleaseManagedToken
@@ -135,16 +138,9 @@ func (o *Opts) ProcessOptions() error {
 		}
 	}
 
-	// Convert options struct to pretty JSON
-	jsonOptions, err2 := json.MarshalIndent(o, "", "  ")
-	if err2 != nil {
-		return fmt.Errorf("error marshalling options: %v", err2)
-	}
-
-	// Dump options to JSON file in putput directory for refference
-	err3 := os.WriteFile(o.OutputDir+"/load-test-options.json", jsonOptions, 0600)
-	if err3 != nil {
-		return fmt.Errorf("error writing to file: %v", err3)
+	// Dump options to JSON file in output directory for reference
+	if err := o.writeOptionsJSON(); err != nil {
+		return err
 	}
 
 	// If startup delay specified, make sure jitter is not bigger than 2 * delay
@@ -163,6 +159,47 @@ func (o *Opts) ProcessOptions() error {
 				o.JourneyReuseApplications = true
 			}
 		}
+	}
+
+	return nil
+}
+
+// writeOptionsJSON dumps the options struct to a pretty JSON file in the output directory.
+func (o *Opts) writeOptionsJSON() error {
+	jsonOptions, err := json.MarshalIndent(o, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshalling options: %v", err)
+	}
+
+	if err := os.WriteFile(o.OutputDir+"/load-test-options.json", jsonOptions, 0600); err != nil {
+		return fmt.Errorf("error writing to file: %v", err)
+	}
+
+	return nil
+}
+
+// ProcessOptionsForProbe pre-processes options for the simplified probe binary (probetest.go). It
+// deliberately skips the loadtest-only checks (fork target, stage-gated managed namespace, journey
+// repeats, startup jitter) that make no sense for a probe that adopts a fixed, pre-onboarded
+// Application/Component. It only requires the fixed identifiers and ensures the output directory
+// exists so the CSV writers and the options JSON can be created.
+func (o *Opts) ProcessOptionsForProbe() error {
+	// Output directory must exist so the options JSON and CSV writers can create their files.
+	if err := os.MkdirAll(o.OutputDir, 0750); err != nil {
+		return fmt.Errorf("error creating output directory %s: %v", o.OutputDir, err)
+	}
+
+	// The probe adopts an existing Application/Component, so these identifiers are mandatory.
+	if o.ApplicationName == "" {
+		return fmt.Errorf("--application is required")
+	}
+	if o.ComponentName == "" {
+		return fmt.Errorf("--component is required")
+	}
+
+	// Dump options to JSON file in output directory for reference
+	if err := o.writeOptionsJSON(); err != nil {
+		return err
 	}
 
 	return nil

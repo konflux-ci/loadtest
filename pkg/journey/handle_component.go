@@ -364,6 +364,7 @@ func checkImageRepositoryCreatedBeforePR(ctx *types.PerComponentContext, mergeRe
 	return nil
 }
 
+// HandleComponent creates or reuses a Component CR and waits for onboarding to complete.
 func HandleComponent(ctx *types.PerComponentContext) error {
 	if ctx.ParentContext.ParentContext.Opts.JourneyReuseComponents && ctx.ParentContext.JourneyRepeatIndex > 0 {
 		// This is a reused component. We need to get the name from the component from the first journey.

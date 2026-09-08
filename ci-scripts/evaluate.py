@@ -71,6 +71,26 @@ METRICS_RELEASE = [
     "validateReleaseCondition",
 ]
 
+# Metrics the simplified probe (probetest.go) intentionally never runs because it
+# adopts a pre-onboarded Application/Component instead of creating one, stripping the
+# one-off journey setup phase (forking, onboarding, repo/image wiring, release setup).
+# They must never be expected in a probe run, otherwise no pass can complete.
+METRICS_PROBE_SKIP = [
+    "HandleUser",
+    "HandleRepoForking",
+    "createApplication",
+    "createIntegrationTestScenario",
+    "createComponent",
+    "createImageRepository",
+    "waitForImageRepositoryReady",
+    "getPaCPullNumber",
+    "createReleasePlan",
+    "createReleasePlanAdmission",
+    "validateReleasePlan",
+    "validateReleasePlanAdmission",
+]
+
+
 # These metrics will be reused when we are reusing applications
 METRICS_REUSE_APPLICATIONS = [
     "createApplication",
@@ -203,6 +223,12 @@ def main():
     # Determine what metrics we need to skip or reuse based on options
     to_skip = []
     to_reuse = []
+    # Detect the simplified probe (probetest.go): it adopts a fixed Application and
+    # Component, which are set in the options, so a full journey is never created.
+    is_probe = bool(options.get("ApplicationName") or options.get("ComponentName"))
+    if is_probe:
+        print("NOTE: Detected simplified probe run, ignoring journey-setup metrics")
+        to_skip += METRICS_PROBE_SKIP
     if options["Stage"]:
         print(
             "NOTE: Ignoring CI cluster related metrics because running against non-CI cluster"

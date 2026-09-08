@@ -302,6 +302,7 @@ func doHarmlessCommit(f *framework.Framework, repoUrl, repoRevision string) (str
 	return commitSha, nil
 }
 
+// HandleRepoForking forks the component repository for repo-templating pipeline runs.
 func HandleRepoForking(ctx *types.PerUserContext) error {
 	var suffix string
 	if ctx.Opts.Stage {

@@ -34,6 +34,7 @@ check-all:
 
 build:
 	go build -o bin/loadtest loadtest.go
+	go build -o bin/probetest probetest.go
 
 vendor:
 	go mod tidy

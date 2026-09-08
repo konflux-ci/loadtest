@@ -82,6 +82,7 @@ func purgeCi(f *framework.Framework, username string) error {
 	return nil
 }
 
+// Purge removes load-test resources from CI or stage namespaces when enabled.
 func Purge() error {
 	if !PerUserContexts[0].Opts.Purge {
 		return nil

@@ -39,6 +39,7 @@ func validateApplication(f *framework.Framework, name, namespace string) error {
 	return err
 }
 
+// HandleApplication creates or reuses an Application CR for the load test journey.
 func HandleApplication(ctx *types.PerApplicationContext) error {
 	if ctx.ParentContext.Opts.JourneyReuseApplications && ctx.JourneyRepeatIndex > 0 {
 		// This is a reused application. We need to get the name from the first application.

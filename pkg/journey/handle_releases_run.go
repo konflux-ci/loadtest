@@ -141,6 +141,7 @@ func validateReleaseCondition(f *framework.Framework, namespace, releaseName str
 	return err
 }
 
+// HandleReleaseRun triggers a release pipeline and optionally waits for completion.
 func HandleReleaseRun(ctx *types.PerComponentContext) error {
 	if ctx.ParentContext.ParentContext.Opts.ReleasePolicy == "" || !ctx.ParentContext.ParentContext.Opts.WaitRelease {
 		logging.Logger.Info("Skipping waiting for releases because policy was not provided or waiting was disabled")

@@ -32,6 +32,7 @@ func createIntegrationTestScenario(f *framework.Framework, namespace, appName, s
 	return name, nil
 }
 
+// HandleIntegrationTestScenario creates an IntegrationTestScenario CR for an application.
 func HandleIntegrationTestScenario(ctx *types.PerApplicationContext) error {
 	if ctx.IntegrationTestScenarioName != "" {
 		logging.Logger.Debug("Skipping integration test scenario creation because reusing integration test scenario %s in namespace %s", ctx.IntegrationTestScenarioName, ctx.ParentContext.Namespace)

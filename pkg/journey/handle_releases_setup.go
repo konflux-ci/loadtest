@@ -272,6 +272,7 @@ func setupReadWriteReleasePlanAdmission(ctx *types.PerApplicationContext, rpaFra
 	return nil
 }
 
+// HandleReleaseSetup creates release plans and admissions for an application.
 func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 	if ctx.ReleasePlanName != "" {
 		if ctx.ReleasePlanAdmissionName == "" {
