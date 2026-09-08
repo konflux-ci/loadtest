@@ -87,8 +87,8 @@ repos:
         pass_filenames: false
 
       - id: go-smoke
-        name: go run loadtest.go -h
-        entry: go run loadtest.go -h
+        name: go run ... -h
+        entry: go run loadtest.go -h && go run probetest.go -h
         language: system
         pass_filenames: false
 
