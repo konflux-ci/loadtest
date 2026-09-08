@@ -266,7 +266,12 @@ func doHarmlessCommit(f *framework.Framework, repoUrl, repoRevision string) (str
 			return "", fmt.Errorf("failed to update file %s in repo %s revision %s: %v", fileName, repoOrgName+"/"+repoName, repoRevision, err)
 		}
 	} else {
-		// For github, we need to get SHA if file exists.
+		// For github, we need to get SHA if file exists. The github client defaults to the
+		// MY_GITHUB_ORG org; a commit/PR only triggers a PaC build if it lands on the repo the
+		// component actually points to, so retarget the client at the org parsed from the URL. This
+		// is a no-op for loadtest forks, whose URL org already matches MY_GITHUB_ORG.
+		f.AsKubeAdmin.CommonController.Github.UpdateGithubOrg(repoOrgName)
+
 		fileResponse, err := f.AsKubeAdmin.CommonController.Github.GetFile(repoName, fileName, repoRevision)
 		if err != nil {
 			// Assuming error means not found.

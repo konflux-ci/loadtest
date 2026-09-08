@@ -32,9 +32,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().StringVar(&opts.ApplicationName, "application", "", "the existing Application CR name to adopt")
-	rootCmd.Flags().StringVar(&opts.ComponentName, "component", "", "the existing Component CR name to adopt")
-	rootCmd.Flags().StringVar(&opts.ComponentRepoUrl, "component-repo", "https://github.com/jhutar/nodejs-devfile-sample", "the component repo URL used for the harmless commit build trigger")
-	rootCmd.Flags().StringVar(&opts.ComponentRepoRevision, "component-repo-revision", "main", "the component repo revision, git branch")
+	rootCmd.Flags().StringVar(&opts.ComponentName, "component", "", "the existing Component CR name to adopt (the build-trigger repo and revision are derived from the Component CR)")
 	rootCmd.Flags().StringVar(&opts.IntegrationTestScenarioName, "integration-test-scenario", "", "the existing IntegrationTestScenario CR name to adopt (required unless the integration test stage is skipped via --test-scenario-git-url \"\" or --waitintegrationtestspipelines false)")
 	rootCmd.Flags().StringVar(&opts.TestScenarioGitURL, "test-scenario-git-url", "https://github.com/konflux-ci/integration-examples.git", "test scenario GIT URL; only emptiness matters here: non-empty waits for the integration test PipelineRun, empty (\"\") waits only for the Snapshot and skips the integration test PipelineRun")
 	rootCmd.Flags().StringVar(&opts.ReleasePolicy, "release-policy", "", "enterprise contract policy name; only emptiness matters here: non-empty waits for the release, empty (\"\") skips the release stage")
@@ -124,7 +122,7 @@ func main() {
 	if _, err := logging.Measure(compCtx, journey.HandleExistingComponent, compCtx, opts.ComponentName); err != nil {
 		logging.Logger.Fatal("Adopting component failed: %v", err)
 	}
-	if _, err := logging.Measure(compCtx, journey.TriggerComponentBuild, compCtx, opts.ComponentRepoUrl, opts.ComponentRepoRevision); err != nil {
+	if _, err := logging.Measure(compCtx, journey.TriggerComponentBuild, compCtx); err != nil {
 		logging.Logger.Fatal("Triggering component build failed: %v", err)
 	}
 	if _, err := logging.Measure(compCtx, journey.HandlePipelineRun, compCtx); err != nil {

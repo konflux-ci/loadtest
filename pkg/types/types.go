@@ -19,6 +19,7 @@ type PerUserContext struct {
 	Username               string
 	Namespace              string
 	ComponentRepoUrl       string // overrides same value from Opts, needed when templating repos
+	ComponentRepoRevision  string // overrides same value from Opts, needed by probe's build trigger (derived from the adopted Component)
 	PerApplicationContexts []*PerApplicationContext
 }
 

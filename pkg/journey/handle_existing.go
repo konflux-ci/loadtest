@@ -59,16 +59,33 @@ func HandleExistingComponent(ctx *types.PerComponentContext, compName string) er
 		return logging.Logger.Fail(201, "Component failed validation: %v", err)
 	}
 
+	// Derive the build-trigger repo from the adopted Component CR so the probe never has to be
+	// told the repo (--component-repo was removed). The PaC pipeline config lives on this repo, so
+	// the harmless commit must land on it to trigger a fresh build.
+	comp, err := ctx.Framework.AsKubeDeveloper.HasController.GetComponent(ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
+	if err != nil {
+		return logging.Logger.Fail(201, "Unable to get component %s in namespace %s: %v", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace, err)
+	}
+	if comp.Spec.Source.GitSource == nil || comp.Spec.Source.GitSource.URL == "" {
+		return logging.Logger.Fail(201, "component %s in namespace %s does not have a git source URL", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
+	}
+	if comp.Spec.Source.GitSource.Revision == "" {
+		return logging.Logger.Fail(201, "component %s in namespace %s does not have a git source revision (branch)", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
+	}
+	ctx.ParentContext.ParentContext.ComponentRepoUrl = comp.Spec.Source.GitSource.URL
+	ctx.ParentContext.ParentContext.ComponentRepoRevision = comp.Spec.Source.GitSource.Revision
+	logging.Logger.Debug("Derived component %s source repo %s (revision %s)", ctx.ComponentName, ctx.ParentContext.ParentContext.ComponentRepoUrl, ctx.ParentContext.ParentContext.ComponentRepoRevision)
+
 	logging.Logger.Info("Adopted existing component %s in namespace %s", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
 	return nil
 }
 
 // TriggerComponentBuild pushes a trivial change to the component repo (via doHarmlessCommit) to
-// trigger a fresh PaC build PipelineRun on the adopted Component.
-func TriggerComponentBuild(ctx *types.PerComponentContext, repoUrl, repoRevision string) error {
-	if repoUrl == "" {
-		return logging.Logger.Fail(202, "Component repo URL not provided")
-	}
+// trigger a fresh PaC build PipelineRun on the adopted Component. The repo and revision come from
+// the Component CR (set by HandleExistingComponent), not from command-line options.
+func TriggerComponentBuild(ctx *types.PerComponentContext) error {
+	repoUrl := ctx.ParentContext.ParentContext.ComponentRepoUrl
+	repoRevision := ctx.ParentContext.ParentContext.ComponentRepoRevision
 
 	_, err := logging.Measure(
 		ctx,
