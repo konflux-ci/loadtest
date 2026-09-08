@@ -24,6 +24,7 @@ date -Ins --utc >started
     --component "${COMPONENT:-comp}" \
     --component-repo "${COMPONENT_REPO:-https://github.com/jhutar/nodejs-devfile-sample}" \
     --component-repo-revision "${COMPONENT_REPO_REVISION:-main}" \
+    --integration-test-scenario "${INTEGRATION_TEST_SCENARIO:-}" \
     --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
     --release-policy "${RELEASE_POLICY:-}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \

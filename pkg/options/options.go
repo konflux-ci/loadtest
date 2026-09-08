@@ -21,6 +21,7 @@ type Opts struct {
 	Concurrency                            int
 	FailFast                               bool
 	ForkTarget                             string
+	IntegrationTestScenarioName            string
 	JourneyDuration                        string
 	JourneyRepeats                         int
 	JourneyUntil                           time.Time

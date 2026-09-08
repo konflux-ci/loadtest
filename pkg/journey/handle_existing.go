@@ -1,7 +1,5 @@
 package journey
 
-import "fmt"
-
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
@@ -14,7 +12,17 @@ func HandleExistingApplication(ctx *types.PerApplicationContext, appName string)
 	}
 
 	ctx.ApplicationName = appName
-	ctx.IntegrationTestScenarioName = fmt.Sprintf("%s-its", appName)
+
+	// Fail fast: the ITS name is only needed when the integration test stage is actually
+	// awaited. It can be skipped by disabling pipeline waits or by leaving the test-scenario GIT
+	// URL empty (wait for the Snapshot only). We never derive a default name.
+	itsSkipped := !ctx.ParentContext.Opts.WaitPipelines || !ctx.ParentContext.Opts.WaitIntegrationTestsPipelines || ctx.ParentContext.Opts.TestScenarioGitURL == ""
+	if !itsSkipped {
+		if ctx.ParentContext.Opts.IntegrationTestScenarioName == "" {
+			return logging.Logger.Fail(200, "integration test scenario name not provided: set --integration-test-scenario, or skip the integration test stage (--test-scenario-git-url \"\")")
+		}
+		ctx.IntegrationTestScenarioName = ctx.ParentContext.Opts.IntegrationTestScenarioName
+	}
 
 	_, err := logging.Measure(
 		ctx,

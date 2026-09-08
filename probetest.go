@@ -35,6 +35,7 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.ComponentName, "component", "", "the existing Component CR name to adopt")
 	rootCmd.Flags().StringVar(&opts.ComponentRepoUrl, "component-repo", "https://github.com/jhutar/nodejs-devfile-sample", "the component repo URL used for the harmless commit build trigger")
 	rootCmd.Flags().StringVar(&opts.ComponentRepoRevision, "component-repo-revision", "main", "the component repo revision, git branch")
+	rootCmd.Flags().StringVar(&opts.IntegrationTestScenarioName, "integration-test-scenario", "", "the existing IntegrationTestScenario CR name to adopt (required unless the integration test stage is skipped via --test-scenario-git-url \"\" or --waitintegrationtestspipelines false)")
 	rootCmd.Flags().StringVar(&opts.TestScenarioGitURL, "test-scenario-git-url", "https://github.com/konflux-ci/integration-examples.git", "test scenario GIT URL; only emptiness matters here: non-empty waits for the integration test PipelineRun, empty (\"\") waits only for the Snapshot and skips the integration test PipelineRun")
 	rootCmd.Flags().StringVar(&opts.ReleasePolicy, "release-policy", "", "enterprise contract policy name; only emptiness matters here: non-empty waits for the release, empty (\"\") skips the release stage")
 	rootCmd.Flags().BoolVarP(&opts.WaitPipelines, "waitpipelines", "w", true, "if you want to wait for build pipelines to finish")
