@@ -198,6 +198,15 @@ func (o *Opts) ProcessOptionsForProbe() error {
 		return fmt.Errorf("--component is required")
 	}
 
+	// Managed namespace needs a way to authenticate against it (a dedicated managed SA token) and
+	// the stage APIURL, same as the full loadtest's Validate().
+	if o.ReleaseManagedNamespace != "" && o.ReleaseManagedToken == "" {
+		return fmt.Errorf("--release-managed-token is required when --release-managed-namespace is set")
+	}
+	if o.ReleaseManagedNamespace != "" && !o.Stage {
+		return fmt.Errorf("--release-managed-namespace requires --stage (need APIURL from stageUsers)")
+	}
+
 	// Dump options to JSON file in output directory for reference
 	if err := o.writeOptionsJSON(); err != nil {
 		return err

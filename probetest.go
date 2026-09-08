@@ -36,6 +36,8 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.IntegrationTestScenarioName, "integration-test-scenario", "", "the existing IntegrationTestScenario CR name to adopt (required unless the integration test stage is skipped via --test-scenario-git-url \"\" or --waitintegrationtestspipelines false)")
 	rootCmd.Flags().StringVar(&opts.TestScenarioGitURL, "test-scenario-git-url", "https://github.com/konflux-ci/integration-examples.git", "test scenario GIT URL; only emptiness matters here: non-empty waits for the integration test PipelineRun, empty (\"\") waits only for the Snapshot and skips the integration test PipelineRun")
 	rootCmd.Flags().StringVar(&opts.ReleasePolicy, "release-policy", "", "enterprise contract policy name; only emptiness matters here: non-empty waits for the release, empty (\"\") skips the release stage")
+	rootCmd.Flags().StringVar(&opts.ReleaseManagedNamespace, "release-managed-namespace", "", "managed namespace where the release pipeline runs (release PLR is monitored here instead of the tenant namespace)")
+	rootCmd.Flags().StringVar(&opts.ReleaseManagedToken, "release-managed-token", "", "SA token for accessing the managed release namespace")
 	rootCmd.Flags().BoolVarP(&opts.WaitPipelines, "waitpipelines", "w", true, "if you want to wait for build pipelines to finish")
 	rootCmd.Flags().BoolVarP(&opts.WaitIntegrationTestsPipelines, "waitintegrationtestspipelines", "i", true, "if you want to wait for IntegrationTests pipelines to finish")
 	rootCmd.Flags().BoolVarP(&opts.WaitRelease, "waitrelease", "r", true, "if you want to wait for Release to finish")
@@ -111,7 +113,7 @@ func main() {
 		logging.Logger.Fatal("Unable to provision framework: %v", err)
 	}
 
-	userCtx := &types.PerUserContext{Opts: &opts, Framework: f, Namespace: namespace}
+	userCtx := &types.PerUserContext{Opts: &opts, Framework: f, Namespace: namespace, UserIndex: 0, StageUsers: &stageUsers}
 	appCtx := &types.PerApplicationContext{ParentContext: userCtx, Framework: f}
 	compCtx := &types.PerComponentContext{ParentContext: appCtx, Framework: f}
 
@@ -130,6 +132,11 @@ func main() {
 	}
 	if _, err := logging.Measure(compCtx, journey.HandleTest, compCtx); err != nil {
 		logging.Logger.Fatal("Test pipeline run failed: %v", err)
+	}
+	// Provision a managed framework so HandleReleaseRun can watch the release PipelineRun in the
+	// managed namespace (when --release-managed-namespace is set). No-op otherwise.
+	if _, err := logging.Measure(compCtx, journey.HandleNewManagedFrameworkForComp, compCtx); err != nil {
+		logging.Logger.Fatal("Setting up managed framework failed: %v", err)
 	}
 	if _, err := logging.Measure(compCtx, journey.HandleReleaseRun, compCtx); err != nil {
 		logging.Logger.Fatal("Release run failed: %v", err)

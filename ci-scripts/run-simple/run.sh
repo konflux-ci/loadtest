@@ -25,6 +25,8 @@ date -Ins --utc >started
     --integration-test-scenario "${INTEGRATION_TEST_SCENARIO:-}" \
     --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
     --release-policy "${RELEASE_POLICY:-}" \
+    --release-managed-namespace "${RELEASE_MANAGED_NAMESPACE:-}" \
+    --release-managed-token "${RELEASE_MANAGED_TOKEN:-}" \
     --waitintegrationtestspipelines="${WAIT_INTEGRATION_TESTS:-true}" \
     --waitpipelines="${WAIT_PIPELINES:-true}" \
     --waitrelease="${WAIT_RELEASE:-true}" \
