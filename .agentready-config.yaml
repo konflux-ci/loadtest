@@ -2,5 +2,9 @@
 # tests alongside source in *_test.go files. This matches Go conventions;
 # agentready's standard_layout check is Python-centric (src/, tests/) and also
 # penalizes root loadtest.go vs cmd/ or main.go without adding value here.
+#
+# openapi_specs: loadtest is a CLI tool with no HTTP API. agentready otherwise
+# picks up vendored Tekton swagger.json (OpenAPI 2.0) under vendor/.
 excluded_attributes:
   - standard_layout
+  - openapi_specs
