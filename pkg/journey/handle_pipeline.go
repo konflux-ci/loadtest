@@ -11,24 +11,40 @@ import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 
-func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName string) error {
+func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName string) (string, error) {
 	interval := time.Second * 20
 	timeout := time.Minute * 30
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pr, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunWithType(compName, appName, namespace, "build", "", "")
+		prs, err := f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", "", "")
 		if err != nil {
-			logging.Logger.Debug("Unable to get created PipelineRun for component %s in namespace %s: %v", compName, namespace, err)
+			logging.Logger.Debug("Unable to get created PipelineRuns for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
+		}
+		if len(*prs) == 0 {
+			logging.Logger.Debug("No build PipelineRun for component %s in namespace %s yet", compName, namespace)
+			return false, nil
+		}
+
+		// Pick the most recent build PipelineRun: the freshly-triggered build is the newest, and the
+		// Snapshot is matched to it by this name (appstudio.openshift.io/build-pipelinerun label).
+		pr = &(*prs)[0]
+		for i := range *prs {
+			if (*prs)[i].CreationTimestamp.Time.After(pr.CreationTimestamp.Time) {
+				pr = &(*prs)[i]
+			}
 		}
 
 		logging.Logger.Debug("Build PipelineRun %s for component %s in namespace %s created", pr.GetName(), compName, namespace)
 		return true, nil
 	}, interval, timeout)
+	if err != nil {
+		return "", err
+	}
 
-	return err
+	return pr.GetName(), nil
 }
 
 func validatePipelineRunStarted(f *framework.Framework, namespace, appName, compName string) error {
@@ -140,7 +156,8 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 
 	logging.Logger.Debug("Waiting for build pipeline run for component %s in namespace %s to be created", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
 
-	_, err = logging.Measure(
+	var iface interface{}
+	iface, err = logging.Measure(
 		ctx,
 		validatePipelineRunCreation,
 		ctx.Framework,
@@ -151,6 +168,8 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 	if err != nil {
 		return logging.Logger.Fail(70, "Build Pipeline Run failed creation: %v", err)
 	}
+	ctx.BuildPipelineRunName, _ = iface.(string)
+	logging.Logger.Debug("Captured build PipelineRun %s for component %s in namespace %s", ctx.BuildPipelineRunName, ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
 
 	logging.Logger.Debug("Waiting for build pipeline run for component %s in namespace %s to start", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
 

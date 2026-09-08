@@ -11,8 +11,8 @@ import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 
-func validateSnapshotCreation(f *framework.Framework, namespace, compName string) (string, error) {
-	logging.Logger.Debug("Waiting for snapshot for component %s in namespace %s to be created", compName, namespace)
+func validateSnapshotCreation(f *framework.Framework, namespace, buildPipelineRunName, compName string) (string, error) {
+	logging.Logger.Debug("Waiting for snapshot for component %s (build %s) in namespace %s to be created", compName, buildPipelineRunName, namespace)
 
 	interval := time.Second * 20
 	timeout := time.Minute * 5
@@ -20,7 +20,9 @@ func validateSnapshotCreation(f *framework.Framework, namespace, compName string
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		snap, err := f.AsKubeDeveloper.IntegrationController.GetSnapshot("", "", compName, namespace)
+		// Match the Snapshot to this build by its build-pipelinerun label (falling back to the
+		// component name) so a component with multiple snapshots does not select a stale one.
+		snap, err := f.AsKubeDeveloper.IntegrationController.GetSnapshot("", buildPipelineRunName, compName, namespace)
 		if err != nil {
 			logging.Logger.Debug("Unable to get created Snapshot for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
@@ -110,6 +112,7 @@ func HandleTest(ctx *types.PerComponentContext) error {
 		validateSnapshotCreation,
 		ctx.Framework,
 		ctx.ParentContext.ParentContext.Namespace,
+		ctx.BuildPipelineRunName,
 		ctx.ComponentName,
 	)
 	if err1 != nil {
