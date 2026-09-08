@@ -20,9 +20,10 @@ func validateSnapshotCreation(f *framework.Framework, namespace, buildPipelineRu
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		// Match the Snapshot to this build by its build-pipelinerun label (falling back to the
-		// component name) so a component with multiple snapshots does not select a stale one.
-		snap, err := f.AsKubeDeveloper.IntegrationController.GetSnapshot("", buildPipelineRunName, compName, namespace)
+		// Match the Snapshot ONLY by its build-pipelinerun label. Passing the component name would
+		// let GetSnapshot fall back to the component label and return the FIRST snapshot of the
+		// component, which may be a stale one from an earlier build.
+		snap, err := f.AsKubeDeveloper.IntegrationController.GetSnapshot("", buildPipelineRunName, "", namespace)
 		if err != nil {
 			logging.Logger.Debug("Unable to get created Snapshot for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
