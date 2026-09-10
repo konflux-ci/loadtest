@@ -4,7 +4,7 @@
 
 ## Related Jira
 
-<!-- e.g. KONFLUX-13938 -->
+<!-- Required for product changes: KONFLUX project, Performance component (see docs/agents/issue-tracker.md). -->
 
 ## Testing
 
