@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Bug report (Jira)
+    url: https://redhat.atlassian.net/jira/software/c/projects/KONFLUX/issues
+    about: Report bugs in the KONFLUX project with component "Performance". See docs/agents/issue-tracker.md.
+  - name: Feature request (Jira)
+    url: https://redhat.atlassian.net/jira/software/c/projects/KONFLUX/issues
+    about: Request features or improvements in Jira (KONFLUX / Performance). See docs/agents/issue-tracker.md.
