@@ -14,6 +14,14 @@
   test_dir:
   - run-lightwell-dev-2026_08_29T09_31_02_746000000_00_00
   type: loadtest
+- caused_by: cluster
+  id: application_creation_failed_because_context_deadline_exceeded
+  note: ''
+  reason: Application creation failed because context deadline exceeded
+  regexp: 'Application failed creation: unable to create the Application [^ ]+: context deadline exceeded$'
+  test_dir:
+  - run-lightwell-dev-2026_09_05T13_31_02_757000000_00_00
+  type: loadtest
 - caused_by: application-controller
   id: application_creation_failed_because_it_already_exists
   note: ''
@@ -264,6 +272,22 @@
   regexp: 'The command ''powershell -Command Remove-Item -Force -ErrorAction SilentlyContinue .npmrc'' returned a non-zero code: 1'
   test_dir:
   - run-stone-stage-p01-2026_04_20T16_24_09_894000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_images_task_failed_because_pushing_image_blob_to_quay_io_timed_out_on_windows
+  note: ''
+  reason: Build images task failed because pushing image blob to quay.io timed out on Windows
+  regexp: 'Put "https://quay\.io/v2/[^"]+/blobs/uploads/[^"]+": read tcp [0-9.]+:[0-9]+->[0-9.]+:[0-9]+: wsarecv: A connection attempt failed'
+  test_dir:
+  - run-stone-stage-p01-2026_09_05T10_44_03_719000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: build_images_task_failed_because_pushing_image_to_quay_io_returned_500_internal_server_error
+  note: ''
+  reason: Build images task failed because pushing image to quay.io returned 500 Internal Server Error
+  regexp: 'The push refers to repository \[quay\.io/[^]]+\].*received unexpected HTTP status: 500 Internal Server Error'
+  test_dir:
+  - run-stone-stage-p01-2026_09_14T12_44_04_713000000_00_00
   type: logs
 - caused_by: task
   id: build_images_task_failed_because_windows_setx_command_denied_registry_access
@@ -538,6 +562,14 @@
   - run-lightwell-dev-2026_08_20T05_31_02_620000000_00_00
   type: loadtest
 - caused_by: cluster
+  id: component_creation_failed_because_context_deadline_exceeded
+  note: ''
+  reason: Component creation failed because context deadline exceeded
+  regexp: 'Component failed creation: unable to create the Component [^ ]+: context deadline exceeded$'
+  test_dir:
+  - run-lightwell-dev-2026_09_05T15_35_03_266000000_00_00
+  type: loadtest
+- caused_by: cluster
   id: component_creation_failed_because_of_resourcequotas_conflict
   note: ''
   reason: Component creation failed because of resourcequotas conflict
@@ -581,6 +613,14 @@
   regexp: 'Component failed providing initial PR: unable to get PaC pull number .* context deadline exceeded'
   test_dir: []
   type: loadtest
+- caused_by: task
+  id: compute_b_and_n_step_failed_because_expected_baseline_tag_was_missing_due_to_repository_initialization_issue
+  note: ''
+  reason: Compute B and N step failed because expected baseline tag was missing due to repository initialization issue
+  regexp: 'ERROR: Baseline tag [^ ]+ does not exist\s+The baseline tag should have been created by taisce-cuan during source ingestion\. Missing baseline tag indicates a repository initialization issue\.'
+  test_dir:
+  - run-lightwell-dev-2026_09_12T00_44_03_559000000_00_00
+  type: logs
 - caused_by: cluster
   id: configuring_pipeline_imagepullsecrets_failed_because_adding_secret_to_service_account_timed_out
   note: ''
@@ -2299,6 +2339,13 @@
   test_dir: []
   type: loadtest
 - caused_by: SKIP
+  id: post_test_data_collection_failed_due_to_cluster_connection_failure
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect [a-zA-Z ]+: .*dial tcp.*(connect: connection timed out|no such host)'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
   id: post_test_event_collection_failed_due_to_unauthorized_api_access
   note: ''
   reason: SKIP
@@ -2860,6 +2907,14 @@
   regexp: 'Repo forking failed: error deleting project [^ :]+: DELETE https://gitlab.cee.redhat.com/api/[^ :]+: 500 .message: 500 Internal Server Error.'
   test_dir:
   - run-stone-prod-p02-2026_05_16T15_20_23_769000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_cleanup_failed_because_github_api_returned_error_500
+  note: ''
+  reason: Repo templating cleanup failed because GitHub API returned error 500
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [a-zA-Z0-9_-]+: error when updating a file on github: PUT https://api\.github\.com/[^ ]+: 500'
+  test_dir:
+  - run-stone-prd-rh01-2026_09_13T09_17_02_847000000_00_00
   type: loadtest
 - caused_by: github.com
   id: repo_templating_cleanup_failed_because_github_com_net_http_tls_handshake_timeout
@@ -3452,6 +3507,20 @@
   regexp: '"message": ?\"..[a-zA-Z0-9-]+.. exited with code 5(: Error)?\"'
   test_dir: []
   type: condition
+- caused_by: SKIP
+  id: skip_7
+  note: Another special error to avoid printing 'Unknown error:' message
+  reason: SKIP
+  regexp: '"message": ?\"..[a-zA-Z0-9-]+.. exited with code 128(: Error)?\"'
+  test_dir: []
+  type: condition
+- caused_by: SKIP
+  id: skip_8
+  note: TaskRun was still Running when the parent PipelineRun was marked as failed; not an actual step failure
+  reason: SKIP
+  regexp: '"message": "Not all Steps in the Task have finished executing", "reason": "Running", "status": "Unknown"'
+  test_dir: []
+  type: condition
 - caused_by: quay.io
   id: source_image_build_failed_because_quay_io_returned_502_bad_gateway_when_requesting_bearer_token
   note: ''
@@ -3499,6 +3568,14 @@
   regexp: '.message.*The node was low on resource: ephemeral-storage'
   test_dir:
   - run-stone-prod-p02-2026_05_12T14_46_52_220000000_00_00
+  type: condition
+- caused_by: task
+  id: task_step_failed_because_it_was_oomkilled
+  note: ''
+  reason: Task step failed because it was OOMKilled
+  regexp: '"message": "OOMKilled", "reason": "StepOOM"'
+  test_dir:
+  - run-stone-stage-p01-2026_09_07T10_48_03_071000000_00_00
   type: condition
 - caused_by: MPC
   id: taskrun_failed_because_aws_ec2_insufficientinstancecapacity
