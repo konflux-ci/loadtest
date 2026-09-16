@@ -8,7 +8,7 @@ require (
 	github.com/tektoncd/pipeline v1.9.2
 	k8s.io/apimachinery v0.37.0
 	k8s.io/klog/v2 v2.140.0
-	sigs.k8s.io/controller-runtime v0.25.0
+	sigs.k8s.io/controller-runtime v0.25.1
 )
 
 replace (
@@ -43,7 +43,7 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.37.0
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.37.0
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.37.0
-	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.25.0
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.25.1
 	vbom.ml/util => github.com/fvbommel/util v0.0.3
 )
 
