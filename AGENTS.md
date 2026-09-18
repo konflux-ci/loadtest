@@ -8,28 +8,14 @@ Go-based load testing tool for Konflux CI/CD. For full project documentation, se
 
 The project uses `pre-commit` for all code checks (Go, Shell, Python, YAML).
 
-Bootstrap development environment:
-```bash
-make bootstrap
-```
-
-Run all checks (includes build and tidy):
-```bash
-make check-all
-```
+Bootstrap: `make bootstrap`. Full checks: `make check-all`. Staged only: `make check`.
 
 Verification relies on linting and a successful build as there are no Go unit tests.
 
-After editing files, run checks before pushing:
-```bash
-make check      # staged changes only
-make check-all  # all files
-```
-
 ## Key Conventions
 
-- Dependencies are vendored (`vendor/` directory). Always run `go mod vendor && go mod tidy` after changing dependencies.
-- CSV output files and Python analysis scripts (`evaluate.py`, `errors.py`) are tightly coupled — column names in Go logging must match what Python expects.
+- Dependencies are vendored (`vendor/`). Run `go mod vendor && go mod tidy` after dependency changes.
+- CSV output and Python analysis (`evaluate.py`, `errors.py`) are tightly coupled — column names must match.
 
 ## Pattern References
 
@@ -54,7 +40,7 @@ Single-context layout (`CONTEXT.md`). See `docs/agents/domain.md`.
 
 ### Design docs
 
-Preconditions, invariants, and rationale: `docs/design/`. Update the matching design doc when changing journey concurrency, measurement/CSV, or results/Horreum.
+Preconditions, invariants, rationale: `docs/design/`. Update when changing concurrency, CSV, or Horreum.
 
 ### Architecture decisions
 
