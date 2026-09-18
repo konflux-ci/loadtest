@@ -54,6 +54,8 @@ Single-context layout (`CONTEXT.md`). See `docs/agents/domain.md`.
 
 ### Design docs
 
-Preconditions, invariants, and rationale live in `docs/design/`. When changing journey
-concurrency, measurement/CSV, or results/Horreum, update the matching design doc.
-See `docs/design/README.md`.
+Preconditions, invariants, and rationale: `docs/design/`. Update the matching design doc when changing journey concurrency, measurement/CSV, or results/Horreum.
+
+### Architecture decisions
+
+ADRs (Status / Context / Decision / Consequences): `docs/adr/`.
