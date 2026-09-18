@@ -33,27 +33,25 @@ make check-all  # all files
 
 ## Pattern References
 
-- New journey stage: see `pkg/journey/handle_pipeline.go` for a reference implementation and `loadtest.go` for wiring into the journey
-- Resource create/delete lifecycle: create the resource in a journey handler under
-  `pkg/journey/` (e.g. `handle_releases_setup.go`, `handle_image_repository.go`) and mirror
-  the teardown in `handle_purge.go` `Purge()` so cleanup stays idempotent.
-- Probe run scripts: shell logic lives in `ci-scripts/run-probe/` (`run.sh`,
-  `collect-results.sh`, `cluster_read_config.yaml`); mirror changes in the `run-ci/` /
-  `run-cluster/` variants.
-- Horreum data scripts: scripts in `ci-scripts/utility_scripts/` (e.g.
-  `postgresql-backfill.sh`, `runs-to-csv.sh`) paired with schemas in
-  `ci-scripts/config/horreum-*.json`.
+- New journey stage: see `pkg/journey/handle_pipeline.go` and `loadtest.go` for wiring
+- Resource create/delete: handlers under `pkg/journey/`; teardown in `handle_purge.go` `Purge()`
+- Probe scripts: `ci-scripts/run-probe/`; mirror in `run-ci/` / `run-cluster/` / `run-simple/`
+- Horreum scripts: `ci-scripts/utility_scripts/` with schemas in `ci-scripts/config/horreum-*.json`
 
 ## CI
 
-Pull requests are validated by Konflux Tekton pipelines (`.tekton/`) and GitHub Actions (`.github/workflows/`).
+PRs are validated by Konflux Tekton (`.tekton/`) and GitHub Actions (`.github/workflows/`).
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues are tracked in Jira at redhat.atlassian.net, project KONFLUX, component "Performance". See `docs/agents/issue-tracker.md`.
+Jira — KONFLUX / Performance. See `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
-Single-context layout (one `CONTEXT.md` at repo root). See `docs/agents/domain.md`.
+Single-context layout (`CONTEXT.md`). See `docs/agents/domain.md`.
+
+### Architecture decisions
+
+ADRs (Status / Context / Decision / Consequences) live in `docs/adr/`.
