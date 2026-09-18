@@ -38,6 +38,7 @@ Jira — KONFLUX / Performance. See `docs/agents/issue-tracker.md`.
 
 Single-context layout (`CONTEXT.md`). See `docs/agents/domain.md`.
 
+<<<<<<< HEAD
 ### Design docs
 
 Preconditions, invariants, rationale: `docs/design/`. Update when changing concurrency, CSV, or Horreum.
@@ -45,3 +46,8 @@ Preconditions, invariants, rationale: `docs/design/`. Update when changing concu
 ### Architecture decisions
 
 ADRs (Status / Context / Decision / Consequences): `docs/adr/`.
+=======
+### Architecture decisions
+
+ADRs (Status / Context / Decision / Consequences) live in `docs/adr/`.
+>>>>>>> 26bc0b19 (chore: KONFLUX-13935 add architecture decision records)
