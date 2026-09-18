@@ -2,7 +2,7 @@
 
 ## Overview
 
-After loadtest exits, CI scripts transform raw artifacts into a single `load-test.json` status file, enrich it with Prometheus monitoring data, and upload to Horreum for trend analysis. Entry points: `ci-scripts/run-ci/collect-results.sh`, `ci-scripts/run-probe/collect-results.sh`, and `ci-scripts/run-cluster/collect-results.sh` (probe/cluster variants mirror CI logic with environment-specific config).
+After loadtest exits, CI scripts transform raw artifacts into a single `load-test.json` status file, enrich it with Prometheus monitoring data, and upload to Horreum for trend analysis. Entry points: `ci-scripts/run-ci/collect-results.sh`, `ci-scripts/run-probe/collect-results.sh`, `ci-scripts/run-cluster/collect-results.sh`, and `ci-scripts/run-simple/collect-results.sh` (probe/cluster/simple variants mirror CI logic with environment-specific config).
 
 ## Pipeline flow
 
