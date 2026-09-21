@@ -32,7 +32,7 @@ func validatePipelineRunCreation(f *framework.Framework, namespace, appName, com
 		// Snapshot is matched to it by this name (appstudio.openshift.io/build-pipelinerun label).
 		pr = &(*prs)[0]
 		for i := range *prs {
-			if (*prs)[i].CreationTimestamp.Time.After(pr.CreationTimestamp.Time) {
+			if (*prs)[i].CreationTimestamp.After(pr.CreationTimestamp.Time) {
 				pr = &(*prs)[i]
 			}
 		}
