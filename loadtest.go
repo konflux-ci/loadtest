@@ -30,7 +30,7 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.ComponentContainerContext, "component-repo-container-context", "/", "the context for image build")
 	rootCmd.Flags().StringVar(&opts.ForkTarget, "fork-target", "", "the target namespace (GitLab) or organization (GitHub) to fork component repository to (if empty, will use MY_GITHUB_ORG env variable)")
 	rootCmd.Flags().StringVar(&opts.QuayRepo, "quay-repo", "redhat-user-workloads-stage", "the target quay repo for PaC templated image pushes")
-	rootCmd.Flags().StringVar(&opts.RunPrefix, "runprefix", "testuser", "identifier used for prefix of usersignup names and as suffix when forking repo")
+	rootCmd.Flags().StringVar(&opts.RunPrefix, "runprefix", "testuser", "identifier used as prefix for user and application names and as suffix when forking repos")
 	rootCmd.Flags().BoolVar(&opts.SerializeComponentOnboarding, "serialize-component-onboarding", false, "should we serialize creation and onboarding of a component (wait will not affect measurement)")
 	rootCmd.Flags().BoolVarP(&opts.Stage, "stage", "s", false, "is you want to run the test on stage")
 	rootCmd.Flags().DurationVar(&opts.StartupDelay, "startup-delay", 0, "when starting per user/per application/per client treads, wait for this duration")
