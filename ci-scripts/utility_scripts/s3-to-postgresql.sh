@@ -111,7 +111,7 @@ for key in "${KEYS[@]}"; do
         --source "${local_file}" \
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
-    # Insert those labels into Postgres. If the row is already there ("already exists"),
+    # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
     # treat that as OK and still mark this S3 key done so we don't keep retrying it.
     if ! out=$(cd "${HDM_DIR}" && uv run python labels-to-postgresql.py \
         --label-values "${labels_file}" \
