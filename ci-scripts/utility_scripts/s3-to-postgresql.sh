@@ -78,21 +78,23 @@ for key in "${KEYS[@]}"; do
     s3_tools download --bucket "${S3_BUCKET}" --remote "${key}" --local "${tmpdir}/run.tar.gz"
     tar -xzf "${tmpdir}/run.tar.gz" -C "${extract_dir}"
 
-    # Find load-test.json; skip if missing (do not mark done — retry next run)
+    # Find load-test.json; if missing, mark done (timestamped keys are not re-uploaded).
     local_file=$(find "${extract_dir}" -name 'load-test.json' -type f | head -1)
     if [[ -z "${local_file}" ]]; then
         echo "  SKIP (no load-test.json)"
+        echo "${key}" >> "${DONE_FILE}"
         continue
     fi
 
     # Check that this is a Konflux cluster probe result (matches Horreum test 372).
-    # If the name is something else, skip it — we don't want other load tests in this DB.
+    # If the name is something else, skip and mark done — that object will not change.
     if ! jq -r '.name' "${local_file}" | grep -q 'Konflux cluster probe'; then
         echo "  SKIP (unexpected .name)"
+        echo "${key}" >> "${DONE_FILE}"
         continue
     fi
 
-    # Read .started from the JSON and turn it into IDs we need for Postgres.
+    # Read .started from the JSON and turn it into IDs we need for PostgreSQL.
     # Probe timestamps look like 2026-09-16T14:45:14,338345249+00:00 — we drop the
     # nanoseconds (after the comma) so `date` can parse it, then build:
     #   start_ts          = start time (ISO-ish)
@@ -126,7 +128,7 @@ for key in "${KEYS[@]}"; do
         --postgresql-db "${POSTGRESQL_DB}" \
         --debug 2>&1); then
         if echo "${out}" | grep -qi 'already exists'; then
-            echo "  WARNING: already in Postgres, marking done"
+            echo "  WARNING: already in PostgreSQL, marking done"
         else
             echo "  ERROR: labels-to-postgresql.py failed:"
             echo "${out}"
