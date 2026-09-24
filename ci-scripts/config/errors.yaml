@@ -577,6 +577,14 @@
   test_dir:
   - run-stone-prd-rh01-2026_06_23T08_01_20_388000000_00_00
   type: loadtest
+- caused_by: application-controller
+  id: component_creation_failed_because_previous_component_with_the_same_name_was_still_being_deleted
+  note: ''
+  reason: Component creation failed because previous Component with the same name was still being deleted
+  regexp: 'Component failed creation: unable to create the Component [^ ]+: object is being deleted: components.appstudio.redhat.com .[^ ]+. already exists'
+  test_dir:
+  - run-lightwell-dev-2026_09_19T08_47_03_339000000_00_00
+  type: loadtest
 - caused_by: cluster
   id: component_creation_failed_because_resourcequota_object_has_been_modified
   note: ''
@@ -683,6 +691,14 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun for component .* in namespace .* failed: .* Reason:CouldntGetPipeline Message:Error retrieving pipeline for pipelinerun .*: resolver failed to get Pipeline : error requesting remote resource: etcdserver: request timed out'
   test_dir: []
   type: loadtest
+- caused_by: pipelines-controller
+  id: couldnt_get_pipeline_result_because_sbom_blob_url_referenced_result_does_not_exist
+  note: ''
+  reason: Couldnt get pipeline result because SBOM_BLOB_URL referenced result does not exist
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetPipelineResult Message:Failed to get PipelineResult from TaskRun Results for PipelineRun [^ ]+: invalid pipelineresults .SBOM_BLOB_URL., the referenced results don.t exist'
+  test_dir:
+  - run-stone-prod-p02-2026_09_18T07_20_02_922000000_00_00
+  type: loadtest
 - caused_by: quay.io
   id: couldnt_get_pipeline_via_bundles_resolver_from_quay_io_due_to_429
   note: ''
@@ -748,12 +764,28 @@
   test_dir: []
   type: loadtest
 - caused_by: pipelines-controller
+  id: couldnt_get_task_via_bundles_resolver_because_missing_required_hub_resolver_params_version
+  note: ''
+  reason: Couldnt get task via bundles resolver because missing required hub resolver params version
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetTask Message:Pipeline [^ ]+ can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .resolver type bundles.*: error requesting remote resource: invalid resource request .[^ ]+.: failed to validate params: missing required hub resolver params: version'
+  test_dir:
+  - run-kflux-prd-rh02-2026_09_23T11_19_03_267000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
   id: couldnt_get_task_via_bundles_resolver_because_resolution_took_longer_than_global_timeout
   note: ''
   reason: Couldnt get task via bundles resolver because resolution took longer than global timeout
   regexp: Message:.*Couldn.t retrieve Task .*resolver type bundles.*resolution took longer than global timeout of .*
   test_dir:
   - run-stone-stage-p01-2026_05_09T15_49_46_072000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: couldnt_get_task_via_bundles_resolver_because_task_not_found_in_bundle_image
+  note: ''
+  reason: Couldnt get task via bundles resolver because task not found in bundle image
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetTask Message:Pipeline [^ ]+ can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .resolver type bundles.*: error requesting remote resource: error getting .bundleresolver. .[^ ]+.: could not find object in image with kind: task and name: [^ ]+'
+  test_dir:
+  - run-lightwell-dev-2026_09_20T00_44_03_141000000_00_00
   type: loadtest
 - caused_by: quay.io
   id: couldnt_get_task_via_bundles_resolver_from_quay_io_due_to_502_bad_gateway
@@ -783,6 +815,14 @@
   reason: Couldnt get task via git resolver because ETCD timeouted
   regexp: 'PipelineRun .* in namespace .* failed: .* Reason:CouldntGetTask Message:Pipeline .* can''t be Run; it contains Tasks that don''t exist: Couldn''t retrieve Task .resolver type git.*url = https://github.com/.*: error requesting remote resource: error updating resource request .* with data: etcdserver: request timed out'
   test_dir: []
+  type: loadtest
+- caused_by: pipelines-controller
+  id: couldnt_get_task_via_git_resolver_because_resolution_took_longer_than_global_timeout
+  note: ''
+  reason: Couldnt get task via git resolver because resolution took longer than global timeout
+  regexp: 'Release pipeline run failed: PipelineRun [^ ]+ in namespace [^ ]+ failed: .* Reason:CouldntGetTask Message:Pipeline [^ ]+ can.t be Run; it contains Tasks that don.t exist: Couldn.t retrieve Task .resolver type git.*: error requesting remote resource: resolution took longer than global timeout of .*'
+  test_dir:
+  - run-kflux-prd-rh03-2026_09_18T12_48_02_839000000_00_00
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: couldnt_get_task_via_git_resolver_from_gitlab_cee_due_to_429
@@ -1784,6 +1824,14 @@
   test_dir:
   - run-stone-stg-rh01-2026_01_11T19_09_19_153000000_00_00
   type: condition
+- caused_by: integration-controller
+  id: integration_test_scenario_creation_failed_because_a_previous_scenario_with_the_same_name_already_existed_causing_context_deadline_exceeded
+  note: ''
+  reason: Integration test scenario creation failed because a previous scenario with the same name already existed, causing context deadline exceeded
+  regexp: 'Integration test scenario failed creation: unable to create the integration Test Scenario [^ ]+ in namespace [^ ]+: context deadline exceeded'
+  test_dir:
+  - run-kflux-lw-p01-2026_09_19T19_37_03_326000000_00_00
+  type: loadtest
 - caused_by: test
   id: introspection_failed_because_of_incomplete_docker_config_json
   note: ''
@@ -2630,6 +2678,14 @@
   test_dir:
   - run-stone-prod-p02-2026_03_22T11_59_10_256000000_00_00
   type: loadtest
+- caused_by: release-controller
+  id: release_plan_creation_failed_because_release_service_author_webhook_timed_out
+  note: ''
+  reason: Release Plan creation failed because release-service author webhook timed out
+  regexp: 'Release Plan failed creation: unable to create the releasePlan [^ ]+ in [^ ]+: Internal error occurred: failed calling webhook .mauthor.kb.io.: failed to call webhook: Post .https://release-service-webhook-service.release-service.svc:443/[^ ]+.: context deadline exceeded'
+  test_dir:
+  - run-lightwell-dev-2026_09_18T03_31_04_216000000_00_00
+  type: loadtest
 - caused_by: release-service
   id: release_plan_creation_failed_because_release_service_webhook_was_unavailable
   note: ''
@@ -2908,6 +2964,14 @@
   test_dir:
   - run-stone-prod-p02-2026_05_16T15_20_23_769000000_00_00
   type: loadtest
+- caused_by: test
+  id: repo_source_artifact_push_to_quay_io_failed_because_registry_returned_unauthorized_wrong_credentials
+  note: ''
+  reason: Repo source artifact push to quay.io failed because registry returned unauthorized (wrong credentials)
+  regexp: 'Executing: oras push .*SOURCE_ARTIFACT.*Error response from registry: unauthorized: access to the requested resource is not authorized: map\[\].*error: Unauthorized error, wrong registry credentials provided, won.t retry'
+  test_dir:
+  - run-stone-prod-p02-2026_09_22T12_20_02_651000000_00_00
+  type: logs
 - caused_by: github.com
   id: repo_templating_cleanup_failed_because_github_api_returned_error_500
   note: ''
@@ -3281,6 +3345,14 @@
   - run-stone-stg-rh01-2026_01_21T10_09_22_173000000_00_00
   type: logs
 - caused_by: quay.io
+  id: rpm_signature_verification_failed_because_quay_io_returned_a_truncated_image_layer_unexpected_eof
+  note: ''
+  reason: RPM signature verification failed because quay.io returned a truncated image layer (unexpected EOF)
+  regexp: 'error: unable to extract layer sha256:[a-f0-9]+ from quay\.io/[^ ]+@sha256:[a-f0-9]+: unexpected EOF'
+  test_dir:
+  - run-kflux-ocp-p01-2026_09_23T20_50_02_747000000_00_00
+  type: logs
+- caused_by: quay.io
   id: rpm_verification_failed_due_to_timeout_when_connecting_to_quay_io
   note: ''
   reason: RPM verification failed due to timeout when connecting to Quay.io
@@ -3473,6 +3545,13 @@
   test_dir: []
   type: condition
 - caused_by: SKIP
+  id: skip_10
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ ]+ for application [^ :]+: Get .[^ ]+.: dial tcp: lookup [^ ]+ on [0-9.]+:53: server misbehaving'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
   id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
@@ -3521,6 +3600,13 @@
   regexp: '"message": "Not all Steps in the Task have finished executing", "reason": "Running", "status": "Unknown"'
   test_dir: []
   type: condition
+- caused_by: SKIP
+  id: skip_9
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect events: failed to list events in namespace [^ ]+: Get .[^ ]+.: dial tcp: lookup [^ ]+ on [0-9.]+:53: server misbehaving'
+  test_dir: []
+  type: loadtest
 - caused_by: quay.io
   id: source_image_build_failed_because_quay_io_returned_502_bad_gateway_when_requesting_bearer_token
   note: ''
