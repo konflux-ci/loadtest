@@ -11,30 +11,36 @@ import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 
-func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName string) (string, error) {
+func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName, buildCommitSha string) (string, error) {
 	interval := time.Second * 20
 	timeout := time.Minute * 30
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		prs, err := f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", "", "")
+		// When the triggering commit SHA is known, the list is filtered on the
+		// pipelinesascode.tekton.dev/sha label, so PipelineRuns from onboarding,
+		// PR merge or earlier runs of the component can never be picked.
+		prs, err := f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", buildCommitSha, "")
 		if err != nil {
 			logging.Logger.Debug("Unable to get created PipelineRuns for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
 		}
-		if len(*prs) == 0 {
-			logging.Logger.Debug("No build PipelineRun for component %s in namespace %s yet", compName, namespace)
-			return false, nil
-		}
 
-		// Pick the most recent build PipelineRun: the freshly-triggered build is the newest, and the
-		// Snapshot is matched to it by this name (appstudio.openshift.io/build-pipelinerun label).
-		pr = &(*prs)[0]
+		// Pick the most recently started PipelineRun for the commit. A never-started
+		// PipelineRun (nil StartTime) is a duplicate on-push trigger that the controller
+		// deletes before it runs, so when none has started yet we keep polling instead
+		// of guessing.
 		for i := range *prs {
-			if (*prs)[i].CreationTimestamp.After(pr.CreationTimestamp.Time) {
-				pr = &(*prs)[i]
+			candidate := &(*prs)[i]
+			if candidate.Status.StartTime != nil &&
+				(pr == nil || pr.Status.StartTime == nil || candidate.Status.StartTime.After(pr.Status.StartTime.Time)) {
+				pr = candidate
 			}
+		}
+		if pr == nil {
+			logging.Logger.Debug("No started build PipelineRun for component %s (commit %s) in namespace %s yet", compName, buildCommitSha, namespace)
+			return false, nil
 		}
 
 		logging.Logger.Debug("Build PipelineRun %s for component %s in namespace %s created", pr.GetName(), compName, namespace)
@@ -164,6 +170,7 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 		ctx.ParentContext.ParentContext.Namespace,
 		ctx.ParentContext.ApplicationName,
 		ctx.ComponentName,
+		ctx.BuildCommitSha,
 	)
 	if err != nil {
 		return logging.Logger.Fail(70, "Build Pipeline Run failed creation: %v", err)

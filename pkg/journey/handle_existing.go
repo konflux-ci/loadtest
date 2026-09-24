@@ -87,7 +87,8 @@ func TriggerComponentBuild(ctx *types.PerComponentContext) error {
 	repoUrl := ctx.ParentContext.ParentContext.ComponentRepoUrl
 	repoRevision := ctx.ParentContext.ParentContext.ComponentRepoRevision
 
-	_, err := logging.Measure(
+	var iface interface{}
+	iface, err := logging.Measure(
 		ctx,
 		doHarmlessCommit,
 		ctx.Framework,
@@ -97,7 +98,14 @@ func TriggerComponentBuild(ctx *types.PerComponentContext) error {
 	if err != nil {
 		return logging.Logger.Fail(202, "Failed to trigger build via harmless commit: %v", err)
 	}
+	// Remember the triggering commit: the build PipelineRun is matched by its
+	// pipelinesascode.tekton.dev/sha label in validatePipelineRunCreation.
+	var ok bool
+	ctx.BuildCommitSha, ok = iface.(string)
+	if !ok {
+		return logging.Logger.Fail(202, "Type assertion failed on harmless commit SHA: %+v", iface)
+	}
 
-	logging.Logger.Info("Triggered build for component %s via harmless commit", ctx.ComponentName)
+	logging.Logger.Info("Triggered build for component %s via harmless commit %s", ctx.ComponentName, ctx.BuildCommitSha)
 	return nil
 }

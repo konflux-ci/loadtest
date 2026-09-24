@@ -48,6 +48,7 @@ type PerComponentContext struct {
 	ManagedFramework     *framework.Framework
 	ParentContext        *PerApplicationContext
 	ComponentName        string
+	BuildCommitSha       string
 	SnapshotName         string
 	BuildPipelineRunName string
 	ReleaseName          string

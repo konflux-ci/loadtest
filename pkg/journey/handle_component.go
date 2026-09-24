@@ -241,14 +241,17 @@ func listAndDeletePipelineRunsWithTimeout(f *framework.Framework, namespace, app
 	return nil
 }
 
-// This handles post-component creation tasks for multi-arch PaC workflow
-func utilityRepoTemplatingComponentCleanup(f *framework.Framework, namespace, appName, compName, repoUrl, repoRev, sourceRepo, sourceRepoDir string, mergeReqNum int, placeholders *map[string]string) error {
+// This handles post-component creation tasks for multi-arch PaC workflow.
+// Returns the SHA of the commit that triggered the real build (the COMPONENT-push.yaml
+// commit), which the caller uses to match the build PipelineRun by its
+// pipelinesascode.tekton.dev/sha label.
+func utilityRepoTemplatingComponentCleanup(f *framework.Framework, namespace, appName, compName, repoUrl, repoRev, sourceRepo, sourceRepoDir string, mergeReqNum int, placeholders *map[string]string) (string, error) {
 	var err error
 
 	// Delete on-pull-request default pipeline run
 	err = listAndDeletePipelineRunsWithTimeout(f, namespace, appName, compName, "", 1)
 	if err != nil {
-		return fmt.Errorf("error deleting on-pull-request default PipelineRun in namespace %s: %v", namespace, err)
+		return "", fmt.Errorf("error deleting on-pull-request default PipelineRun in namespace %s: %v", namespace, err)
 	}
 	logging.Logger.Debug("Repo-templating workflow: Cleaned up (first cleanup) for %s/%s/%s", namespace, appName, compName)
 
@@ -286,38 +289,49 @@ func utilityRepoTemplatingComponentCleanup(f *framework.Framework, namespace, ap
 	if err != nil {
 		// Report the last merge error rather than the generic wait timeout
 		if mergeErr != nil {
-			return mergeErr
+			return "", mergeErr
 		}
-		return err
+		return "", err
 	}
 	logging.Logger.Debug("Repo-templating workflow: Merged PR %d in %s", mergeReqNum, repoUrl)
 
 	// Delete all pipeline runs as we do not care about these
 	err = listAndDeletePipelineRunsWithTimeout(f, namespace, appName, compName, "", 1)
 	if err != nil {
-		return fmt.Errorf("error deleting on-push merged PipelineRun in namespace %s: %v", namespace, err)
+		return "", fmt.Errorf("error deleting on-push merged PipelineRun in namespace %s: %v", namespace, err)
 	}
 	logging.Logger.Debug("Repo-templating workflow: Cleaned up (second cleanup) for %s/%s/%s", namespace, appName, compName)
 
 	// Template our multi-arch PaC files
 	shaMap, err := templateFiles(f, repoUrl, repoRev, sourceRepo, sourceRepoDir, placeholders)
 	if err != nil {
-		return fmt.Errorf("error templating PaC files: %v", err)
+		return "", fmt.Errorf("error templating PaC files: %v", err)
 	}
 	logging.Logger.Debug("Repo-templating workflow: Our PaC files templated in %s", repoUrl)
+
+	// The on-push pipeline file (COMPONENT-push.yaml) triggers the real build that the probe
+	// follows; earlier templated commits (and all onboarding/merge-phase PipelineRuns) have
+	// different SHAs.
+	var buildSha string
+	for file, sha := range *shaMap {
+		if strings.HasSuffix(file, "-push.yaml") {
+			buildSha = sha
+			logging.Logger.Debug("Repo-templating workflow: Build triggering commit is %s (from %s)", sha, file)
+		}
+	}
 
 	// Delete pipeline run we do not care about
 	for file, sha := range *shaMap {
 		if !strings.HasSuffix(file, "-push.yaml") {
 			err = listAndDeletePipelineRunsWithTimeout(f, namespace, appName, compName, sha, 1)
 			if err != nil {
-				return fmt.Errorf("error deleting on-push merged PipelineRun in namespace %s: %v", namespace, err)
+				return "", fmt.Errorf("error deleting on-push merged PipelineRun in namespace %s: %v", namespace, err)
 			}
 		}
 	}
 	logging.Logger.Debug("Repo-templating workflow: Cleaned up (third cleanup) for %s/%s/%s", namespace, appName, compName)
 
-	return nil
+	return buildSha, nil
 }
 
 // Check that ImageRepository CR was created before the MR/PR was created.
@@ -394,10 +408,13 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 
 	if ctx.ComponentName != "" {
 		logging.Logger.Debug("Skipping setting up component because reusing component %s in namespace %s, triggering build with push to the repo", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace)
-		_, err := doHarmlessCommit(ctx.Framework, ctx.ParentContext.ParentContext.ComponentRepoUrl, ctx.ParentContext.ParentContext.Opts.ComponentRepoRevision)
+		commitSha, err := doHarmlessCommit(ctx.Framework, ctx.ParentContext.ParentContext.ComponentRepoUrl, ctx.ParentContext.ParentContext.Opts.ComponentRepoRevision)
 		if err != nil {
 			return logging.Logger.Fail(60, "Commiting to repo for reused component %s in namespace %s failed: %v", ctx.ComponentName, ctx.ParentContext.ParentContext.Namespace, err)
 		}
+		// Remember the triggering commit: the build PipelineRun is matched by its
+		// pipelinesascode.tekton.dev/sha label in validatePipelineRunCreation.
+		ctx.BuildCommitSha = commitSha
 		return nil
 	}
 
@@ -511,7 +528,7 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 		}
 
 		// Skip what we do not care about, merge PR, graft pipeline yamls
-		_, err = logging.Measure(
+		iface, err = logging.Measure(
 			ctx,
 			utilityRepoTemplatingComponentCleanup,
 			ctx.Framework,
@@ -528,6 +545,14 @@ func HandleComponent(ctx *types.PerComponentContext) error {
 		if err != nil {
 			return logging.Logger.Fail(68, "Repo-templating workflow component cleanup failed: %v", err)
 		}
+
+		// Remember the build-triggering commit SHA: validatePipelineRunCreation
+		// matches the build PipelineRun via the pipelinesascode.tekton.dev/sha label.
+		buildSha, ok := iface.(string)
+		if !ok {
+			return logging.Logger.Fail(68, "Type assertion failed on templating build commit SHA: %+v", iface)
+		}
+		ctx.BuildCommitSha = buildSha
 
 	}
 
