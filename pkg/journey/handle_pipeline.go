@@ -1,5 +1,6 @@
 package journey
 
+import "context"
 import "fmt"
 import "strings"
 import "time"
@@ -10,6 +11,7 @@ import types "github.com/konflux-ci/loadtest/pkg/types"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
+import k8stypes "k8s.io/apimachinery/pkg/types"
 
 func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName, buildCommitSha string) (string, error) {
 	interval := time.Second * 20
@@ -53,40 +55,49 @@ func validatePipelineRunCreation(f *framework.Framework, namespace, appName, com
 	return pr.GetName(), nil
 }
 
-func validatePipelineRunStarted(f *framework.Framework, namespace, appName, compName string) error {
+// getBuildPipelineRun fetches the build PipelineRun selected by
+// validatePipelineRunCreation by its exact name, so every build stage
+// tracks the same resource instead of re-listing and guessing.
+func getBuildPipelineRun(f *framework.Framework, namespace, name string) (*pipeline.PipelineRun, error) {
+	pr := &pipeline.PipelineRun{}
+	err := f.AsKubeDeveloper.HasController.KubeRest().Get(context.Background(), k8stypes.NamespacedName{Name: name, Namespace: namespace}, pr)
+	return pr, err
+}
+
+func validatePipelineRunStarted(f *framework.Framework, namespace, buildPipelineRunName string) error {
 	interval := time.Second * 20
 	timeout := time.Minute * 30
 	var pr *pipeline.PipelineRun
 
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pr, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunWithType(compName, appName, namespace, "build", "", "")
+		pr, err = getBuildPipelineRun(f, namespace, buildPipelineRunName)
 		if err != nil {
-			logging.Logger.Debug("Unable to get created PipelineRun for component %s in namespace %s: %v", compName, namespace, err)
+			logging.Logger.Debug("Unable to get build PipelineRun %s in namespace %s: %v", buildPipelineRunName, namespace, err)
 			return false, nil
 		}
 
 		if pr.Spec.Status != pipeline.PipelineRunSpecStatusPending {
-			logging.Logger.Debug("Build PipelineRun %s for component %s in namespace %s started with status: %s", pr.GetName(), compName, namespace, pr.Spec.Status)
+			logging.Logger.Debug("Build PipelineRun %s in namespace %s started with status: %s", pr.GetName(), namespace, pr.Spec.Status)
 			return true, nil
 		}
 
-		logging.Logger.Trace("Still waiting for pipeline run to start for component %s in namespace %s", compName, namespace)
+		logging.Logger.Trace("Still waiting for pipeline run %s in namespace %s to start", buildPipelineRunName, namespace)
 		return false, nil
 	}, interval, timeout)
 
 	return err
 }
 
-func validatePipelineRunCondition(f *framework.Framework, namespace, appName, compName string) error {
+func validatePipelineRunCondition(f *framework.Framework, namespace, buildPipelineRunName, compName string) error {
 	interval := time.Second * 20
 	timeout := time.Minute * 60
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pr, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunWithType(compName, appName, namespace, "build", "", "")
+		pr, err = getBuildPipelineRun(f, namespace, buildPipelineRunName)
 		if err != nil {
-			logging.Logger.Debug("Unable to get created PipelineRun for component %s in namespace %s: %v", compName, namespace, err)
+			logging.Logger.Debug("Unable to get build PipelineRun %s for component %s in namespace %s: %v", buildPipelineRunName, compName, namespace, err)
 			return false, nil
 		}
 
@@ -116,22 +127,22 @@ func validatePipelineRunCondition(f *framework.Framework, namespace, appName, co
 	return err
 }
 
-func validatePipelineRunSignature(f *framework.Framework, namespace, appName, compName string) error {
+func validatePipelineRunSignature(f *framework.Framework, namespace, buildPipelineRunName string) error {
 	interval := time.Second * 20
 	timeout := time.Minute * 60
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
-		pr, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunWithType(compName, appName, namespace, "build", "", "")
+		pr, err = getBuildPipelineRun(f, namespace, buildPipelineRunName)
 		if err != nil {
-			logging.Logger.Debug("Unable to get created PipelineRun for component %s in namespace %s: %v", compName, namespace, err)
+			logging.Logger.Debug("Unable to get build PipelineRun %s in namespace %s: %v", buildPipelineRunName, namespace, err)
 			return false, nil
 		}
 
 		// Check if there are some annotations
 		if len(pr.Annotations) == 0 {
-			logging.Logger.Debug("PipelineRun for component %s in namespace %s lacks metadata annotations", compName, namespace)
+			logging.Logger.Debug("PipelineRun %s in namespace %s lacks metadata annotations", buildPipelineRunName, namespace)
 			return false, nil
 		}
 
@@ -140,11 +151,11 @@ func validatePipelineRunSignature(f *framework.Framework, namespace, appName, co
 			if pr.Annotations["chains.tekton.dev/signed"] == "true" {
 				return true, nil
 			} else {
-				logging.Logger.Debug("PipelineRun for component %s in namespace %s still not signed", compName, namespace)
+				logging.Logger.Debug("PipelineRun %s in namespace %s still not signed", buildPipelineRunName, namespace)
 				return false, nil
 			}
 		} else {
-			logging.Logger.Debug("PipelineRun for component %s in namespace %s do not have 'chains.tekton.dev/signed' annotation", compName, namespace)
+			logging.Logger.Debug("PipelineRun %s in namespace %s do not have 'chains.tekton.dev/signed' annotation", buildPipelineRunName, namespace)
 			return false, nil
 		}
 	}, interval, timeout)
@@ -185,8 +196,7 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 		validatePipelineRunStarted,
 		ctx.Framework,
 		ctx.ParentContext.ParentContext.Namespace,
-		ctx.ParentContext.ApplicationName,
-		ctx.ComponentName,
+		ctx.BuildPipelineRunName,
 	)
 	if err != nil {
 		return logging.Logger.Fail(71, "Build Pipeline Run failed starting: %v", err)
@@ -199,7 +209,7 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 		validatePipelineRunCondition,
 		ctx.Framework,
 		ctx.ParentContext.ParentContext.Namespace,
-		ctx.ParentContext.ApplicationName,
+		ctx.BuildPipelineRunName,
 		ctx.ComponentName,
 	)
 	if err != nil {
@@ -213,8 +223,7 @@ func HandlePipelineRun(ctx *types.PerComponentContext) error {
 		validatePipelineRunSignature,
 		ctx.Framework,
 		ctx.ParentContext.ParentContext.Namespace,
-		ctx.ParentContext.ApplicationName,
-		ctx.ComponentName,
+		ctx.BuildPipelineRunName,
 	)
 	if err != nil {
 		return logging.Logger.Fail(73, "Build Pipeline Run failed signing: %v", err)
