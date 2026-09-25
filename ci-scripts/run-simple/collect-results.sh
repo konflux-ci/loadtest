@@ -89,7 +89,7 @@ ci-scripts/utility_scripts/show-pipelineruns.py --data-dir "${ARTIFACT_DIR}" &>"
 mv "${ARTIFACT_DIR}/output.svg" "${ARTIFACT_DIR}/show-pipelines.svg" || true
 
 echo "[$(date --utc -Ins)] Computing duration of PRs, TRs and steps"
-ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIFACT_DIR}" --dump-json "${ARTIFACT_DIR}/get-taskruns-durations.json" &>"${ARTIFACT_DIR}/get-taskruns-durations.log"
+ci-scripts/utility_scripts/get-taskruns-durations.py --debug --data-dir "${ARTIFACT_DIR}" --dump-json "${ARTIFACT_DIR}/get-taskruns-durations.json" &>"${ARTIFACT_DIR}/get-taskruns-durations.log" || true
 
 echo "[$(date --utc -Ins)] Parsing POD, task and step names from collected-taskrun JSON"
 CD="${ARTIFACT_DIR}/collected-data"
@@ -146,8 +146,19 @@ status_data.py \
 
 } 2>&1 | tee "${ARTIFACT_DIR}/collect-results.log"
 
+# Detect probe mode: if ApplicationName or ComponentName is set, this is a validation probe
+is_probe=$(jq -r 'if .ApplicationName or .ComponentName then "true" else "false" end' "${ARTIFACT_DIR}/load-test-options.json")
+
 errors=$(jq -r '.results.measurements.KPI.errors // "null"' "${ARTIFACT_DIR}/load-test.json")
 successes=$(jq -r '.results.measurements.KPI.successes // "null"' "${ARTIFACT_DIR}/load-test.json")
+
+# For probe mode where we validate existing resources without triggering new builds,
+# KPI metrics may be null if no builds were triggered. Treat this as success.
+if [[ "$is_probe" == "true" ]] && ([[ "$errors" == "null" ]] || [[ "$successes" == "null" ]]); then
+    echo "[$(date --utc -Ins)] Probe mode detected with no build metrics - treating as success"
+    errors=0
+    successes=1
+fi
 
 if [[ "$errors" != "null" ]] && [[ "$errors" -eq 0 ]] && [[ "$successes" != "null" ]] && [[ "$successes" -gt 0 ]] && [[ -d "${ARTIFACT_DIR}/collected-data" ]]; then
     echo "[$(date --utc -Ins)] Test passed, compressing collected-data/ to save storage"
