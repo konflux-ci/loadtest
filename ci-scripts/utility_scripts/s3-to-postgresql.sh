@@ -5,13 +5,14 @@
 # Requires: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, POSTGRESQL_PASS,
 #           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, jq, uv
 #
-# S3 object keys recorded in DONE_FILE to avoid duplicates
+# After a successful ingest (or a permanent skip), the S3 object is deleted so we do not
+# rely on a local done-file on Jenkins (workspaces get cleaned). Failed ingests leave the
+# object in place for the next hourly run. Bucket lifecycle still expires anything left.
 
-# --- Constants: bucket/prefix to scan, Horreum test id, done-file, path to s3-artifacts.py ---
+# --- Constants: bucket/prefix to scan, Horreum test id, path to s3-artifacts.py ---
 S3_BUCKET="konflux-perfscale-artifacts"
 S3_PREFIX="run-probe/"
 HORREUM_TEST_ID=372
-DONE_FILE="${DONE_FILE:-$(pwd)/s3-to-postgresql-done.txt}"
 # Resolve s3-artifacts.py relative to this script (ci-scripts/), not cwd.
 S3_ARTIFACTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/s3-artifacts.py"
 
@@ -38,9 +39,12 @@ s3_tools() {
     uv run --with boto3 python "${S3_ARTIFACTS}" "$@"
 }
 
-# Make sure the done-file exists (create its directory if needed)
-mkdir -p "$(dirname "${DONE_FILE}")"
-touch "${DONE_FILE}"
+# Remove the object from S3 once we are done with it (success or permanent skip).
+s3_delete() {
+    local key="$1"
+    echo "  Deleting s3://${S3_BUCKET}/${key}"
+    s3_tools delete --bucket "${S3_BUCKET}" --remote "${key}"
+}
 
 # Temp folder for this run; delete it when the script exits
 tmpdir=$(mktemp -d)
@@ -64,12 +68,6 @@ echo "Found ${#KEYS[@]} tarball(s)"
 for key in "${KEYS[@]}"; do
     echo "=== ${key}"
 
-    # Skip keys already recorded in DONE_FILE
-    if grep -qFx "${key}" "${DONE_FILE}"; then
-        echo "  SKIP (already processed)"
-        continue
-    fi
-
     # Download tarball and extract into a fresh directory
     extract_dir="${tmpdir}/extract"
     rm -rf "${extract_dir}"
@@ -78,19 +76,19 @@ for key in "${KEYS[@]}"; do
     s3_tools download --bucket "${S3_BUCKET}" --remote "${key}" --local "${tmpdir}/run.tar.gz"
     tar -xzf "${tmpdir}/run.tar.gz" -C "${extract_dir}"
 
-    # Find load-test.json; if missing, mark done (timestamped keys are not re-uploaded).
+    # Find load-test.json; if missing, delete the object (timestamped keys are not re-uploaded).
     local_file=$(find "${extract_dir}" -name 'load-test.json' -type f | head -1)
     if [[ -z "${local_file}" ]]; then
         echo "  SKIP (no load-test.json)"
-        echo "${key}" >> "${DONE_FILE}"
+        s3_delete "${key}"
         continue
     fi
 
     # Check that this is a Konflux cluster probe result (matches Horreum test 372).
-    # If the name is something else, skip and mark done — that object will not change.
+    # If the name is something else, skip and delete — that object will not change.
     if ! jq -r '.name' "${local_file}" | grep -q 'Konflux cluster probe'; then
         echo "  SKIP (unexpected .name)"
-        echo "${key}" >> "${DONE_FILE}"
+        s3_delete "${key}"
         continue
     fi
 
@@ -114,7 +112,7 @@ for key in "${KEYS[@]}"; do
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
-    # treat that as OK and still mark this S3 key done so we don't keep retrying it.
+    # treat that as OK and still delete the S3 object.
     if ! out=$(cd "${HDM_DIR}" && uv run python labels-to-postgresql.py \
         --label-values "${labels_file}" \
         --horreum-test-id "${HORREUM_TEST_ID}" \
@@ -128,7 +126,7 @@ for key in "${KEYS[@]}"; do
         --postgresql-db "${POSTGRESQL_DB}" \
         --debug 2>&1); then
         if echo "${out}" | grep -qi 'already exists'; then
-            echo "  WARNING: already in PostgreSQL, marking done"
+            echo "  WARNING: already in PostgreSQL, deleting S3 object"
         else
             echo "  ERROR: labels-to-postgresql.py failed:"
             echo "${out}"
@@ -136,8 +134,8 @@ for key in "${KEYS[@]}"; do
         fi
     fi
 
-    # Record key so future hourly runs skip this object
-    echo "${key}" >> "${DONE_FILE}"
+    # Ingest succeeded (or already in DB) — remove from S3 so the next run won't see it.
+    s3_delete "${key}"
     echo "  Done"
 done
 
