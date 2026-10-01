@@ -13,6 +13,31 @@ import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 import pipeline "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 import k8stypes "k8s.io/apimachinery/pkg/types"
 
+// callWithTimeout runs a blocking, uncancelable operation (e.g. a framework
+// k8s call that hardcodes context.Background()) and returns when fn completes
+// or after d, whichever comes first. On timeout the in-flight call is
+// abandoned — it keeps running in the background until the underlying socket
+// dies — and a timeout error is returned so the caller can retry instead of
+// blocking for the full OS-level TCP timeout (~15-30min).
+func callWithTimeout[T any](d time.Duration, fn func() (T, error)) (T, error) {
+	type result struct {
+		val T
+		err error
+	}
+	ch := make(chan result, 1) // buffered: abandoned fn can still exit after we time out
+	go func() {
+		v, e := fn()
+		ch <- result{v, e}
+	}()
+	select {
+	case r := <-ch:
+		return r.val, r.err
+	case <-time.After(d):
+		var zero T
+		return zero, fmt.Errorf("operation timed out after %s", d)
+	}
+}
+
 func validatePipelineRunCreation(f *framework.Framework, namespace, appName, compName, buildCommitSha string) (string, error) {
 	interval := time.Second * 20
 	timeout := time.Minute * 30
@@ -23,7 +48,9 @@ func validatePipelineRunCreation(f *framework.Framework, namespace, appName, com
 		// When the triggering commit SHA is known, the list is filtered on the
 		// pipelinesascode.tekton.dev/sha label, so PipelineRuns from onboarding,
 		// PR merge or earlier runs of the component can never be picked.
-		prs, err := f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", buildCommitSha, "")
+		prs, err := callWithTimeout(30*time.Second, func() (*[]pipeline.PipelineRun, error) {
+			return f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", buildCommitSha, "")
+		})
 		if err != nil {
 			logging.Logger.Debug("Unable to get created PipelineRuns for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil

@@ -203,7 +203,9 @@ func listPipelineRunsWithTimeout(f *framework.Framework, namespace, appName, com
 	timeout := time.Minute * 15
 
 	err = utils.WaitUntilWithInterval(func() (done bool, err error) {
-		prs, err = f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", sha, "")
+		prs, err = callWithTimeout(30*time.Second, func() (*[]pipeline.PipelineRun, error) {
+			return f.AsKubeDeveloper.HasController.GetComponentPipelineRunsWithType(compName, appName, namespace, "build", sha, "")
+		})
 		if err != nil {
 			logging.Logger.Debug("Waiting for PipelineRun for component %s in namespace %s: %v", compName, namespace, err)
 			return false, nil
