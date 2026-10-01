@@ -11,7 +11,7 @@ import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
 func createIntegrationTestScenario(f *framework.Framework, namespace, appName, scenarioGitURL, scenarioRevision, scenarioPathInRepo string) (string, error) {
 	interval := time.Second * 10
-	timeout := time.Minute * 1
+	timeout := time.Minute * 5
 
 	name := fmt.Sprintf("%s-its", appName)
 	logging.Logger.Debug("Creating integration test scenario %s for application %s in namespace %s", name, appName, namespace)
