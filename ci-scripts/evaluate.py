@@ -59,6 +59,12 @@ METRICS_ITS = [
     "validateTestPipelineRunCondition",
 ]
 
+# These metrics will be ignored if the whole test wait stage was skipped
+# (pipeline waits disabled -> HandleTest records nothing, not even the snapshot)
+METRICS_TEST_STAGE = [
+    "validateSnapshotCreation",
+]
+
 # These metrics will be ignored if Release was skipped
 METRICS_RELEASE = [
     "createReleasePlan",
@@ -234,12 +240,22 @@ def main():
             "NOTE: Ignoring CI cluster related metrics because running against non-CI cluster"
         )
         to_skip += METRICS_CI
-    if options["TestScenarioGitURL"] == "":
+    # Mirror the Go journey gates: HandleTest records validateSnapshotCreation
+    # (and the ITS test PipelineRun metrics) only when both pipeline waits are
+    # enabled, and HandleReleaseRun only when a policy is set and wait is on.
+    if options["WaitPipelines"] and options["WaitIntegrationTestsPipelines"]:
+        if options["TestScenarioGitURL"] == "":
+            print(
+                "NOTE: Ignoring ITS related metrics because they were disabled at test run"
+            )
+            to_skip += METRICS_ITS
+    else:
         print(
-            "NOTE: Ignoring ITS related metrics because they were disabled at test run"
+            "NOTE: Ignoring test stage metrics because pipeline waits were disabled at test run"
         )
         to_skip += METRICS_ITS
-    if options["ReleasePolicy"] == "":
+        to_skip += METRICS_TEST_STAGE
+    if options["ReleasePolicy"] == "" or not options["WaitRelease"]:
         print(
             "NOTE: Ignoring Release related metrics because they were disabled at test run"
         )

@@ -23,7 +23,7 @@ Every journey step is wrapped in `logging.Measure()`, which records duration and
   8. Parameters (sorted `type:value` pairs; `*framework.Framework` redacted)
   9. Error (`<nil>` or `%v` text)
 - **Thread ID `-1`** means the measurement applies at a parent scope (e.g. repo forking at user level); `evaluate.py` treats incomplete IDs as wildcards when merging rows into a complete journey pass.
-- **KPI completeness**: a journey pass counts toward `KPI.mean` only when every expected metric for that options profile is present without error. Expected metrics are listed in `evaluate.py` `METRICS` and conditional subsets (`METRICS_CI`, `METRICS_ITS`, `METRICS_RELEASE`, reuse lists).
+- **KPI completeness**: a journey pass counts toward `KPI.mean` only when every expected metric for that options profile is present without error. Expected metrics are listed in `evaluate.py` `METRICS` and conditional subsets (`METRICS_CI`, `METRICS_ITS`, `METRICS_TEST_STAGE`, `METRICS_RELEASE`, reuse lists). Each subset is gated on the same options that gate the matching Go handler's early return (`--stage`; `WaitPipelines`/`WaitIntegrationTestsPipelines`/`TestScenarioGitURL`; `ReleasePolicy`/`WaitRelease`) — when a journey gate changes, its `evaluate.py` skip rule must be updated in the same change.
 - **Metric rename coupling**: renaming a measured function or changing CSV column positions breaks `evaluate.py` and `errors.py` without coordinated updates.
 - **Async writers**: measurements and errors are sent on channels and batched (size 3) to CSV by background goroutines; callers must not read CSV files until `MeasurementsStop()` returns.
 

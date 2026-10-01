@@ -19,11 +19,13 @@ OUTPUT_DIR="${OUTPUT_DIR:-.}"
 mkdir -p "${OUTPUT_DIR}"
 
 date -Ins --utc >started
+# Note TEST_SCENARIO_GIT_URL uses '-' not ':-' below, so an explicitly empty value
+# disables the integration test stage (needed for RPM probes, which have no ITS CR)
 "${cmd[@]}" \
     --application "${APPLICATION:-simple-probe-app}" \
     --component "${COMPONENT:-comp}" \
     --integration-test-scenario "${INTEGRATION_TEST_SCENARIO:-}" \
-    --test-scenario-git-url "${TEST_SCENARIO_GIT_URL:-https://github.com/konflux-ci/integration-examples.git}" \
+    --test-scenario-git-url "${TEST_SCENARIO_GIT_URL-https://github.com/konflux-ci/integration-examples.git}" \
     --release-policy "${RELEASE_POLICY:-}" \
     --release-managed-namespace "${RELEASE_MANAGED_NAMESPACE:-}" \
     --release-managed-token "${RELEASE_MANAGED_TOKEN:-}" \
