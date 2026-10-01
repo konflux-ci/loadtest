@@ -59,8 +59,13 @@ func validatePipelineRunCreation(f *framework.Framework, namespace, appName, com
 // validatePipelineRunCreation by its exact name, so every build stage
 // tracks the same resource instead of re-listing and guessing.
 func getBuildPipelineRun(f *framework.Framework, namespace, name string) (*pipeline.PipelineRun, error) {
+	// Bound the request so a half-open TCP connection to the API server cannot
+	// stall the whole wait loop. On timeout the caller logs and retries after
+	// the poll interval with a fresh connection.
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	pr := &pipeline.PipelineRun{}
-	err := f.AsKubeDeveloper.HasController.KubeRest().Get(context.Background(), k8stypes.NamespacedName{Name: name, Namespace: namespace}, pr)
+	err := f.AsKubeDeveloper.HasController.KubeRest().Get(ctx, k8stypes.NamespacedName{Name: name, Namespace: namespace}, pr)
 	return pr, err
 }
 
