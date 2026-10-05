@@ -17,7 +17,7 @@ HORREUM_TEST_ID=372
 S3_ARTIFACTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/s3-artifacts.py"
 
 # Freebusy Postgres; only POSTGRESQL_PASS comes from Vault.
-POSTGRESQL_HOST="10.1.170.11"
+POSTGRESQL_HOST="10.1.93.176"
 POSTGRESQL_PORT="5432"
 POSTGRESQL_USER="freebusy"
 POSTGRESQL_DB="freebusy"
