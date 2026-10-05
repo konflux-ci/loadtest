@@ -106,14 +106,14 @@ for key in "${KEYS[@]}"; do
     echo "  Ingesting start=${start_ts}"
 
     # Turn load-test.json into a labels JSON file using horreum-data-mirror's
-    # compute-labels.py and our Horreum schema (SCHEMA_FILE).
-    (cd "${HDM_DIR}" && uv run python compute-labels.py \
+    # compute_labels.py and our Horreum schema (SCHEMA_FILE).
+    (cd "${HDM_DIR}" && uv run python compute_labels.py \
         --source "${local_file}" \
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
     # treat that as OK and still delete the S3 object.
-    if ! out=$(cd "${HDM_DIR}" && uv run python labels-to-postgresql.py \
+    if ! out=$(cd "${HDM_DIR}" && uv run python labels_to_postgresql.py \
         --label-values "${labels_file}" \
         --horreum-test-id "${HORREUM_TEST_ID}" \
         --horreum-run-id "${horreum_run_id}" \
@@ -128,7 +128,7 @@ for key in "${KEYS[@]}"; do
         if echo "${out}" | grep -qi 'already exists'; then
             echo "  WARNING: already in PostgreSQL, deleting S3 object"
         else
-            echo "  ERROR: labels-to-postgresql.py failed:"
+            echo "  ERROR: labels_to_postgresql.py failed:"
             echo "${out}"
             exit 1
         fi
