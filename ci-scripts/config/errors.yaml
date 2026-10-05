@@ -1026,6 +1026,14 @@
   - run-kflux-prd-rh03-2026_01_13T23_45_19_660000000_00_00
   type: logs
 - caused_by: MPC
+  id: error_allocating_host_because_aws_could_not_validate_the_provided_ec2_credentials
+  note: ''
+  reason: Error allocating host because AWS could not validate the provided EC2 credentials
+  regexp: 'Error allocating host: failed to retrieve EC2 instances starting with [^ ]+: operation error EC2: DescribeInstances, https response error StatusCode: 401, RequestID: [a-f0-9-]+, api error AuthFailure: AWS was not able to validate the provided access credentials'
+  test_dir:
+  - run-lightwell-dev-2026_10_05T07_31_03_798000000_00_00
+  type: logs
+- caused_by: MPC
   id: error_allocating_host_because_ec2_not_authorized_for_ami
   note: Windows MPC AMI authorization failure on stone_stage_p01_Windows (Jul 15-16 2026)
   reason: Error allocating host because EC2 is not authorized for AMI
@@ -2257,6 +2265,14 @@
   regexp: '.message.: .failed to create task run pod [^ ]+: etcdserver: request timed out. Maybe missing or invalid Task [^ ]+., .reason.: .PodCreationFailed.'
   test_dir: []
   type: condition
+- caused_by: pipelines-controller
+  id: pod_creation_failed_because_generated_pod_spec_had_no_containers_missing_or_invalid_task
+  note: ''
+  reason: Pod creation failed because generated Pod spec had no containers (missing or invalid Task)
+  regexp: '.message.: .failed to create task run pod [^ ]+: Pod [^ ]+ is invalid: spec.containers: Required value. Maybe missing or invalid Task [^ ]+., .reason.: .PodCreationFailed.'
+  test_dir:
+  - run-lightwell-dev-2026_10_05T07_35_03_513000000_00_00
+  type: condition
 - caused_by: cluster
   id: pod_creation_failed_because_kyverno_policy_execution_failed
   note: ''
@@ -2677,6 +2693,14 @@
   regexp: 'FAIL\([0-9]+\): Release Plan Admission failed creation: unable to create the releasePlanAdmission [^ ]+ in [^:]+: Operation cannot be fulfilled on resourcequotas .konflux.: the object has been modified'
   test_dir:
   - run-stone-prod-p02-2026_03_22T11_59_10_256000000_00_00
+  type: loadtest
+- caused_by: cluster
+  id: release_plan_admission_deletion_failed_because_cluster_api_server_timed_out
+  note: ''
+  reason: Release Plan Admission deletion failed because cluster API server timed out
+  regexp: 'Release Plan Admission failed creation: unable to delete the releasePlanAdmission [^ ]+ in [^ ]+: Timeout: request did not complete within requested timeout - context deadline exceeded'
+  test_dir:
+  - run-stone-prod-p02-2026_10_01T04_40_04_387000000_00_00
   type: loadtest
 - caused_by: release-controller
   id: release_plan_creation_failed_because_release_service_author_webhook_timed_out
