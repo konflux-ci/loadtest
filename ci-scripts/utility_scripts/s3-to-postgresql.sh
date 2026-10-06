@@ -50,11 +50,11 @@ s3_delete() {
 tmpdir=$(mktemp -d)
 trap 'rm -rf "${tmpdir}"' EXIT
 
-# List S3 keys under run-probe/, keep only .tar.gz
+# Prioritize newest uploads across all clusters/scenarios; preserve S3 helper order.
+# Older objects not reached before bucket lifecycle expiry may remain un-ingested.
 mapfile -t KEYS < <(
-    s3_tools list --bucket "${S3_BUCKET}" --prefix "${S3_PREFIX}" \
-        | grep '\.tar\.gz$' \
-        | sort
+    s3_tools list --bucket "${S3_BUCKET}" --prefix "${S3_PREFIX}" --newest-first \
+        | grep '\.tar\.gz$'
 )
 
 # Empty bucket / no tarballs → success (nothing to do this hour).
