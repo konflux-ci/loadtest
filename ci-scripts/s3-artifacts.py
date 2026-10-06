@@ -84,19 +84,25 @@ def delete_files(
         return response
 
 
-def list_objects(s3_resource, bucket_name: str, prefix: str = "") -> list[str]:
+def list_objects(
+    s3_resource, bucket_name: str, prefix: str = "", newest_first: bool = False
+) -> list[str]:
     """
     List object keys in an S3 bucket.
     Args:
         s3_resource: S3 resource object from connect()
         bucket_name: S3 bucket name
         prefix: optional prefix to filter objects
+        newest_first: sort by S3 last-modified time descending across all keys
     Returns:
         List of object keys
     """
     logger.debug(f"Going to list objects in {bucket_name} with prefix '{prefix}'")
     s3_bucket = s3_resource.Bucket(name=bucket_name)
-    keys = [obj.key for obj in s3_bucket.objects.filter(Prefix=prefix)]
+    objects = list(s3_bucket.objects.filter(Prefix=prefix))
+    if newest_first:
+        objects.sort(key=lambda obj: (obj.last_modified, obj.key), reverse=True)
+    keys = [obj.key for obj in objects]
     logger.info(f"Found {len(keys)} objects in {bucket_name}")
     return keys
 
@@ -128,6 +134,11 @@ if __name__ == "__main__":
     parser.add_argument("--local", help="Local file path (for push/download)")
     parser.add_argument("--remote", help="Remote S3 key (for push/download/delete)")
     parser.add_argument("--prefix", default="", help="Prefix filter (for list)")
+    parser.add_argument(
+        "--newest-first",
+        action="store_true",
+        help="List newest uploads first by S3 last-modified time",
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
@@ -144,7 +155,7 @@ if __name__ == "__main__":
         upload_file(s3, args.local, args.bucket, args.remote)
 
     elif args.action == "list":
-        keys = list_objects(s3, args.bucket, args.prefix)
+        keys = list_objects(s3, args.bucket, args.prefix, args.newest_first)
         for key in keys:
             print(key)
 
