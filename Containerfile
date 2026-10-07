@@ -77,7 +77,7 @@ COPY requirements.txt requirements.txt
 USER 0
 RUN update-ca-trust
 # Install dependencies for our python scripts
-RUN INSTALL_PKGS="git-core jq tar xz tcpdump" && \
+RUN INSTALL_PKGS="git-core jq tar xz" && \
     microdnf -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 install $INSTALL_PKGS && \
     microdnf -y clean all --enablerepo='*'
 USER 1001
