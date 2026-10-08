@@ -149,7 +149,7 @@ for key in "${KEYS[@]}"; do
     mv "${stage_dir}" "${dest_dir}"
     local_file=$(find "${dest_dir}" -name 'load-test.json' -type f | head -1)
     # Fail fast if the publish step failed instead of feeding an empty path into
-    # compute_labels.py (KONFLUX-16245: cascaded into confusing downstream errors).
+    # compute_labels (KONFLUX-16245: cascaded into confusing downstream errors).
     if [[ -z "${local_file}" ]]; then
         echo "  ERROR: artifact publish failed for ${key}"
         exit 1
@@ -158,14 +158,14 @@ for key in "${KEYS[@]}"; do
     echo "  Ingesting start=${start_ts}"
 
     # Turn load-test.json into a labels JSON file using horreum-data-mirror's
-    # compute_labels.py and our Horreum schema (SCHEMA_FILE).
-    (compute_labels.py \
+    # compute_labels and our Horreum schema (SCHEMA_FILE).
+    (compute_labels \
         --source "${local_file}" \
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
     # treat that as OK and still delete the S3 object.
-    if ! out=$(labels_to_postgresql.py \
+    if ! out=$(labels_to_postgresql \
         --label-values "${labels_file}" \
         --horreum-test-id "${HORREUM_TEST_ID}" \
         --horreum-run-id "${horreum_run_id}" \
@@ -180,7 +180,7 @@ for key in "${KEYS[@]}"; do
         if echo "${out}" | grep -qi 'already exists'; then
             echo "  WARNING: already in PostgreSQL, deleting S3 object"
         else
-            echo "  ERROR: labels_to_postgresql.py failed:"
+            echo "  ERROR: labels_to_postgresql failed:"
             echo "${out}"
             exit 1
         fi
