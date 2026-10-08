@@ -76,25 +76,33 @@ for key in "${KEYS[@]}"; do
     echo "=== ${key}"
 
     # Derive job name and run dir from the S3 key: run-probe/<cluster>/<type>/<file>.tar.gz
+    # Components become directory names that get rm -rf'ed, so each must be a plain name —
+    # this rejects empty, ".", ".." and any other path tricks (KONFLUX-16245 review).
+    name_re='^[A-Za-z0-9][A-Za-z0-9._-]*$'
     rel="${key#"${S3_PREFIX}"}"
     IFS='/' read -r cluster rtype rest <<<"${rel}"
-    if [[ -z "${cluster}" || -z "${rtype}" || -z "${rest}" || "${rest}" != *.tar.gz ]]; then
+    if [[ -z "${rest}" || "${rest}" == */* || "${rest}" != *.tar.gz ||
+          ! "${cluster}" =~ ${name_re} || ! "${rtype}" =~ ${name_re} || ! "${rest}" =~ ${name_re} ]]; then
         echo "  ERROR: unexpected S3 key layout: ${key}"
         exit 1
     fi
     job_name="StoneSoupLoadTestFromS3_probe_${cluster}_${rtype}"
     rundir="${rest%.tar.gz}"
     dest_dir="${WORKSPACE}/ARTIFACTS/${job_name}/${rundir}"
-    rm -rf "${dest_dir}"
-    mkdir -p "${dest_dir}"
 
-    # Download tarball and extract it into the workspace ARTIFACTS directory so
-    # workdir-exporter serves the files (KONFLUX-16245).
+    # Download tarball and extract it into a staging dir first; the published dir is
+    # replaced only after extraction succeeds, so a failed retry cannot destroy an
+    # already-published copy (KONFLUX-16245 review). Staging lives in tmpdir and is
+    # cleaned by the EXIT trap.
+    stage_dir="${tmpdir}/stage"
+    rm -rf "${stage_dir}"
+    mkdir -p "${stage_dir}"
+
     s3_tools download --bucket "${S3_BUCKET}" --remote "${key}" --local "${tmpdir}/run.tar.gz"
-    tar -xzf "${tmpdir}/run.tar.gz" -C "${dest_dir}"
+    tar -xzf "${tmpdir}/run.tar.gz" -C "${stage_dir}"
 
     # Find load-test.json; if missing, delete the object (timestamped keys are not re-uploaded).
-    local_file=$(find "${dest_dir}" -name 'load-test.json' -type f | head -1)
+    local_file=$(find "${stage_dir}" -name 'load-test.json' -type f | head -1)
     if [[ -z "${local_file}" ]]; then
         echo "  SKIP (no load-test.json)"
         s3_delete "${key}"
@@ -120,14 +128,21 @@ for key in "${KEYS[@]}"; do
     horreum_dataset_id=$(date -u -d "${start_ts}" +%H%M%S)
     labels_file="${tmpdir}/load-test-labels.json"
 
-    # In-cluster runs have no Jenkins env, so fill in the labels investigate.py needs
-    # to build the workdir-exporter URL (KONFLUX-16245). Existing values win.
+    # Overwrite JOB_NAME / ARTIFACT_DIR with where this script publishes the artifacts:
+    # any values from the source run refer to the in-cluster pod, not the served files,
+    # and investigate.py must build its URL from the published location (KONFLUX-16245 review).
     jq --arg job_name "${job_name}" --arg artifact_dir "${dest_dir}" '
         .metadata.env = (.metadata.env // {})
-        | .metadata.env.JOB_NAME = (.metadata.env.JOB_NAME // $job_name)
-        | .metadata.env.ARTIFACT_DIR = (.metadata.env.ARTIFACT_DIR // $artifact_dir)
+        | .metadata.env.JOB_NAME = $job_name
+        | .metadata.env.ARTIFACT_DIR = $artifact_dir
     ' "${local_file}" >"${tmpdir}/load-test-enriched.json"
     mv "${tmpdir}/load-test-enriched.json" "${local_file}"
+
+    # Publish: replace the served run dir only now that the replacement is complete
+    # (KONFLUX-16245 review).
+    rm -rf "${dest_dir}"
+    mv "${stage_dir}" "${dest_dir}"
+    local_file=$(find "${dest_dir}" -name 'load-test.json' -type f | head -1)
 
     echo "  Ingesting start=${start_ts}"
 
