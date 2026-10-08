@@ -72,24 +72,28 @@ repos:
         name: go mod vendor
         entry: bash -c 'make vendor && git diff --exit-code go.mod go.sum'
         language: system
+        files: '\.(go|mod|sum)$'
         pass_filenames: false
 
       - id: go-build
         name: go build
         entry: make build
         language: system
+        files: '\.(go|mod|sum)$'
         pass_filenames: false
 
       - id: go-test
         name: go test
         entry: go test ./...
         language: system
+        files: '\.(go|mod|sum)$'
         pass_filenames: false
 
       - id: go-smoke
         name: go run ... -h
         entry: go run loadtest.go -h && go run probetest.go -h
         language: system
+        files: '\.(go|mod|sum)$'
         pass_filenames: false
 
       - id: lint-agents-md-size
