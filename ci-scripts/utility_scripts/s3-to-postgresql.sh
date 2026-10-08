@@ -46,9 +46,9 @@ WORKDIR_ROOT="${WORKDIR_ROOT:-/home/jenkins/workspace}"
 [[ -f "${SCHEMA_FILE}" ]] || { echo "ERROR: SCHEMA_FILE not found: ${SCHEMA_FILE}"; exit 1; }
 [[ -f "${S3_ARTIFACTS}" ]] || { echo "ERROR: s3-artifacts.py not found: ${S3_ARTIFACTS}"; exit 1; }
 
-# S3 helper: run s3-artifacts.py via uv with ephemeral boto3 (same AWS_* env vars)
+# S3 helper: run s3-artifacts.py with the platform python (boto3 from requirements.txt)
 s3_tools() {
-    uv run --with boto3 python "${S3_ARTIFACTS}" "$@"
+    "${S3_ARTIFACTS}" "$@"
 }
 
 # Remove the object from S3 once we are done with it (success or permanent skip).
