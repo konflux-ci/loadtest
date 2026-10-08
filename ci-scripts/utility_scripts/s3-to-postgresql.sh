@@ -3,7 +3,11 @@
 # Pull Kanary probe tarballs from S3 and ingest load-test.json into PostgreSQL (KONFLUX-15648).
 #
 # Requires: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, POSTGRESQL_PASS,
-#           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, jq, uv
+#           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, WORKSPACE, jq, uv
+#
+# Artifacts are extracted to ${WORKSPACE}/ARTIFACTS/StoneSoupLoadTestFromS3_probe_<cluster>_<type>/<rundir>/
+# so workdir-exporter serves them for investigate.py (KONFLUX-16245). Missing JOB_NAME /
+# ARTIFACT_DIR labels in load-test.json are filled in before label computation.
 #
 # After a successful ingest (or a permanent skip), the S3 object is deleted so we do not
 # rely on a local done-file on Jenkins (workspaces get cleaned). Failed ingests leave the
@@ -29,6 +33,7 @@ POSTGRESQL_DB="freebusy"
 : "${AWS_REGION:?AWS_REGION is required}"
 : "${HDM_DIR:?HDM_DIR (horreum-data-mirror checkout) is required}"
 : "${SCHEMA_FILE:?SCHEMA_FILE is required}"
+: "${WORKSPACE:?WORKSPACE is required (must be served by workdir-exporter)}"
 
 [[ -d "${HDM_DIR}" ]] || { echo "ERROR: HDM_DIR does not exist: ${HDM_DIR}"; exit 1; }
 [[ -f "${SCHEMA_FILE}" ]] || { echo "ERROR: SCHEMA_FILE not found: ${SCHEMA_FILE}"; exit 1; }
@@ -47,6 +52,8 @@ s3_delete() {
 }
 
 # Temp folder for this run; delete it when the script exits
+# (workspace ARTIFACTS dirs are intentionally NOT cleaned up — they are the
+# persistent copy of the artifacts, see KONFLUX-16245)
 tmpdir=$(mktemp -d)
 trap 'rm -rf "${tmpdir}"' EXIT
 
@@ -68,16 +75,26 @@ echo "Found ${#KEYS[@]} tarball(s)"
 for key in "${KEYS[@]}"; do
     echo "=== ${key}"
 
-    # Download tarball and extract into a fresh directory
-    extract_dir="${tmpdir}/extract"
-    rm -rf "${extract_dir}"
-    mkdir -p "${extract_dir}"
+    # Derive job name and run dir from the S3 key: run-probe/<cluster>/<type>/<file>.tar.gz
+    rel="${key#"${S3_PREFIX}"}"
+    IFS='/' read -r cluster rtype rest <<<"${rel}"
+    if [[ -z "${cluster}" || -z "${rtype}" || -z "${rest}" || "${rest}" != *.tar.gz ]]; then
+        echo "  ERROR: unexpected S3 key layout: ${key}"
+        exit 1
+    fi
+    job_name="StoneSoupLoadTestFromS3_probe_${cluster}_${rtype}"
+    rundir="${rest%.tar.gz}"
+    dest_dir="${WORKSPACE}/ARTIFACTS/${job_name}/${rundir}"
+    rm -rf "${dest_dir}"
+    mkdir -p "${dest_dir}"
 
+    # Download tarball and extract it into the workspace ARTIFACTS directory so
+    # workdir-exporter serves the files (KONFLUX-16245).
     s3_tools download --bucket "${S3_BUCKET}" --remote "${key}" --local "${tmpdir}/run.tar.gz"
-    tar -xzf "${tmpdir}/run.tar.gz" -C "${extract_dir}"
+    tar -xzf "${tmpdir}/run.tar.gz" -C "${dest_dir}"
 
     # Find load-test.json; if missing, delete the object (timestamped keys are not re-uploaded).
-    local_file=$(find "${extract_dir}" -name 'load-test.json' -type f | head -1)
+    local_file=$(find "${dest_dir}" -name 'load-test.json' -type f | head -1)
     if [[ -z "${local_file}" ]]; then
         echo "  SKIP (no load-test.json)"
         s3_delete "${key}"
@@ -102,6 +119,15 @@ for key in "${KEYS[@]}"; do
     horreum_run_id=$(date -u -d "${start_ts}" +%Y%m%d)
     horreum_dataset_id=$(date -u -d "${start_ts}" +%H%M%S)
     labels_file="${tmpdir}/load-test-labels.json"
+
+    # In-cluster runs have no Jenkins env, so fill in the labels investigate.py needs
+    # to build the workdir-exporter URL (KONFLUX-16245). Existing values win.
+    jq --arg job_name "${job_name}" --arg artifact_dir "${dest_dir}" '
+        .metadata.env = (.metadata.env // {})
+        | .metadata.env.JOB_NAME = (.metadata.env.JOB_NAME // $job_name)
+        | .metadata.env.ARTIFACT_DIR = (.metadata.env.ARTIFACT_DIR // $artifact_dir)
+    ' "${local_file}" >"${tmpdir}/load-test-enriched.json"
+    mv "${tmpdir}/load-test-enriched.json" "${local_file}"
 
     echo "  Ingesting start=${start_ts}"
 
