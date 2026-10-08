@@ -6,6 +6,7 @@ import "strings"
 import "time"
 
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
+import k8s_api_errors "k8s.io/apimachinery/pkg/api/errors"
 import types "github.com/konflux-ci/loadtest/pkg/types"
 
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
@@ -123,13 +124,22 @@ func validatePipelineRunStarted(f *framework.Framework, namespace, buildPipeline
 func validatePipelineRunCondition(f *framework.Framework, namespace, buildPipelineRunName, compName string) error {
 	interval := time.Second * 20
 	timeout := time.Minute * 60
+	// A PipelineRun that no longer exists will never reappear, so a "not
+	// found" error persisting this long means it was either never created
+	// or already finished and garbage collected — fail fast instead of
+	// waiting for the full timeout.
+	notFoundFailAfter := time.Minute * 10
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
+	waitStarted := time.Now()
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
 		pr, err = getBuildPipelineRun(f, namespace, buildPipelineRunName)
 		if err != nil {
 			logging.Logger.Debug("Unable to get build PipelineRun %s for component %s in namespace %s: %v", buildPipelineRunName, compName, namespace, err)
+			if k8s_api_errors.IsNotFound(err) && time.Since(waitStarted) >= notFoundFailAfter {
+				return false, fmt.Errorf("build PipelineRun %s for component %s in namespace %s not found after %s of waiting, it was likely never created or already garbage collected", buildPipelineRunName, compName, namespace, notFoundFailAfter)
+			}
 			return false, nil
 		}
 
