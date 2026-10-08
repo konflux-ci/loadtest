@@ -172,13 +172,22 @@ func validatePipelineRunCondition(f *framework.Framework, namespace, buildPipeli
 func validatePipelineRunSignature(f *framework.Framework, namespace, buildPipelineRunName string) error {
 	interval := time.Second * 20
 	timeout := time.Minute * 60
+	// A PipelineRun that no longer exists will never reappear, so a "not
+	// found" error persisting this long means it was either never created
+	// or already finished and garbage collected — fail fast instead of
+	// waiting for the full timeout.
+	notFoundFailAfter := time.Minute * 10
 	var pr *pipeline.PipelineRun
 
 	// TODO It would be much better to watch this resource for a condition
+	waitStarted := time.Now()
 	err := utils.WaitUntilWithInterval(func() (done bool, err error) {
 		pr, err = getBuildPipelineRun(f, namespace, buildPipelineRunName)
 		if err != nil {
 			logging.Logger.Debug("Unable to get build PipelineRun %s in namespace %s: %v", buildPipelineRunName, namespace, err)
+			if k8s_api_errors.IsNotFound(err) && time.Since(waitStarted) >= notFoundFailAfter {
+				return false, fmt.Errorf("build PipelineRun %s in namespace %s not found after %s of waiting, it was likely never created or already garbage collected", buildPipelineRunName, namespace, notFoundFailAfter)
+			}
 			return false, nil
 		}
 
