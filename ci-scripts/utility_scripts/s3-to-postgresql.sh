@@ -3,8 +3,7 @@
 # Pull Kanary probe tarballs from S3 and ingest load-test.json into PostgreSQL (KONFLUX-15648).
 #
 # Requires: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, POSTGRESQL_PASS,
-#           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, jq, uv
-#           (WORKDIR_ROOT optional, defaults to /home/jenkins/workspace)
+#           SCHEMA_FILE, jq, (WORKDIR_ROOT optional, defaults to /home/jenkins/workspace)
 #
 # Artifacts are extracted to ${WORKDIR_ROOT}/ARTIFACTS/StoneSoupLoadTestFromS3_probe_<cluster>_<type>/<rundir>/
 # so workdir-exporter serves them for investigate.py (KONFLUX-16245). WORKDIR_ROOT must be
@@ -36,17 +35,14 @@ POSTGRESQL_DB="freebusy"
 : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}"
 : "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}"
 : "${AWS_REGION:?AWS_REGION is required}"
-: "${HDM_DIR:?HDM_DIR (horreum-data-mirror checkout) is required}"
 : "${SCHEMA_FILE:?SCHEMA_FILE is required}"
 # Dir served by workdir-exporter at /workspace (same root the probe Jenkins jobs write to).
 WORKDIR_ROOT="${WORKDIR_ROOT:-/home/jenkins/workspace}"
 [[ -d "${WORKDIR_ROOT}" ]] || { echo "ERROR: WORKDIR_ROOT does not exist (is this the workdir-exporter agent?): ${WORKDIR_ROOT}"; exit 1; }
 
-[[ -d "${HDM_DIR}" ]] || { echo "ERROR: HDM_DIR does not exist: ${HDM_DIR}"; exit 1; }
 [[ -f "${SCHEMA_FILE}" ]] || { echo "ERROR: SCHEMA_FILE not found: ${SCHEMA_FILE}"; exit 1; }
 [[ -f "${S3_ARTIFACTS}" ]] || { echo "ERROR: s3-artifacts.py not found: ${S3_ARTIFACTS}"; exit 1; }
 
-# S3 helper: run s3-artifacts.py with the platform python (boto3 from requirements.txt)
 s3_tools() {
     "${S3_ARTIFACTS}" "$@"
 }
@@ -66,10 +62,10 @@ trap 'rm -rf "${tmpdir}"' EXIT
 
 # Prioritize newest uploads across all clusters/scenarios; preserve S3 helper order.
 # Older objects not reached before bucket lifecycle expiry may remain un-ingested.
-mapfile -t KEYS < <(
-    s3_tools list --bucket "${S3_BUCKET}" --prefix "${S3_PREFIX}" --newest-first \
-        | grep '\.tar\.gz$'
-)
+# List failure (auth/network) must abort — an empty result only means "nothing to do".
+list_out=$(s3_tools list --bucket "${S3_BUCKET}" --prefix "${S3_PREFIX}" --newest-first) \
+    || { echo "ERROR: failed to list s3://${S3_BUCKET}/${S3_PREFIX}"; exit 1; }
+mapfile -t KEYS < <(printf '%s\n' "${list_out}" | grep '\.tar\.gz$' || true)
 
 # Empty bucket / no tarballs → success (nothing to do this hour).
 if [[ ${#KEYS[@]} -eq 0 || -z "${KEYS[0]:-}" ]]; then
@@ -163,13 +159,13 @@ for key in "${KEYS[@]}"; do
 
     # Turn load-test.json into a labels JSON file using horreum-data-mirror's
     # compute_labels.py and our Horreum schema (SCHEMA_FILE).
-    (cd "${HDM_DIR}" && uv run python compute_labels.py \
+    (compute_labels.py \
         --source "${local_file}" \
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
     # treat that as OK and still delete the S3 object.
-    if ! out=$(cd "${HDM_DIR}" && uv run python labels_to_postgresql.py \
+    if ! out=$(labels_to_postgresql.py \
         --label-values "${labels_file}" \
         --horreum-test-id "${HORREUM_TEST_ID}" \
         --horreum-run-id "${horreum_run_id}" \
