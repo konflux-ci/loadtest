@@ -3,11 +3,16 @@
 # Pull Kanary probe tarballs from S3 and ingest load-test.json into PostgreSQL (KONFLUX-15648).
 #
 # Requires: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, POSTGRESQL_PASS,
-#           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, WORKSPACE, jq, uv
+#           HDM_DIR (horreum-data-mirror checkout), SCHEMA_FILE, jq, uv
+#           (WORKDIR_ROOT optional, defaults to /home/jenkins/workspace)
 #
-# Artifacts are extracted to ${WORKSPACE}/ARTIFACTS/StoneSoupLoadTestFromS3_probe_<cluster>_<type>/<rundir>/
-# so workdir-exporter serves them for investigate.py (KONFLUX-16245). Missing JOB_NAME /
-# ARTIFACT_DIR labels in load-test.json are filled in before label computation.
+# Artifacts are extracted to ${WORKDIR_ROOT}/ARTIFACTS/StoneSoupLoadTestFromS3_probe_<cluster>_<type>/<rundir>/
+# so workdir-exporter serves them for investigate.py (KONFLUX-16245). WORKDIR_ROOT must be
+# the directory the exporter serves at /workspace — the probe Jenkins jobs hardcode
+# /home/jenkins/workspace/ARTIFACTS/... and investigate.py builds URLs from the last path
+# element of ARTIFACT_DIR, so the job's own ${WORKSPACE} (a per-job subdir) would 404.
+# Missing JOB_NAME / ARTIFACT_DIR labels in load-test.json are filled in before label
+# computation.
 #
 # After a successful ingest (or a permanent skip), the S3 object is deleted so we do not
 # rely on a local done-file on Jenkins (workspaces get cleaned). Failed ingests leave the
@@ -33,7 +38,9 @@ POSTGRESQL_DB="freebusy"
 : "${AWS_REGION:?AWS_REGION is required}"
 : "${HDM_DIR:?HDM_DIR (horreum-data-mirror checkout) is required}"
 : "${SCHEMA_FILE:?SCHEMA_FILE is required}"
-: "${WORKSPACE:?WORKSPACE is required (must be served by workdir-exporter)}"
+# Dir served by workdir-exporter at /workspace (same root the probe Jenkins jobs write to).
+WORKDIR_ROOT="${WORKDIR_ROOT:-/home/jenkins/workspace}"
+[[ -d "${WORKDIR_ROOT}" ]] || { echo "ERROR: WORKDIR_ROOT does not exist (is this the workdir-exporter agent?): ${WORKDIR_ROOT}"; exit 1; }
 
 [[ -d "${HDM_DIR}" ]] || { echo "ERROR: HDM_DIR does not exist: ${HDM_DIR}"; exit 1; }
 [[ -f "${SCHEMA_FILE}" ]] || { echo "ERROR: SCHEMA_FILE not found: ${SCHEMA_FILE}"; exit 1; }
@@ -88,7 +95,7 @@ for key in "${KEYS[@]}"; do
     fi
     job_name="StoneSoupLoadTestFromS3_probe_${cluster}_${rtype}"
     rundir="${rest%.tar.gz}"
-    dest_dir="${WORKSPACE}/ARTIFACTS/${job_name}/${rundir}"
+    dest_dir="${WORKDIR_ROOT}/ARTIFACTS/${job_name}/${rundir}"
 
     # Download tarball and extract it into a staging dir first; the published dir is
     # replaced only after extraction succeeds, so a failed retry cannot destroy an
@@ -139,10 +146,18 @@ for key in "${KEYS[@]}"; do
     mv "${tmpdir}/load-test-enriched.json" "${local_file}"
 
     # Publish: replace the served run dir only now that the replacement is complete
-    # (KONFLUX-16245 review).
+    # (KONFLUX-16245 review). mv requires the destination's parent dir to exist —
+    # Jenkins workspaces ship without ARTIFACTS/ — so create it first.
+    mkdir -p "$(dirname "${dest_dir}")"
     rm -rf "${dest_dir}"
     mv "${stage_dir}" "${dest_dir}"
     local_file=$(find "${dest_dir}" -name 'load-test.json' -type f | head -1)
+    # Fail fast if the publish step failed instead of feeding an empty path into
+    # compute_labels.py (KONFLUX-16245: cascaded into confusing downstream errors).
+    if [[ -z "${local_file}" ]]; then
+        echo "  ERROR: artifact publish failed for ${key}"
+        exit 1
+    fi
 
     echo "  Ingesting start=${start_ts}"
 
