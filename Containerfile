@@ -86,6 +86,8 @@ RUN python3 -m pip install -U pip && \
 # Install our scripts
 COPY ci-scripts/ \
      ./ci-scripts/
-# Test s3-artifacts script is OK
-RUN python3 ci-scripts/s3-artifacts.py --help
+# Test s3-artifacts script is OK and also scripts from horreum-data-mirror.git
+RUN python3 ci-scripts/s3-artifacts.py --help && \
+    labels-to-postgresql.py --help && \
+    compute-labels.py --help
 CMD ["sleep", "5d"]
