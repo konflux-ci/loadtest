@@ -50,7 +50,7 @@ s3_tools() {
 # Remove the object from S3 once we are done with it (success or permanent skip).
 s3_delete() {
     local key="$1"
-    echo "  Deleting s3://${S3_BUCKET}/${key}"
+    echo "$( date --utc -Ins ) Deleting s3://${S3_BUCKET}/${key}"
     s3_tools delete --bucket "${S3_BUCKET}" --remote "${key}"
 }
 
@@ -63,20 +63,21 @@ trap 'rm -rf "${tmpdir}"' EXIT
 # Prioritize newest uploads across all clusters/scenarios; preserve S3 helper order.
 # Older objects not reached before bucket lifecycle expiry may remain un-ingested.
 # List failure (auth/network) must abort — an empty result only means "nothing to do".
+echo "$( date --utc -Ins ) Listing tarball(s)"
 list_out=$(s3_tools list --bucket "${S3_BUCKET}" --prefix "${S3_PREFIX}" --newest-first) \
-    || { echo "ERROR: failed to list s3://${S3_BUCKET}/${S3_PREFIX}"; exit 1; }
+    || { echo "$( date --utc -Ins ) ERROR: failed to list s3://${S3_BUCKET}/${S3_PREFIX}"; exit 1; }
 mapfile -t KEYS < <(printf '%s\n' "${list_out}" | grep '\.tar\.gz$' || true)
 
 # Empty bucket / no tarballs → success (nothing to do this hour).
 if [[ ${#KEYS[@]} -eq 0 || -z "${KEYS[0]:-}" ]]; then
-    echo "No .tar.gz objects under s3://${S3_BUCKET}/${S3_PREFIX}"
+    echo "$( date --utc -Ins ) No .tar.gz objects under s3://${S3_BUCKET}/${S3_PREFIX}"
     exit 0
 fi
 
-echo "Found ${#KEYS[@]} tarball(s)"
+echo "$( date --utc -Ins ) Found ${#KEYS[@]} tarball(s)"
 
 for key in "${KEYS[@]}"; do
-    echo "=== ${key}"
+    echo "$( date --utc -Ins ) Working on ${key}"
 
     # Derive job name and run dir from the S3 key: run-probe/<cluster>/<type>/<file>.tar.gz
     # Components become directory names that get rm -rf'ed, so each must be a plain name —
@@ -101,13 +102,15 @@ for key in "${KEYS[@]}"; do
     rm -rf "${stage_dir}"
     mkdir -p "${stage_dir}"
 
+    echo "$( date --utc -Ins ) Downloading ${rest}"
     s3_tools download --bucket "${S3_BUCKET}" --remote "${key}" --local "${tmpdir}/run.tar.gz"
+    echo "$( date --utc -Ins ) Extracting ${rest}"
     tar -xzf "${tmpdir}/run.tar.gz" -C "${stage_dir}"
 
     # Find load-test.json; if missing, delete the object (timestamped keys are not re-uploaded).
     local_file=$(find "${stage_dir}" -name 'load-test.json' -type f | head -1)
     if [[ -z "${local_file}" ]]; then
-        echo "  SKIP (no load-test.json)"
+        echo "$( date --utc -Ins ) SKIP (no load-test.json)"
         s3_delete "${key}"
         continue
     fi
@@ -115,7 +118,7 @@ for key in "${KEYS[@]}"; do
     # Check that this is a Konflux cluster probe result (matches Horreum test 372).
     # If the name is something else, skip and delete — that object will not change.
     if ! jq -r '.name' "${local_file}" | grep -q 'Konflux cluster probe'; then
-        echo "  SKIP (unexpected .name)"
+        echo "$( date --utc -Ins ) SKIP (unexpected .name)"
         s3_delete "${key}"
         continue
     fi
@@ -134,6 +137,7 @@ for key in "${KEYS[@]}"; do
     # Overwrite JOB_NAME / ARTIFACT_DIR with where this script publishes the artifacts:
     # any values from the source run refer to the in-cluster pod, not the served files,
     # and investigate.py must build its URL from the published location (KONFLUX-16245 review).
+    echo "$( date --utc -Ins ) Enritching ${rest}"
     jq --arg job_name "${job_name}" --arg artifact_dir "${dest_dir}" '
         .metadata.env = (.metadata.env // {})
         | .metadata.env.JOB_NAME = $job_name
@@ -151,20 +155,20 @@ for key in "${KEYS[@]}"; do
     # Fail fast if the publish step failed instead of feeding an empty path into
     # compute-labels.py (KONFLUX-16245: cascaded into confusing downstream errors).
     if [[ -z "${local_file}" ]]; then
-        echo "  ERROR: artifact publish failed for ${key}"
+        echo "$( date --utc -Ins ) ERROR: artifact publish failed for ${key}"
         exit 1
     fi
 
-    echo "  Ingesting start=${start_ts}"
-
     # Turn load-test.json into a labels JSON file using horreum-data-mirror's
     # compute-labels.py and our Horreum schema (SCHEMA_FILE).
+    echo "$( date --utc -Ins ) Computing labels ${rest} start=${start_ts}"
     (compute-labels.py \
         --source "${local_file}" \
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
     # treat that as OK and still delete the S3 object.
+    echo "$( date --utc -Ins ) Inserting labels ${rest} start=${start_ts}"
     if ! out=$(labels-to-postgresql.py \
         --label-values "${labels_file}" \
         --horreum-test-id "${HORREUM_TEST_ID}" \
@@ -178,9 +182,9 @@ for key in "${KEYS[@]}"; do
         --postgresql-db "${POSTGRESQL_DB}" \
         --debug 2>&1); then
         if echo "${out}" | grep -qi 'already exists'; then
-            echo "  WARNING: already in PostgreSQL, deleting S3 object"
+            echo "$( date --utc -Ins ) WARNING: already in PostgreSQL, deleting S3 object"
         else
-            echo "  ERROR: labels-to-postgresql.py failed:"
+            echo "$( date --utc -Ins ) ERROR: labels-to-postgresql.py failed:"
             echo "${out}"
             exit 1
         fi
@@ -188,7 +192,7 @@ for key in "${KEYS[@]}"; do
 
     # Ingest succeeded (or already in DB) — remove from S3 so the next run won't see it.
     s3_delete "${key}"
-    echo "  Done"
+    echo "$( date --utc -Ins ) Done with ${rest}"
 done
 
 echo "Finished"
