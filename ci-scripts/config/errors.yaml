@@ -26,8 +26,9 @@
   id: application_creation_failed_because_it_already_exists
   note: ''
   reason: Application creation failed because it already exists
-  regexp: 'Application failed creation: Unable to create the Application .*: applications.appstudio.redhat.com .* already exists'
-  test_dir: []
+  regexp: 'Application failed creation: unable to create the Application .*: applications.appstudio.redhat.com .* already exists'
+  test_dir:
+  - run-probe-stone-prod-p02-rpm-20261008T104919Z
   type: loadtest
 - caused_by: test
   id: application_creation_failed_because_of_tls_handshake_timeout
@@ -377,6 +378,14 @@
   test_dir:
   - run-stone-stage-p01-2026_08_11T18_44_28_176000000_00_00
   type: loadtest
+- caused_by: pipelines-controller
+  id: build_pipeline_run_failed_because_tekton_couldnt_get_task_due_to_missing_required_cluster_resolver_params_namespace
+  note: ''
+  reason: Build Pipeline Run failed because Tekton could not resolve the git-clone-oci-ta task, missing required cluster resolver params namespace
+  regexp: 'Reason:CouldntGetTask Message:Pipeline [^ ]+ can.t be Run; it contains Tasks that don.t exist.*missing required cluster resolver params: namespace'
+  test_dir:
+  - run-probe-kflux-fedora-01-container-single-arch-20261006T100217Z
+  type: loadtest
 - caused_by: cluster
   id: build_pipeline_run_failed_starting_because_cluster_context_deadline_exceeded
   note: ''
@@ -392,12 +401,28 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun for component .* failed: \{Type:Succeeded Status:False Severity: LastTransitionTime:\{Inner:.*\} Reason:CouldntGetPipeline Message:Error retrieving pipeline for pipelinerun .*: resolver failed to get Pipeline : error requesting remote resource: invalid resource request "[^"]+": invalid git repository url: (RPM_PIPELINE_URL|\{\{ (RPM_PIPELINE_URL)? \}\})\}'
   test_dir: []
   type: loadtest
+- caused_by: cluster
+  id: build_pipeline_run_failed_waiting_because_pipelinerun_was_not_found_after_10m0s_of_waiting_likely_never_created_or_already_garbage_collected
+  note: ''
+  reason: Build Pipeline Run failed waiting because PipelineRun was not found after 10m0s of waiting, likely never created or already garbage collected
+  regexp: 'Build Pipeline Run failed (run|signing): build PipelineRun [^ ]+ (for component [^ ]+ )?in namespace [^ ]+ not found after [0-9]+m[0-9]+s of waiting, it was likely never created or already garbage collected'
+  test_dir:
+  - run-kflux-lw-p01-2026_10_08T11_18_03_047000000_00_00
+  type: loadtest
 - caused_by: pipelines-controller
   id: build_pipeline_run_was_cancelled
   note: ''
   reason: Build Pipeline Run was cancelled
   regexp: 'Build Pipeline Run failed run: PipelineRun for component .* in namespace .* failed: .* Reason:Cancelled.*Message:PipelineRun .* was cancelled'
   test_dir: []
+  type: loadtest
+- caused_by: test
+  id: build_pipeline_validation_failed_because_source_to_sdist_task_is_missing_required_params_fix_type_build_configs_repo_url_build_configs_revision
+  note: ''
+  reason: Build pipeline validation failed because source-to-sdist task is missing required params FIX_TYPE, BUILD_CONFIGS_REPO_URL, BUILD_CONFIGS_REVISION
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .*Reason:PipelineValidationFailed Message:\[User error\] Validation failed for pipelinerun [^ ]+ with error invalid input params for task source-to-sdist: missing values for these params which have no default values: \[FIX_TYPE BUILD_CONFIGS_REPO_URL BUILD_CONFIGS_REVISION\]'
+  test_dir:
+  - run-lightwell-dev-2026_10_05T13_44_04_563000000_00_00
   type: loadtest
 - caused_by: cluster
   id: build_pod_creation_forbidden_because_scc_restricted_v2_does_not_allow_container_runasuser_0
@@ -489,6 +514,14 @@
   regexp: 'buildah \[stderr\] Error: unable to copy from source docker://registry\.access\.redhat\.com/[^ ]+: initializing source docker://registry\.access\.redhat\.com/[^ ]+:.*unable to retrieve auth token: invalid username/password: unauthorized: Please login to the Red Hat Registry using your Customer Portal credentials\..*pre-pulling image \{[^}]+\}: exit status 125'
   test_dir:
   - run-stone-prod-p02-2026_08_12T20_40_21_592000000_00_00
+  type: logs
+- caused_by: MPC
+  id: calculate_deps_s390x_mock_build_failed_because_podman_could_not_inspect_ubi10_bootstrap_image
+  note: Mock s390x build fails in the buildroot_lock plugin postdeps hook when podman image inspect of registry.access.redhat.com/ubi10/ubi returns exit status 125 (registry access failure on the s390x builder)
+  reason: s390x calculate-deps mock build failed because podman could not inspect the ubi10 bootstrap image, exit status 125
+  regexp: 'subprocess.CalledProcessError: Command .\[.podman., .image., .inspect.,.*registry\.access\.redhat\.com/ubi10/ubi.*returned non-zero exit status 125'
+  test_dir:
+  - run-probe-stone-prod-p02-rpm-20261009T182705Z
   type: logs
 - caused_by: task
   id: can_not_find_chroot_scan_tar_gz_file
@@ -1489,6 +1522,14 @@
   regexp: 'Release .* in namespace .* failed: .*Message:Release validation failed.*'
   test_dir: []
   type: loadtest
+- caused_by: task
+  id: fromager_build_wheels_failed_because_primary_wheel_metadata_version_mismatched_computed_remediated_version
+  note: ''
+  reason: Fromager build wheels failed because primary wheel metadata version did not match computed remediated version
+  regexp: 'FATAL: primary wheel [^ ]+ metadata version .[^ ]+.. != computed remediated version .[^ ]+..'
+  test_dir:
+  - run-kflux-lw-p01-2026_10_07T14_15_53_682000000_00_00
+  type: logs
 - caused_by: cluster
   id: fulcio_signing_cert_400_bad_request
   note: ''
@@ -1817,6 +1858,14 @@
   - run-stone-stage-p01-2026_06_01T07_44_18_613000000_00_00
   type: logs
 - caused_by: image-controller
+  id: imagerepository_creation_failed_because_it_is_already_being_deleted
+  note: ''
+  reason: ImageRepository creation failed because it is already being deleted
+  regexp: 'ImageRepository creation failed: unable to create ImageRepository [^ ]+: object is being deleted: imagerepositories.appstudio.redhat.com .[^ ]+. already exists'
+  test_dir:
+  - run-probe-stone-stg-rh01-container-multi-arch-20261008T112101Z
+  type: loadtest
+- caused_by: image-controller
   id: imagerepository_failed_to_become_ready_because_context_deadline_exceeded
   note: Seen across multiple clusters Jul 15-16 2026 (UNKNOWN dump); distinct from component onboarding timeout
   reason: ImageRepository failed to become ready because context deadline exceeded
@@ -1878,6 +1927,14 @@
   test_dir:
   - run-stone-stg-rh01-2026_01_11T09_09_18_354000000_00_00
   type: loadtest
+- caused_by: task
+  id: mirror_rpm_repo_step_failed
+  note: ''
+  reason: Mirror-rpm-repo step failed
+  regexp: Mirror-rpm-repo step failed
+  test_dir:
+  - run-probe-kflux-fedora-01-rpm-20261009T202048Z
+  type: loadtest
 - caused_by: pipelines-controller
   id: missing_expected_fields_in_taskrun
   note: This is special error, meaning everithing failed basically
@@ -1922,6 +1979,14 @@
   regexp: 'urllib3.exceptions.ProtocolError: .''Connection broken: IncompleteRead.*'
   test_dir:
   - run-stone-prod-p02-2026_01_28T16_03_43_020000000_00_00
+  type: logs
+- caused_by: mirrors.fedoraproject.org
+  id: mock_build_failed_to_download_metadata_because_mirrors_fedoraproject_org_returned_503
+  note: ''
+  reason: Mock build failed to download metadata because mirrors.fedoraproject.org returned 503
+  regexp: 'ERROR Command returned error: Failed to download metadata \(metalink: .https://mirrors\.fedoraproject\.org/metalink\?repo=rawhide&arch=[a-z0-9_]+.\) for repository .fedora.: Download failed: Status code: 503 for https://mirrors\.fedoraproject\.org/metalink\?repo=rawhide&arch=[a-z0-9_]+'
+  test_dir:
+  - run-probe-stone-prd-rh01-rpm-20261009T060932Z
   type: logs
 - caused_by: mirrors.fedoraproject.org
   id: mock_build_failed_to_download_metadata_due_to_zchunk_lead_error
@@ -2422,6 +2487,14 @@
   reason: SKIP
   regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Unauthorized'
   test_dir: []
+  type: loadtest
+- caused_by: cluster
+  id: post_test_pod_log_collection_failed_to_list_pods_because_connection_to_the_cluster_api_server_timed_out
+  note: ''
+  reason: Post-test pod log collection failed to list pods because connection to the cluster API server timed out
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Get .[^ ]+.: read tcp [0-9.:]+->[0-9.:]+: read: connection timed out'
+  test_dir:
+  - run-kflux-lw-p01-2026_10_07T11_37_03_171000000_00_00
   type: loadtest
 - caused_by: cluster
   id: prefetch_dependencies_failed_because_artifact_registry_proxy_connection_failed
@@ -2954,8 +3027,9 @@
   id: repo_forking_failed_on_gitlab_com_because_401_unauthorized
   note: ''
   reason: Repo forking failed on gitlab.com because 401 Unauthorized
-  regexp: 'Repo forking failed: Error getting project [^ ]+: GET https://gitlab.com/[^ ]+: 401 .message: 401 Unauthorized.'
-  test_dir: []
+  regexp: 'Repo forking failed: error getting project [^ ]+: GET https://gitlab.com/[^ ]+: 401 .message: 401 Unauthorized.'
+  test_dir:
+  - run-probe-kflux-lw-p01-container-multi-arch-20261008T104536Z
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: repo_forking_failed_timeout_likely_maintenance_or_conflict
@@ -3416,6 +3490,14 @@
   test_dir:
   - run-stone-stage-p01-2026_08_24T09_44_03_556000000_00_00
   type: logs
+- caused_by: task
+  id: rpms_signature_scan_step_oomkilled_with_exit_code_137
+  note: ''
+  reason: RPM signature scan step was OOMKilled with exit code 137
+  regexp: '.message.: ?\"(\\\")?step-rpms-signature-scan(\\\")? exited with code 137: OOMKilled'
+  test_dir:
+  - run-kflux-ocp-p01-2026_10_08T11_50_01_840000000_00_00
+  type: condition
 - caused_by: quay.io
   id: sast_results_upload_failed_because_quay_io_auth_redirected_to_brew_registry_redhat_io_returned_401
   note: ''
@@ -3576,6 +3658,13 @@
   test_dir: []
   type: loadtest
 - caused_by: SKIP
+  id: skip_11
+  note: ''
+  reason: SKIP
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Get .[^ ]+.: read tcp [0-9.:]+->[0-9.:]+: read: connection timed out'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
   id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
@@ -3647,6 +3736,14 @@
   test_dir:
   - run-stone-prod-p02-2026_03_11T20_51_32_754000000_00_00
   type: logs
+- caused_by: task
+  id: source_to_sdist_failed_because_build_config_validation_found_versions_0_must_be_a_string_got_dict
+  note: ''
+  reason: Source-to-sdist failed because build config validation reported versions entry 0 must be a string, got dict
+  regexp: versions\[0\] must be a string, got dict
+  test_dir:
+  - run-kflux-lw-p01-2026_10_07T14_02_07_546000000_00_00
+  type: logs
 - caused_by: test
   id: ssh_connection_reset_during_build
   note: ''
@@ -3702,6 +3799,14 @@
   regexp: '"message": "TaskRun Pod exceeded available resources", "reason": "ExceededNodeResources"'
   test_dir:
   - run-kflux-prd-rh03-2026_02_15T16_16_58_697000000_00_00
+  type: condition
+- caused_by: pipelines-controller
+  id: taskrun_resolution_failed_because_missing_required_hub_resolver_params_version
+  note: ''
+  reason: TaskRun resolution failed because missing required hub resolver params version
+  regexp: '.message.: .error requesting remote resource: invalid resource request .[^ ]+.: failed to validate params: missing required hub resolver params: version., .reason.: .TaskRunResolutionFailed.'
+  test_dir:
+  - run-probe-stone-stg-rh01-container-multi-arch-20261008T110229Z
   type: condition
 - caused_by: pipelines-controller
   id: taskrun_resolution_failed_because_tekton_encountered_invalid_yaml_control_characters
