@@ -3,7 +3,7 @@ module github.com/konflux-ci/loadtest
 go 1.26.0
 
 require (
-	github.com/konflux-ci/e2e-tests v0.0.0-20261005080553-57f6fb6eb6f2
+	github.com/konflux-ci/e2e-tests v0.0.0-20261008173851-02aa7d0c3700
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.9.2
 	k8s.io/apimachinery v0.37.1
