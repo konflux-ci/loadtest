@@ -87,6 +87,9 @@ func validateTestPipelineRunCondition(f *framework.Framework, namespace, itsName
 			if (strings.HasPrefix(string(condition.Type), "Error") || strings.HasSuffix(string(condition.Type), "Error")) && condition.Status == "True" {
 				return false, fmt.Errorf("PipelineRun for integration test pipeline %s in namespace %s is in error state: %+v", snapName, namespace, condition)
 			}
+			if condition.Type == "Succeeded" && condition.Status == "False" {
+				return false, fmt.Errorf("PipelineRun for integration test pipeline %s in namespace %s failed: %+v", snapName, namespace, condition)
+			}
 			if condition.Type == "Succeeded" && condition.Status == "True" {
 				return true, nil
 			}
