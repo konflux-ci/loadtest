@@ -12,7 +12,7 @@ loadtest binary
   → collected-data/{namespace}/{journeyIndex}/   (K8s object dumps)
 
 collect-results.sh
-  → evaluate.py        → load-test-timings.json
+  → evaluate.py        → load-test-timings.json (KPI and TaskRun locations)
   → errors.py          → load-test-errors.json
   → get-taskruns-durations.py → get-taskruns-durations.json
   → show-pipelineruns.py      → show-pipelines.svg
@@ -33,6 +33,7 @@ Horreum / PostgreSQL (utility scripts)
 ## Invariants
 
 - **`load-test.json` shape**: `status_data.py` sets `parameters.options`, `results.measurements`, `results.errors`, and `results.durations` subtrees from the intermediate JSON files; downstream Horreum extractors use JSONPath labels like `$.results.measurements.KPI.mean`.
+- **TaskRun locations**: `results.measurements.task_locations` maps each TaskRun name to its pipeline, task, platform, Pod, node, VM, duration, and success state. `node` comes from the collected Pod's `spec.nodeName`; `vm` comes from a valid TaskRun cloud-address annotation or a single IP in the Pod's build log. `results.errors.task_errors` maps failed TaskRun names to classified reasons. Consumers join the two maps by TaskRun name before grouping by node or VM.
 - **Evaluation order**: `evaluate.py` runs before `errors.py` because error categorization may reference timing structure.
 - **Schema coupling**: changes to KPI JSON keys require updating `horreum-schema.json` and re-importing to Horreum (see `ci-scripts/config/README.md`).
 - **Probe exit policy**: `run-probe/collect-results.sh` may fail the job when KPI thresholds are breached; CI daily runs typically record without gating.
@@ -42,6 +43,7 @@ Horreum / PostgreSQL (utility scripts)
 - **Separation of concerns**: Go emits raw timings; Python computes KPI semantics; shell orchestrates aggregation and monitoring in the environment where secrets and Prometheus live.
 - **Single master JSON** simplifies Horreum upload and historical backfill (`shovel.py`, `horreum-data-mirror`) without re-running cluster queries.
 - **Collected Kubernetes JSON** is independent of KPI math — it supports deep dives when CSV aggregates hide failure context.
+- VM attribution depends on the SSH client emitting a known-hosts line in the collected build log. A task that never reached SSH, or whose log contains multiple distinct host IPs, has no VM attribution. PipelineRun-level errors with no TaskRun cannot be attributed to a node or VM.
 
 ## Trade-offs
 

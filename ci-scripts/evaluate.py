@@ -4,9 +4,11 @@
 import csv
 import datetime
 import json
+import ipaddress
 import re
 import statistics
 import sys
+from pathlib import Path
 
 # Column indexes in input data
 COLUMN_WHEN = 0
@@ -217,6 +219,105 @@ def count_stats_when(data):
         }
 
 
+VM_HOST_RE = re.compile(
+    r"Permanently added ['\"]([^'\"]+)['\"] \([^)]*\) to the list of known hosts"
+)
+
+
+def task_locations(collected_data):
+    """Map each collected TaskRun to its execution node and, when known, VM IP."""
+    root = Path(collected_data)
+    if not root.is_dir():
+        return {}
+
+    pods = {}
+    for path in root.rglob("collected-pod-*.json"):
+        try:
+            pod = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        name = pod.get("metadata", {}).get("name")
+        if name:
+            pods[(path.parent, name)] = pod
+
+    locations = {}
+    for path in root.rglob("collected-taskrun-*.json"):
+        try:
+            taskrun = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        meta = taskrun.get("metadata", {})
+        status = taskrun.get("status", {})
+        name = meta.get("name")
+        if not name:
+            continue
+        labels = meta.get("labels", {})
+        pod_name = status.get("podName")
+        pod = pods.get((path.parent, pod_name), {})
+        node = pod.get("spec", {}).get("nodeName") or status.get("nodeName")
+        platform = labels.get("build.appstudio.redhat.com/target-platform")
+        if not platform:
+            platform = next(
+                (
+                    param.get("value")
+                    for param in taskrun.get("spec", {}).get("params", [])
+                    if param.get("name")
+                    in ("PLATFORM", "image-arch", "image-platform", "platform")
+                ),
+                None,
+            )
+        duration = None
+        try:
+            created = str2date(meta["creationTimestamp"])
+            completed = str2date(status["completionTime"])
+            duration = (completed - created).total_seconds()
+        except (KeyError, TypeError, ValueError):
+            pass
+        succeeded = next(
+            (
+                condition.get("status") == "True"
+                for condition in status.get("conditions", [])
+                if condition.get("type") == "Succeeded"
+            ),
+            None,
+        )
+        location = {
+            "pipelinerun": labels.get("tekton.dev/pipelineRun"),
+            "task": labels.get("tekton.dev/task"),
+            "pipeline_type": labels.get("pipelines.appstudio.openshift.io/type"),
+            "platform": platform,
+            "pod": pod_name,
+            "node": node,
+            "vm": None,
+            "duration": duration,
+            "succeeded": succeeded,
+        }
+        annotated_vm = meta.get("annotations", {}).get(
+            "build.appstudio.redhat.com/cloud-address"
+        )
+        if annotated_vm:
+            try:
+                location["vm"] = str(ipaddress.ip_address(annotated_vm))
+            except ValueError:
+                pass
+        addresses = set()
+        if pod_name and location["vm"] is None:
+            for log in path.parent.glob(f"pod-{pod_name}-step-build.log"):
+                try:
+                    for match in VM_HOST_RE.finditer(log.read_text(errors="replace")):
+                        candidate = match.group(1)
+                        try:
+                            addresses.add(str(ipaddress.ip_address(candidate)))
+                        except ValueError:
+                            pass
+                except OSError:
+                    pass
+        if len(addresses) == 1:
+            location["vm"] = addresses.pop()
+        locations[name] = location
+    return locations
+
+
 def main():
     options_file = sys.argv[1]
     input_file = sys.argv[2]
@@ -410,6 +511,8 @@ def main():
     print(f"KPI failed phase: {stats['KPI']['failed_phase']}")
 
     with open(output_file, "w") as fp:
+        if len(sys.argv) > 4:
+            stats["task_locations"] = task_locations(sys.argv[4])
         json.dump(stats, fp, indent=4)
     print(f"Stats dumped to {output_file}")
 
