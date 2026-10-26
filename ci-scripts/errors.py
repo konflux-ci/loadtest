@@ -196,6 +196,51 @@ class Analyzer:
         except FileNotFoundError:
             return ""
 
+    def task_error_reasons(self) -> dict[str, list[str]]:
+        """Classify failed TaskRuns independently for node/VM attribution."""
+        errors = {}
+        if not self.dump_dir.is_dir():
+            return errors
+        for path in self.dump_dir.rglob("collected-taskrun-*.json"):
+            taskrun = self.load_json(path)
+            name = taskrun.get("metadata", {}).get("name")
+            status = taskrun.get("status", {})
+            failed = next(
+                (
+                    condition
+                    for condition in status.get("conditions", [])
+                    if condition.get("type") == "Succeeded"
+                    and condition.get("status") == "False"
+                ),
+                None,
+            )
+            if not name or not failed:
+                continue
+            reasons = set()
+            pod_name = status.get("podName")
+            if pod_name:
+                for step in status.get("steps", []):
+                    terminated = step.get("terminated") or {}
+                    if terminated.get("exitCode", 0) == 0:
+                        continue
+                    container = step.get("container")
+                    if not container:
+                        continue
+                    log_path = path.parent / f"pod-{pod_name}-{container}.log"
+                    try:
+                        reason, _ = self.plr_matcher.match(
+                            log_path.read_text(encoding="utf-8", errors="replace")
+                        )
+                        if reason not in ("SKIP", "UNKNOWN"):
+                            reasons.add(reason)
+                    except OSError:
+                        pass
+            condition_reason, _ = self.tr_matcher.match(json.dumps(failed))
+            if condition_reason not in ("SKIP", "UNKNOWN"):
+                reasons.add(condition_reason)
+            errors[name] = sorted(reasons) if reasons else ["UNKNOWN"]
+        return errors
+
     def investigate_plr(self, plr_type: str = "build") -> list[tuple[str, str]]:
         """
         Performs a deep investigation into a failed PipelineRun to find
@@ -266,7 +311,9 @@ class StatsProcessor:
             if cause and reason != "SKIP":
                 self.caused_by_list.append(cause)
 
-    def dump(self, output_path: Path) -> None:
+    def dump(
+        self, output_path: Path, task_errors: dict[str, list[str]] | None = None
+    ) -> None:
         """Writes the aggregated statistics to a JSON file."""
         data = {
             "error_by_code": self.error_by_code,
@@ -279,6 +326,7 @@ class StatsProcessor:
             "error_messages": self.error_messages,
             "error_caused_by": self.caused_by_list,
             "error_caused_by_simple": ", ".join(sorted(set(self.caused_by_list))),
+            "task_errors": task_errors or {},
         }
 
         print(f"Errors detected: {len(self.error_messages)}")
@@ -351,7 +399,7 @@ def process_csv_mode(
     if timings.get("KPI", {}).get("mean") == -1 and not stats.error_messages:
         stats.add("No test run finished", "No test run finished", [])
 
-    stats.dump(output_file)
+    stats.dump(output_file, analyzer.task_error_reasons())
 
 
 def main():
