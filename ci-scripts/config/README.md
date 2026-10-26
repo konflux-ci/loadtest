@@ -28,6 +28,14 @@ To add a label:
 
 After changing the schema, re-import it in Horreum (see import guide above).
 
+The `__results_measurements_task_locations` label extracts the TaskRun location
+map from `$.results.measurements.task_locations`. After importing this schema,
+check a new probe run in Horreum to confirm the label contains the TaskRun names
+and their node and VM values. The `__results_errors_task_errors` label extracts
+classified reasons for failed TaskRuns from `$.results.errors.task_errors`.
+Existing runs will not have these fields. VM values can be null when neither
+the TaskRun annotation nor its build log identifies one IP.
+
 Local verification
 ------------------
 
