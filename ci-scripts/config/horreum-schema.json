@@ -8540,6 +8540,21 @@
     {
       "access": "PUBLIC",
       "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_errors_task_errors",
+      "extractors": [
+        {
+          "name": "__results_errors_task_errors",
+          "jsonpath": "$.results.errors.task_errors",
+          "isarray": false
+        }
+      ],
+      "filtering": false,
+      "metrics": false,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
       "id": 14007,
       "name": "__results_measurements_HandleUser_error_rate",
       "extractors": [
@@ -8821,6 +8836,21 @@
       ],
       "filtering": false,
       "metrics": true,
+      "schemaId": 169
+    },
+    {
+      "access": "PUBLIC",
+      "owner": "hybrid-cloud-experience-perfscale-team",
+      "name": "__results_measurements_task_locations",
+      "extractors": [
+        {
+          "name": "__results_measurements_task_locations",
+          "jsonpath": "$.results.measurements.task_locations",
+          "isarray": false
+        }
+      ],
+      "filtering": false,
+      "metrics": false,
       "schemaId": 169
     },
     {
