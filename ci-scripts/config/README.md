@@ -32,9 +32,10 @@ and stored in Postgres by ``ci-scripts/utility_scripts/s3-to-postgresql.sh``
 The ``__results_measurements_taskrun_locations`` label extracts
 ``$.results.measurements.taskrun_locations``, an object keyed by TaskRun name::
 
-    "<taskrun>": {"pipelinerun": ..., "task": ..., "pipeline_type": ...,
-                  "platform": ..., "pod": ..., "node": ..., "vm": ...,
-                  "duration": <seconds>, "succeeded": <bool>}
+    "<taskrun>": {"namespace": ..., "pipelinerun": ..., "task": ...,
+                  "pipeline_type": ..., "platform": ..., "pod": ...,
+                  "node": ..., "vm": ..., "duration": <seconds>,
+                  "succeeded": <bool>}
 
 ``node`` and ``vm`` are null when unknown. ``task`` is the Tekton Task name,
 not the TaskRun name. The value is a JSON object (not an array), so SQL against
