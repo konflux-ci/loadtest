@@ -4,7 +4,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 spec = importlib.util.spec_from_file_location(
     "evaluate", Path(__file__).with_name("evaluate.py")
 )
@@ -105,6 +104,40 @@ class TaskLocationsTest(unittest.TestCase):
             )
             self.assertEqual(
                 evaluate.task_locations(directory)["build"]["vm"], "10.207.1.250"
+            )
+
+    def test_null_metadata_status_and_spec_are_tolerated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "collected-taskrun-null.json").write_text(
+                json.dumps({"metadata": None, "status": None})
+            )
+            (root / "collected-taskrun-build.json").write_text(
+                json.dumps(
+                    {
+                        "metadata": {"name": "build", "labels": None},
+                        "status": {"podName": "build-pod", "conditions": None},
+                    }
+                )
+            )
+            (root / "collected-pod-build-pod.json").write_text(
+                json.dumps({"metadata": {"name": "build-pod"}, "spec": None})
+            )
+            locations = evaluate.task_locations(directory)
+            self.assertNotIn("null", locations)
+            self.assertEqual(
+                locations["build"],
+                {
+                    "pipelinerun": None,
+                    "task": None,
+                    "pipeline_type": None,
+                    "platform": None,
+                    "pod": "build-pod",
+                    "node": None,
+                    "vm": None,
+                    "duration": None,
+                    "succeeded": None,
+                },
             )
 
 

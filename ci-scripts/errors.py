@@ -49,20 +49,25 @@ class ErrorMatcher:
             caused_by = entry.get("caused_by", "UNKNOWN")
             self.patterns.append((reason, regexp, caused_by))
 
-    def match(self, message: str) -> tuple[str, str]:
+    def match(self, message: str, *, quiet: bool = False) -> tuple[str, str]:
         """
         Matches a message against loaded patterns. Returns a tuple of
         (reason, caused_by).
+
+        When quiet is True, suppress Matched/Unknown print noise (used for
+        bulk per-TaskRun classification).
         """
         # Optimize: remove newlines and limit size for efficient matching
         clean_msg = message.replace("\n", " ")[-250000:]
 
         for reason, pattern, caused_by in self.patterns:
             if pattern.search(clean_msg):
-                print(f"Matched error pattern: {pattern.pattern}")
+                if not quiet:
+                    print(f"Matched error pattern: {pattern.pattern}")
                 return reason, caused_by
 
-        print(f"Unknown error: {clean_msg}")
+        if not quiet:
+            print(f"Unknown error: {clean_msg}")
         return "UNKNOWN", "UNKNOWN"
 
 
@@ -203,12 +208,12 @@ class Analyzer:
             return errors
         for path in self.dump_dir.rglob("collected-taskrun-*.json"):
             taskrun = self.load_json(path)
-            name = taskrun.get("metadata", {}).get("name")
-            status = taskrun.get("status", {})
+            name = (taskrun.get("metadata") or {}).get("name")
+            status = taskrun.get("status") or {}
             failed = next(
                 (
                     condition
-                    for condition in status.get("conditions", [])
+                    for condition in status.get("conditions") or []
                     if condition.get("type") == "Succeeded"
                     and condition.get("status") == "False"
                 ),
@@ -219,7 +224,7 @@ class Analyzer:
             reasons = set()
             pod_name = status.get("podName")
             if pod_name:
-                for step in status.get("steps", []):
+                for step in status.get("steps") or []:
                     terminated = step.get("terminated") or {}
                     if terminated.get("exitCode", 0) == 0:
                         continue
@@ -229,13 +234,14 @@ class Analyzer:
                     log_path = path.parent / f"pod-{pod_name}-{container}.log"
                     try:
                         reason, _ = self.plr_matcher.match(
-                            log_path.read_text(encoding="utf-8", errors="replace")
+                            log_path.read_text(encoding="utf-8", errors="replace"),
+                            quiet=True,
                         )
                         if reason not in ("SKIP", "UNKNOWN"):
                             reasons.add(reason)
                     except OSError:
                         pass
-            condition_reason, _ = self.tr_matcher.match(json.dumps(failed))
+            condition_reason, _ = self.tr_matcher.match(json.dumps(failed), quiet=True)
             if condition_reason not in ("SKIP", "UNKNOWN"):
                 reasons.add(condition_reason)
             errors[name] = sorted(reasons) if reasons else ["UNKNOWN"]

@@ -3,8 +3,8 @@
 
 import csv
 import datetime
-import json
 import ipaddress
+import json
 import re
 import statistics
 import sys
@@ -236,7 +236,7 @@ def task_locations(collected_data):
             pod = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError):
             continue
-        name = pod.get("metadata", {}).get("name")
+        name = (pod.get("metadata") or {}).get("name")
         if name:
             pods[(path.parent, name)] = pod
 
@@ -246,21 +246,21 @@ def task_locations(collected_data):
             taskrun = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError):
             continue
-        meta = taskrun.get("metadata", {})
-        status = taskrun.get("status", {})
+        meta = taskrun.get("metadata") or {}
+        status = taskrun.get("status") or {}
         name = meta.get("name")
         if not name:
             continue
-        labels = meta.get("labels", {})
+        labels = meta.get("labels") or {}
         pod_name = status.get("podName")
         pod = pods.get((path.parent, pod_name), {})
-        node = pod.get("spec", {}).get("nodeName") or status.get("nodeName")
+        node = (pod.get("spec") or {}).get("nodeName") or status.get("nodeName")
         platform = labels.get("build.appstudio.redhat.com/target-platform")
         if not platform:
             platform = next(
                 (
                     param.get("value")
-                    for param in taskrun.get("spec", {}).get("params", [])
+                    for param in (taskrun.get("spec") or {}).get("params", [])
                     if param.get("name")
                     in ("PLATFORM", "image-arch", "image-platform", "platform")
                 ),
@@ -276,7 +276,7 @@ def task_locations(collected_data):
         succeeded = next(
             (
                 condition.get("status") == "True"
-                for condition in status.get("conditions", [])
+                for condition in status.get("conditions") or []
                 if condition.get("type") == "Succeeded"
             ),
             None,
@@ -292,7 +292,7 @@ def task_locations(collected_data):
             "duration": duration,
             "succeeded": succeeded,
         }
-        annotated_vm = meta.get("annotations", {}).get(
+        annotated_vm = (meta.get("annotations") or {}).get(
             "build.appstudio.redhat.com/cloud-address"
         )
         if annotated_vm:
