@@ -224,7 +224,18 @@ VM_HOST_RE = re.compile(
 )
 
 
-def task_locations(collected_data):
+def normalize_platform(platform):
+    """Prefer linux/<arch> over linux-<arch> so one run does not split platforms."""
+    if (
+        isinstance(platform, str)
+        and platform.startswith("linux-")
+        and "/" not in platform
+    ):
+        return "linux/" + platform.removeprefix("linux-")
+    return platform
+
+
+def taskrun_locations(collected_data):
     """Map each collected TaskRun to its execution node and, when known, VM IP."""
     root = Path(collected_data)
     if not root.is_dir():
@@ -238,7 +249,7 @@ def task_locations(collected_data):
             continue
         name = (pod.get("metadata") or {}).get("name")
         if name:
-            pods[(path.parent, name)] = pod
+            pods[(path.parent, name)] = (pod.get("spec") or {}).get("nodeName")
 
     locations = {}
     for path in root.rglob("collected-taskrun-*.json"):
@@ -253,8 +264,7 @@ def task_locations(collected_data):
             continue
         labels = meta.get("labels") or {}
         pod_name = status.get("podName")
-        pod = pods.get((path.parent, pod_name), {})
-        node = (pod.get("spec") or {}).get("nodeName") or status.get("nodeName")
+        node = pods.get((path.parent, pod_name)) or status.get("nodeName")
         platform = labels.get("build.appstudio.redhat.com/target-platform")
         if not platform:
             platform = next(
@@ -266,6 +276,7 @@ def task_locations(collected_data):
                 ),
                 None,
             )
+        platform = normalize_platform(platform)
         duration = None
         try:
             created = str2date(meta["creationTimestamp"])
@@ -281,7 +292,10 @@ def task_locations(collected_data):
             ),
             None,
         )
+        rel = path.relative_to(root).parts
+        namespace = rel[0] if len(rel) > 1 else None
         location = {
+            "namespace": namespace,
             "pipelinerun": labels.get("tekton.dev/pipelineRun"),
             "task": labels.get("tekton.dev/task"),
             "pipeline_type": labels.get("pipelines.appstudio.openshift.io/type"),
@@ -512,7 +526,7 @@ def main():
 
     with open(output_file, "w") as fp:
         if len(sys.argv) > 4:
-            stats["task_locations"] = task_locations(sys.argv[4])
+            stats["taskrun_locations"] = taskrun_locations(sys.argv[4])
         json.dump(stats, fp, indent=4)
     print(f"Stats dumped to {output_file}")
 

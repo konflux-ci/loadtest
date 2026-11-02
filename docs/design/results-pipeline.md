@@ -28,14 +28,14 @@ Horreum / PostgreSQL (utility scripts)
 - `started` and `ended` timestamp files exist in the run directory (written by `run.sh` before/after loadtest).
 - Raw CSV and `load-test-options.json` are present in the artifact directory before `evaluate.py` runs.
 - For monitoring enrichment, `cluster_read_config.yaml` must define Prometheus queries valid for the target cluster window (`started`…`ended`).
-- Horreum schema (`ci-scripts/config/horreum-schema.json`, id 169) must be imported in the Horreum instance before new label extractors take effect.
+- Label extractors in `ci-scripts/config/horreum-schema.json` (id 169) must be present before `compute-labels.py` / `s3-to-postgresql.sh` can populate new labels in Postgres.
 
 ## Invariants
 
-- **`load-test.json` shape**: `status_data.py` sets `parameters.options`, `results.measurements`, `results.errors`, and `results.durations` subtrees from the intermediate JSON files; downstream Horreum extractors use JSONPath labels like `$.results.measurements.KPI.mean`.
-- **TaskRun locations**: `results.measurements.task_locations` maps each TaskRun name to its pipeline, task, platform, Pod, node, VM, duration, and success state. `node` comes from the collected Pod's `spec.nodeName`; `vm` comes from a valid TaskRun cloud-address annotation or a single IP in the Pod's build log. `results.errors.task_errors` maps failed TaskRun names to classified reasons. Consumers join the two maps by TaskRun name before grouping by node or VM.
+- **`load-test.json` shape**: `status_data.py` sets `parameters.options`, `results.measurements`, `results.errors`, and `results.durations` subtrees from the intermediate JSON files; downstream label extractors use JSONPath labels like `$.results.measurements.KPI.mean`.
+- **TaskRun locations**: `results.measurements.taskrun_locations` maps each TaskRun name to its namespace, pipeline, Tekton Task, platform, Pod, node, VM, duration, and success state. `node` comes from the collected Pod's `spec.nodeName`; `vm` comes from a valid TaskRun cloud-address annotation or a single IP in the Pod's build log. Platforms are normalized to `linux/<arch>`. `results.errors.taskrun_errors` maps failed TaskRun names to classified reasons. Consumers join the two maps by TaskRun name before grouping by node or VM.
 - **Evaluation order**: `evaluate.py` runs before `errors.py` because error categorization may reference timing structure.
-- **Schema coupling**: changes to KPI JSON keys require updating `horreum-schema.json` and re-importing to Horreum (see `ci-scripts/config/README.md`).
+- **Schema coupling**: changes to KPI JSON keys require updating `horreum-schema.json` so `compute-labels.py` picks them up (see `ci-scripts/config/README.md`).
 - **Probe exit policy**: `run-probe/collect-results.sh` may fail the job when KPI thresholds are breached; CI daily runs typically record without gating.
 
 ## Rationale

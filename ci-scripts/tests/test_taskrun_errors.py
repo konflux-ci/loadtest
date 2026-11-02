@@ -1,4 +1,4 @@
-"""Tests for task-level error attribution in collected artifacts."""
+"""Tests for TaskRun-level error attribution in collected artifacts."""
 
 import importlib.util
 import json
@@ -16,7 +16,7 @@ if importlib.util.find_spec("yaml") is None:
     sys.modules["yaml"] = yaml
 
 spec = importlib.util.spec_from_file_location(
-    "errors", Path(__file__).with_name("errors.py")
+    "errors", Path(__file__).parent.parent / "errors.py"
 )
 errors = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(errors)
@@ -35,7 +35,7 @@ class Matcher:
         )
 
 
-class TaskErrorAttributionTest(unittest.TestCase):
+class TaskrunErrorAttributionTest(unittest.TestCase):
     """Ensure only the failed TaskRun receives its reason."""
 
     def test_failed_taskrun_reason_uses_its_own_log(self):
@@ -81,7 +81,9 @@ class TaskErrorAttributionTest(unittest.TestCase):
             analyzer.dump_dir = Path(directory)
             analyzer.plr_matcher = Matcher()
             analyzer.tr_matcher = Matcher()
-            self.assertEqual(analyzer.task_error_reasons(), {"failed": ["Pull failed"]})
+            self.assertEqual(
+                analyzer.taskrun_error_reasons(), {"failed": ["Pull failed"]}
+            )
 
     def test_null_metadata_and_status_are_skipped(self):
         """API dumps with null metadata/status must not crash attribution."""
@@ -94,7 +96,7 @@ class TaskErrorAttributionTest(unittest.TestCase):
             analyzer.dump_dir = Path(directory)
             analyzer.plr_matcher = Matcher()
             analyzer.tr_matcher = Matcher()
-            self.assertEqual(analyzer.task_error_reasons(), {})
+            self.assertEqual(analyzer.taskrun_error_reasons(), {})
 
     def test_error_matcher_quiet_suppresses_prints(self):
         """Bulk TaskRun matching must not print Unknown/Matched lines."""

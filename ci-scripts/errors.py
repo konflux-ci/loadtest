@@ -201,7 +201,7 @@ class Analyzer:
         except FileNotFoundError:
             return ""
 
-    def task_error_reasons(self) -> dict[str, list[str]]:
+    def taskrun_error_reasons(self) -> dict[str, list[str]]:
         """Classify failed TaskRuns independently for node/VM attribution."""
         errors = {}
         if not self.dump_dir.is_dir():
@@ -298,6 +298,7 @@ class StatsProcessor:
         self.error_by_code: dict[int, int] = collections.defaultdict(int)
         self.error_by_reason: dict[str, int] = collections.defaultdict(int)
         self.caused_by_list: list[str] = []
+        self.taskrun_errors: dict[str, list[str]] = {}
 
     def add(
         self,
@@ -317,9 +318,7 @@ class StatsProcessor:
             if cause and reason != "SKIP":
                 self.caused_by_list.append(cause)
 
-    def dump(
-        self, output_path: Path, task_errors: dict[str, list[str]] | None = None
-    ) -> None:
+    def dump(self, output_path: Path) -> None:
         """Writes the aggregated statistics to a JSON file."""
         data = {
             "error_by_code": self.error_by_code,
@@ -332,7 +331,7 @@ class StatsProcessor:
             "error_messages": self.error_messages,
             "error_caused_by": self.caused_by_list,
             "error_caused_by_simple": ", ".join(sorted(set(self.caused_by_list))),
-            "task_errors": task_errors or {},
+            "taskrun_errors": self.taskrun_errors,
         }
 
         print(f"Errors detected: {len(self.error_messages)}")
@@ -405,7 +404,8 @@ def process_csv_mode(
     if timings.get("KPI", {}).get("mean") == -1 and not stats.error_messages:
         stats.add("No test run finished", "No test run finished", [])
 
-    stats.dump(output_file, analyzer.task_error_reasons())
+    stats.taskrun_errors = analyzer.taskrun_error_reasons()
+    stats.dump(output_file)
 
 
 def main():

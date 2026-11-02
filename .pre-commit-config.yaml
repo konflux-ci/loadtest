@@ -109,3 +109,10 @@ repos:
         language: system
         files: (\.gitignore|\.dockerignore)$
         pass_filenames: false
+
+      - id: python-unittests
+        name: python unittests
+        entry: python3 -m unittest discover -s ci-scripts/tests -t ci-scripts/tests -v
+        language: system
+        files: ^ci-scripts/(evaluate|errors)\.py$|^ci-scripts/tests/
+        pass_filenames: false
