@@ -211,7 +211,7 @@ def count_stats_when(data):
             "min": min(data).isoformat(),
             "max": max(data).isoformat(),
             "mean": datetime.datetime.fromtimestamp(
-                statistics.mean([i.timestamp() for i in data]), tz=datetime.timezone.utc
+                statistics.mean([i.timestamp() for i in data]), tz=datetime.UTC
             ).isoformat(),
             "span": (max(data) - min(data)).total_seconds(),
         }

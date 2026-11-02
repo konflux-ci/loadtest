@@ -14,14 +14,12 @@ def iso_date(s: str) -> datetime.datetime:
         dt = datetime.datetime.fromisoformat(s)
     except ValueError:
         try:
-            dt = datetime.datetime.strptime(s, "%Y-%m-%d").replace(
-                tzinfo=datetime.timezone.utc
-            )
+            dt = datetime.datetime.strptime(s, "%Y-%m-%d").replace(tzinfo=datetime.UTC)
         except ValueError:
             raise argparse.ArgumentTypeError(f"Not a valid ISO date: '{s}'.")
 
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
+        dt = dt.replace(tzinfo=datetime.UTC)
     return dt
 
 
