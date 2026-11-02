@@ -30,6 +30,14 @@
   test_dir:
   - run-probe-stone-prod-p02-rpm-20261008T104919Z
   type: loadtest
+- caused_by: application-controller
+  id: application_creation_failed_because_mapplication_kb_io_webhook_call_timed_out
+  note: ''
+  reason: Application creation failed because mapplication.kb.io webhook call timed out
+  regexp: 'Application failed creation: unable to create the Application .*: Internal error occurred: failed calling webhook .mapplication\.kb\.io.: failed to call webhook: Post .https://application-service-webhook-service\.application-service\.svc:443/mutate-appstudio-redhat-com-v1alpha1-application\?timeout=10s.: context deadline exceeded'
+  test_dir:
+  - run-kflux-lw-p01-2026_10_27T13_37_02_976000000_00_00
+  type: loadtest
 - caused_by: test
   id: application_creation_failed_because_of_tls_handshake_timeout
   note: ''
@@ -431,6 +439,14 @@
   regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .*Reason:PipelineValidationFailed Message:\[User error\] Validation failed for pipelinerun [^ ]+ with error invalid input params for task source-to-sdist: missing values for these params which have no default values: \[FIX_TYPE BUILD_CONFIGS_REPO_URL BUILD_CONFIGS_REVISION\]'
   test_dir:
   - run-lightwell-dev-2026_10_05T13_44_04_563000000_00_00
+  type: loadtest
+- caused_by: task
+  id: build_pipeline_validation_failed_because_task_is_missing_required_param_build_type
+  note: ''
+  reason: Build pipeline validation failed because task is missing required param BUILD_TYPE
+  regexp: 'invalid input params for task [a-z0-9-]+: missing values for these params which have no default values: \[BUILD_TYPE\]'
+  test_dir:
+  - run-kflux-lw-p01-2026_10_26T22_18_04_158000000_00_00
   type: loadtest
 - caused_by: cluster
   id: build_pod_creation_forbidden_because_scc_restricted_v2_does_not_allow_container_runasuser_0
@@ -2338,6 +2354,30 @@
   regexp: 'Couldn.t retrieve Task .resolver type bundles.*: error requesting remote resource: invalid resource request .[^ .]+.: missing required http resolver params: url'
   test_dir:
   - run-stone-stage-p01-2026_10_29T09_48_03_026000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: pipelinerun_could_not_resolve_git_task_because_requested_resolver_kind_does_not_match_its_parameters
+  note: ''
+  reason: PipelineRun could not resolve git task because requested resolver kind does not match its parameters
+  regexp: 'Couldn.t retrieve Task .resolver type git.*: error requesting remote resource: invalid resource request .[^ .]+.: missing required cluster resolver params: name, namespace'
+  test_dir:
+  - run-stone-prod-p02-2026_10_28T11_20_02_931000000_00_00
+  type: loadtest
+- caused_by: pipelines-controller
+  id: pipelinerun_could_not_resolve_task_because_bundle_content_could_not_be_decoded_as_yaml
+  note: ''
+  reason: PipelineRun could not resolve task because bundle content could not be decoded as YAML
+  regexp: 'error getting .bundleresolver. .[^ .]+.: resolved resource validation error: decoding error: error converting YAML to JSON: yaml: control characters are not allowed'
+  test_dir:
+  - run-kflux-rhel-p01-2026_10_24T08_11_02_739000000_00_00
+  type: loadtest
+- caused_by: task
+  id: pipelinerun_could_not_resolve_task_because_pipeline_sets_build_type_parameter_more_than_once
+  note: ''
+  reason: PipelineRun could not resolve task because pipeline sets BUILD_TYPE parameter more than once
+  regexp: 'Reason:CouldntGetTask Message:.*validation failed for referenced object [a-z0-9-]+: admission webhook .validation\.webhook\.pipeline\.tekton\.dev. denied the request: validation failed: parameter appears more than once: spec\.params\[BUILD_TYPE\]'
+  test_dir:
+  - run-lightwell-dev-2026_10_22T18_44_03_468000000_00_00
   type: loadtest
 - caused_by: cluster
   id: pipelinerun_failed_because_pod_stuck_in_pending
