@@ -29,7 +29,7 @@ fi
 # Create the done file if it doesn't exist
 touch "${DONE_FILE}"
 
-ARTIFACTS_BASE="https://workdir-exporter-jenkins-csb-perf.apps.int.gpc.ocp-hub.prod.psi.redhat.com/workspace/ARTIFACTS"
+ARTIFACTS_BASE="https://hceperf-jenkins-workdir.apps.int.prod-scale-spoke1-dc-rdu3.itup.redhat.com/workspace/ARTIFACTS"
 mapfile -t ARTIFACT_URLS < <(
     curl -sS "${ARTIFACTS_BASE}/" \
         | grep -oP 'href="(StoneSoupLoadTestProbe_[^"]+/)"' \
