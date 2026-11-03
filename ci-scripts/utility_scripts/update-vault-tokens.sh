@@ -64,6 +64,7 @@ if [ "$UPDATE_STAGING" = true ]; then
     update_tokens "staging" "stone-stg-rh01"
     update_tokens "staging" "stone-stage-p01"
     update_tokens "staging" "lightwell-dev"
+    update_tokens "staging" "kflux-stg-p02"
 fi
 
 if [ "$UPDATE_PRODUCTION" = true ]; then
