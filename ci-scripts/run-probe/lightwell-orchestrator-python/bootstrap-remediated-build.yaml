@@ -1,0 +1,49 @@
+# Idempotent Konflux identity for the Lightwell orchestrator Python probe
+# (KONFLUX-16318) on kflux-lw-p01 / konflux-perfscale-3-tenant.
+#
+# PaC LWPython cleanup deletes Applications / Components / ImageRepositories,
+# so the probe reapplies this every run. Controllers then recreate
+# ServiceAccount build-pipeline-remediated-build + Quay push linkage.
+#
+# Prerequisites (not managed here — durable secrets/configmaps):
+#   - Secret probe-build-configs-git-auth
+#   - ConfigMap trusted-ca
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Application
+metadata:
+  name: remediated-build
+  namespace: konflux-perfscale-3-tenant
+spec:
+  displayName: remediated-build
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  name: remediated-build
+  namespace: konflux-perfscale-3-tenant
+  annotations:
+    # Avoid PaC merge-request noise; orchestrator creates PipelineRuns directly.
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+spec:
+  application: remediated-build
+  containerImage: registry.example.com/konflux-perfscale-3-tenant/remediated-build
+  source:
+    git:
+      url: https://gitlab.cee.redhat.com/jhutar/lw-pypi.org-ntplib-1
+      revision: main
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: ImageRepository
+metadata:
+  name: remediated-build
+  namespace: konflux-perfscale-3-tenant
+  annotations:
+    image-controller.appstudio.redhat.com/update-component-image: "true"
+  labels:
+    appstudio.redhat.com/application: remediated-build
+    appstudio.redhat.com/component: remediated-build
+spec:
+  image:
+    name: konflux-perfscale-3-tenant/remediated-build
+    visibility: private
