@@ -31,7 +31,7 @@ fi
 S3_BUCKET="konflux-perfscale-artifacts"
 S3_PREFIX="run-probe/"
 HORREUM_TEST_ID=372
-MAX_PARALLEL=4
+MAX_PARALLEL=16
 # Resolve s3-artifacts.py relative to this script (ci-scripts/), not cwd.
 S3_ARTIFACTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/s3-artifacts.py"
 
