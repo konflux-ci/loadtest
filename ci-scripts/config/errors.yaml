@@ -457,6 +457,14 @@
   - run-kflux-lw-p01-2026_10_26T22_18_04_158000000_00_00
   type: loadtest
 - caused_by: cluster
+  id: build_pipelinerun_failed_because_tekton_could_not_retrieve_task_from_bundle_resolver_due_to_etcd_connection_timeout
+  note: ''
+  reason: Build PipelineRun failed because Tekton could not retrieve Task from bundle resolver due to etcd connection timeout
+  regexp: 'Build Pipeline Run failed run: PipelineRun for component [^ ]+ in namespace [^ ]+ failed: .* it contains Tasks that don.t exist: Couldn.t retrieve Task .resolver type bundles.*: error requesting remote resource: error getting .bundleresolver. [^ ]+: rpc error: code = Unavailable desc = error reading from server: read tcp [^ ]+: read: connection timed out'
+  test_dir:
+  - run-probe-stone-stage-p01-container-single-arch-20261110T213220Z
+  type: loadtest
+- caused_by: cluster
   id: build_pod_creation_forbidden_because_scc_restricted_v2_does_not_allow_container_runasuser_0
   note: ''
   reason: Build pod creation forbidden because SCC restricted-v2 does not allow container runAsUser 0
@@ -1229,6 +1237,14 @@
   regexp: 'Application failed creation: Unable to create the Application .*: Internal error occurred: failed calling webhook .*mapplication.kb.io.*: failed to call webhook: Post .*https://application-service-webhook-service.application-service.svc:443/mutate-appstudio-redhat-com-v1alpha1-application.* no endpoints available for service .*application-service-webhook-service'
   test_dir: []
   type: loadtest
+- caused_by: MPC
+  id: failed_because_cpu_is_not_power10
+  note: ''
+  reason: Failed because CPU is not Power10
+  regexp: 'ERROR: CPU is not Power10, aborting build\.'
+  test_dir:
+  - run-probe-stone-stage-p01-rpm-20261111T002159Z
+  type: logs
 - caused_by: MPC
   id: failed_because_cpu_is_not_x86_64_v4
   note: ''
@@ -3358,6 +3374,14 @@
   regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to get file [^ ]+ from repo [^ ]+ revision [^:]+: error when listing file contents: Get .https://api\.github\.com/[^ ]+.: dial tcp: lookup api\.github\.com on [0-9.]+:53: server misbehaving'
   test_dir:
   - run-stone-stage-p01-2026_09_02T21_33_03_546000000_00_00
+  type: loadtest
+- caused_by: gitlab.cee.redhat.com
+  id: repo_templating_failed_to_update_pac_files_because_gitlab_cee_does_not_allow_pushing_code
+  note: ''
+  reason: Repo templating failed to update PaC files because GitLab CEE does not allow pushing code
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file \.tekton/[^ ]+ in repo .*: failed to update/create file: PUT https://gitlab\.cee\.redhat\.com/api/v4/projects/[^ ]+/repository/files/\.tekton/[^ ]+: 400 .message: You are not allowed to push code to this project\.'
+  test_dir:
+  - run-probe-stone-stage-p01-container-single-arch-20261110T113224Z
   type: loadtest
 - caused_by: github.com
   id: repo_templating_failed_when_merging_pr_on_api_github_com_because_500_error
