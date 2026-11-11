@@ -137,6 +137,14 @@
   test_dir:
   - run-kflux-rhel-p01-2026_04_16T00_56_53_967000000_00_00
   type: logs
+- caused_by: task
+  id: bootstrap_image_pull_failed_because_oci_archive_manifest_digest_would_not_match_destination_reference
+  note: Mock in the RPM build environment container (fedora) cannot pull the hermetic bootstrap.tar produced by calculate-deps; tracked in ROK-2249. Keep this Rule before can_not_find_chroot_scan_tar_gz_file in the DB, because errors.py returns the first matching Rule and the missing chroot_scan.tar.gz is only a symptom of this abort.
+  reason: Bootstrap image pull failed because oci-archive manifest digest would not match destination reference
+  regexp: 'unable to perform copy: unable to copy from source oci-archive:[^ ]+:: Digest of source image.s manifest would not match destination reference'
+  test_dir:
+  - run-kflux-fedora-01-2026_11_10T07_11_02_678000000_00_00
+  type: logs
 - caused_by: test
   id: build_container_failed_because_dockerfile_was_not_found
   note: https://issues.redhat.com/browse/KONFLUX-12423
@@ -627,6 +635,14 @@
   - run-kflux-lw-p01-2026_11_01T17_37_05_172000000_00_00
   type: loadtest
 - caused_by: cluster
+  id: component_creation_failed_because_cluster_api_server_dns_lookup_was_refused
+  note: ''
+  reason: Component creation failed because cluster API server DNS lookup was refused
+  regexp: 'Component failed creation: unable to create the Component [^ ]+: failed to get server groups: Get .https://api\.[^ ]+/api.: dial tcp: lookup [^ ]+ on [0-9.]+:53: read udp [0-9.:]+->[0-9.:]+:53: read: connection refused'
+  test_dir:
+  - run-probe-stone-stage-p01-container-multi-arch-20261110T095214Z
+  type: loadtest
+- caused_by: cluster
   id: component_creation_failed_because_context_deadline_exceeded
   note: ''
   reason: Component creation failed because context deadline exceeded
@@ -717,6 +733,14 @@
   regexp: 'failed to pull remote container: GET https://quay\.io/v2/[^ ]+/manifests/[^ ]+: unexpected status code 502 Bad Gateway'
   test_dir:
   - run-stone-stg-rh01-2026_10_28T11_09_03_884000000_00_00
+  type: logs
+- caused_by: quay.io
+  id: conforma_app_check_failed_to_pull_image_layers_because_quay_io_returned_unexpected_eof
+  note: ''
+  reason: Conforma app-check failed to pull image layers because quay.io returned unexpected EOF
+  regexp: 'target image.*image=.quay\.io/[^ ]+.*failed to pull image layers: failed to pull layer sha256:[a-f0-9]+ after [0-9]+ attempts: unexpected EOF'
+  test_dir:
+  - run-lightwell-dev-2026_11_07T14_35_03_002000000_00_00
   type: logs
 - caused_by: quay.io
   id: conforma_validation_failed_to_fetch_data_acceptable_bundles_from_quay_io
@@ -977,6 +1001,14 @@
   regexp: 'Creation time check failed for IR and PR: failed to get PR [0-9]+: GET https://api.github.com/repos/[^ ]+: 401 Bad credentials'
   test_dir:
   - run-kflux-prd-rh03-2026_06_18T00_48_20_362000000_00_00
+  type: loadtest
+- caused_by: gitlab.cee.redhat.com
+  id: creation_time_check_failed_because_gitlab_cee_returned_404_not_found_for_merge_request
+  note: ''
+  reason: Creation time check failed because GitLab CEE returned 404 Not Found for merge request
+  regexp: 'Creation time check failed for IR and PR: failed to get MR [0-9]+: 404 Not Found'
+  test_dir:
+  - run-probe-stone-prod-p02-container-single-arch-20261110T020532Z
   type: loadtest
 - caused_by: src.fedoraproject.org
   id: curl_failed_to_download_file_because_src_fedoraproject_org_returned_503
@@ -1624,6 +1656,14 @@
   regexp: 'Error: initializing source docker://quay.io/[^ ]+: reading manifest [^ ]+ in quay.io/[^ ]+: received unexpected HTTP status: 504 Gateway Time-out'
   test_dir: []
   type: logs
+- caused_by: brewhub.engineering.redhat.com
+  id: get_build_target_step_failed_to_resolve_build_target_because_brew_hub_was_unreachable
+  note: ''
+  reason: get-build-target step failed to resolve build target because Brew hub was unreachable
+  regexp: 'koji -p brew --noauth call --json-out getBuildTarget [^ ]+ .*Error: Unable to connect to server'
+  test_dir:
+  - run-stone-prod-p02-2026_11_03T09_20_02_784000000_00_00
+  type: logs
 - caused_by: quay.io
   id: getting_repo_tags_from_quay_io_failed_because_of_502_bad_gateway
   note: ''
@@ -2166,6 +2206,14 @@
   - run-stone-stage-p01-2026_03_12T08_48_19_565000000_00_00
   type: logs
 - caused_by: MPC
+  id: multi_platform_build_failed_to_obtain_otp_because_mpc_otp_server_could_not_be_resolved
+  note: ''
+  reason: Multi-platform build failed to obtain OTP because MPC OTP server could not be resolved
+  regexp: 'curl: \(6\) Could not resolve host: multi-platform-otp-server\.multi-platform-controller\.svc\.cluster\.local'
+  test_dir:
+  - run-stone-stage-p01-2026_11_10T09_48_03_023000000_00_00
+  type: logs
+- caused_by: MPC
   id: multi_platform_build_failed_to_obtain_otp_because_mpc_otp_server_refused_connection
   note: ''
   reason: Multi-platform build failed to obtain OTP because MPC OTP server refused connection
@@ -2281,6 +2329,14 @@
   regexp: 'url: https://github\.com/.*level=fatal msg="git fetch failed: git fetch failed with exit code 128: exit status 128"'
   test_dir:
   - run-kflux-prd-rh03-2026_08_03T08_45_28_175000000_00_00
+  type: logs
+- caused_by: download.devel.redhat.com
+  id: pipeline_failed_mock_build_failed_because_of_download_timeout_from_download_devel_redhat_com
+  note: ''
+  reason: 'Pipeline failed: Mock build failed because of download timeout from download.devel.redhat.com'
+  regexp: ReadTimeoutError.*download-[0-9]+\.beak-[0-9]+\.prod\.iad2\.dc\.redhat\.com.*Read timed out
+  test_dir:
+  - run-stone-prod-p02-2026_11_06T00_20_02_520000000_00_00
   type: logs
 - caused_by: download.eng.brq.redhat.com
   id: pipeline_failed_mock_build_failed_because_of_download_timeout_from_download_eng_brq_redhat_com
@@ -3815,6 +3871,13 @@
   regexp: '"message": ?\"..[a-zA-Z0-9-]+.. exited with code 7(: Error)?\"'
   test_dir: []
   type: condition
+- caused_by: SKIP
+  id: skip_13
+  note: Another special error to avoid printing 'Unknown error:' message
+  reason: SKIP
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: unexpected error when reading response body\. Please retry\. Original error: read tcp [0-9.:]+->[0-9.:]+: read: connection timed out'
+  test_dir: []
+  type: loadtest
 - caused_by: SKIP
   id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
