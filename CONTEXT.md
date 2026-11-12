@@ -20,7 +20,7 @@
 
 - **Purge** -- cleanup phase: delete Application, Component, ReleasePlan, and (in read-write mode) ReleasePlanAdmission. Runs after all journeys complete. Controlled by `--purge` (enable) and `--purge-only` (skip journeys, just clean up; implies `--purge`).
 
-- **ReleasePlan (RP)** -- CR in tenant namespace, created by loadtest via `createReleasePlan()`, targeting the managed namespace (or the tenant namespace itself when no managed namespace is configured). Name pattern: `{appName}-rp`.
+- **ReleasePlan (RP)** -- CR in tenant namespace, created by loadtest via `createReleasePlan()`, targeting the managed namespace (or the tenant namespace itself when no managed namespace is configured). Name pattern: `{appName}-rp`. Standing attribution is on and the `release.appstudio.openshift.io/author` label is set from `--release-author` (default `rhtap-perfscale-team@redhat.com`), because the release-service author webhook rejects ReleasePlans authored by a service account. The label must be set at create time; the webhook only derives the author when it is missing.
 
 - **ReleasePlanAdmission (RPA)** -- CR in managed namespace (or tenant namespace when no managed namespace is configured). In read-write mode, created and deleted by loadtest via `createReleasePlanAdmission()` (name pattern: `{appName}-rpa`). In read-only mode, pre-existing, created once by releng.
 

@@ -41,6 +41,7 @@ func init() {
 	rootCmd.Flags().StringVar(&opts.TestScenarioRevision, "test-scenario-revision", "main", "test scenario GIT URL repo revision to use")
 	rootCmd.Flags().StringVar(&opts.TestScenarioPathInRepo, "test-scenario-path-in-repo", "pipelines/integration_resolver_pipeline_pass.yaml", "test scenario path in GIT repo")
 	rootCmd.Flags().StringVar(&opts.ReleasePolicy, "release-policy", "", "enterprise contract policy name to use, e.g. \"tmp-onboard-policy\" (keep empty to skip release testing)")
+	rootCmd.Flags().StringVar(&opts.ReleaseAuthor, "release-author", "rhtap-perfscale-team@redhat.com", "human identity to set as ReleasePlan author (release-service rejects service account authors); use a cluster username or an email")
 	rootCmd.Flags().StringVar(&opts.ReleasePipelineUrl, "release-pipeline-url", "https://github.com/konflux-ci/release-service-catalog.git", "release pipeline URL suitable for git resolver")
 	rootCmd.Flags().StringVar(&opts.ReleasePipelineRevision, "release-pipeline-revision", "production", "release pipeline repo branch suitable for git resolver")
 	rootCmd.Flags().StringVar(&opts.ReleasePipelinePath, "release-pipeline-path", "pipelines/managed/e2e/e2e.yaml", "release pipeline file path suitable for git resolver")

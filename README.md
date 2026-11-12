@@ -59,7 +59,7 @@ Per-User Thread (--concurrency)
 2. **Create Application** - Create Konflux Application CR in namespace
 3. **Create Integration Test Scenario** - Define integration test pipeline (optional, skipped if `--test-scenario-git-url=""`)
 4. **Create Component** - Create Component CR, trigger PaC (Pipeline as Code) PR
-5. **Create ReleasePlan + ReleasePlanAdmission** - Set up release configuration (optional, requires `--release-policy`)
+5. **Create ReleasePlan + ReleasePlanAdmission** - Set up release configuration (optional, requires `--release-policy`). The ReleasePlan author label is set from `--release-author` (default `rhtap-perfscale-team@redhat.com`) because release-service rejects service account authors.
 6. **Wait for Build Pipeline** - Monitor build pipeline completion (if `--waitpipelines`)
 7. **Wait for Integration Test** - Monitor integration test execution (if `--waitintegrationtestspipelines`)
 8. **Wait for Release** - Monitor release pipeline completion (if `--waitrelease`)

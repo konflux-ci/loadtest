@@ -1,9 +1,12 @@
 package journey
 
+import "context"
 import "encoding/json"
 import "fmt"
 import "os"
+import "strings"
 import "time"
+import "unicode"
 
 import logging "github.com/konflux-ci/loadtest/pkg/logging"
 import types "github.com/konflux-ci/loadtest/pkg/types"
@@ -11,15 +14,56 @@ import types "github.com/konflux-ci/loadtest/pkg/types"
 import framework "github.com/konflux-ci/e2e-tests/pkg/framework"
 import utils "github.com/konflux-ci/e2e-tests/pkg/utils"
 
+import releaseApi "github.com/konflux-ci/release-service/api/v1alpha1"
+import releaseMetadata "github.com/konflux-ci/release-service/metadata"
+
 import k8serrors "k8s.io/apimachinery/pkg/api/errors"
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 import "k8s.io/apimachinery/pkg/runtime"
 
-// Create ReleasePlan CR
-func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespace string) (string, error) {
-	name := appName + "-rp"
-	logging.Logger.Debug("Creating release plan %s in namespace %s targeting %s", name, namespace, targetNamespace)
+// sanitizeLabelValue makes the provided author usable as a Kubernetes label value.
+// It mirrors what the release-service author webhook does to the requesting username:
+// colons are replaced with underscores, the first at sign with a dot, the value is
+// truncated to the maximum label length and trailing non-alphanumeric characters are removed.
+func sanitizeLabelValue(author string) string {
+	sanitized := strings.ReplaceAll(author, ":", "_")
+	sanitized = strings.Replace(sanitized, "@", ".", 1)
+	if len(sanitized) > releaseMetadata.MaxLabelLength {
+		sanitized = sanitized[0:releaseMetadata.MaxLabelLength]
+	}
+	return strings.TrimRightFunc(sanitized, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	})
+}
 
-	_, err := f.AsKubeDeveloper.ReleaseController.CreateReleasePlan(name, namespace, appName, targetNamespace, "true", nil, nil, nil)
+// Create ReleasePlan CR
+// The release-service author webhook rejects ReleasePlans authored by a service account, so the
+// author label is set explicitly to the configured human identity (or team identity) when creating it.
+func createReleasePlan(f *framework.Framework, namespace, appName, targetNamespace, author string) (string, error) {
+	name := appName + "-rp"
+	logging.Logger.Debug("Creating release plan %s in namespace %s targeting %s with author %s", name, namespace, targetNamespace, author)
+
+	labels := map[string]string{
+		releaseMetadata.AttributionLabel: "true",
+		releaseMetadata.AutoReleaseLabel: "true",
+	}
+	if author != "" {
+		labels[releaseMetadata.AuthorLabel] = sanitizeLabelValue(author)
+	}
+
+	releasePlan := &releaseApi.ReleasePlan{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labels,
+		},
+		Spec: releaseApi.ReleasePlanSpec{
+			Application: appName,
+			Target:      targetNamespace,
+		},
+	}
+
+	err := f.AsKubeDeveloper.ReleaseController.KubeRest().Create(context.Background(), releasePlan)
 	if err != nil {
 		return "", fmt.Errorf("unable to create the releasePlan %s in %s: %v", name, namespace, err)
 	}
@@ -305,6 +349,7 @@ func HandleReleaseSetup(ctx *types.PerApplicationContext) error {
 		ctx.ParentContext.Namespace,
 		ctx.ApplicationName,
 		rpTargetNamespace,
+		ctx.ParentContext.Opts.ReleaseAuthor,
 	)
 	if err != nil {
 		return logging.Logger.Fail(91, "Release Plan failed creation: %v", err)

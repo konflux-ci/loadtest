@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	github.com/konflux-ci/e2e-tests v0.0.0-20261026131115-100538aff5db
+	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
 	github.com/spf13/cobra v1.10.2
 	github.com/tektoncd/pipeline v1.9.2
 	k8s.io/apimachinery v0.37.2
@@ -135,7 +136,6 @@ require (
 	github.com/konflux-ci/image-controller v0.0.0-20260623200458-d2ed99f6f8a6 // indirect
 	github.com/konflux-ci/integration-service v0.0.0-20260427172031-371664c90b07 // indirect
 	github.com/konflux-ci/operator-toolkit v0.0.0-20260312101100-d4e398191a68 // indirect
-	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace // indirect
 	github.com/magefile/mage v1.14.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

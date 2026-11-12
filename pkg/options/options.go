@@ -31,6 +31,7 @@ type Opts struct {
 	LogInfo                                bool
 	LogTrace                               bool
 	OutputDir                              string
+	ReleaseAuthor                          string
 	ReleaseManagedNamespace                string
 	ReleaseManagedReadOnly                 bool
 	ReleaseManagedReleasePlanAdmissionName string
