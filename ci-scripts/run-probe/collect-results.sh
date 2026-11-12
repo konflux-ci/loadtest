@@ -65,6 +65,9 @@ if [[ "$MEMBER_CLUSTER" == *"c111-e.us-east.containers.cloud.ibm.com"* ]]; then
 elif [[ "$MEMBER_CLUSTER" == *"da837cbw0di4ab97asm0.vpe.private.us-east.containers.cloud.ibm.com"* ]]; then
   # Workaround: kflux-lw-p01 cluster does not follow standard apps.$BASE_URL convention
   PROMETHEUS_HOST="thanos-querier-openshift-monitoring.kflux-lw-p01-23c2640bcea594f87bc757d4116925b2-0000.us-east.containers.appdomain.cloud"
+elif [[ "$MEMBER_CLUSTER" == *"dadgb8nw06g868q4631g.vpe.private.us-east.containers.cloud.ibm.com"* ]]; then
+  # Workaround: kflux-stg-p02 cluster does not follow standard apps.$BASE_URL convention
+  PROMETHEUS_HOST="thanos-querier-openshift-monitoring.kflux-stg-p02-861edabb428ba4747c2d33f45e5a0de2-0000.us-east.containers.appdomain.cloud"
 else
   BASE_URL=$(echo "$MEMBER_CLUSTER" | grep -oP 'https://api\.\K[^:]+')
   PROMETHEUS_HOST="thanos-querier-openshift-monitoring.apps.$BASE_URL"
