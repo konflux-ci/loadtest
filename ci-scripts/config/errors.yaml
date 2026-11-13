@@ -2975,6 +2975,14 @@
   test_dir:
   - run-stone-prod-p02-2026_10_01T04_40_04_387000000_00_00
   type: loadtest
+- caused_by: test
+  id: release_plan_creation_failed_because_release_service_author_webhook_rejected_service_account_author
+  note: ''
+  reason: Release Plan creation failed because release-service author webhook rejected service account author
+  regexp: 'Release Plan failed creation: unable to create the releasePlan [^ ]+ in [^ ]+: admission webhook .mauthor\.kb\.io. denied the request: releasePlan author cannot be a service account'
+  test_dir:
+  - run-stone-stg-rh01-2026_11_11T16_09_03_103000000_00_00
+  type: loadtest
 - caused_by: release-controller
   id: release_plan_creation_failed_because_release_service_author_webhook_timed_out
   note: ''
@@ -3903,6 +3911,13 @@
   test_dir: []
   type: loadtest
 - caused_by: SKIP
+  id: skip_14
+  note: Another special error to avoid printing 'Unknown error:' message
+  reason: SKIP
+  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: the server was unable to return a response in the time allotted, but may still be processing the request .get pods.'
+  test_dir: []
+  type: loadtest
+- caused_by: SKIP
   id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
@@ -4060,6 +4075,14 @@
   reason: TaskRun resolution failed because validation.webhook.pipeline.tekton.dev returned EOF
   regexp: '.message.: .error requesting remote resource: error updating resource request [^ ]+ with data: Internal error occurred: failed calling webhook .*validation.webhook.pipeline.tekton.dev.*: failed to call webhook: Post .*https://tekton-pipelines-webhook.openshift-pipelines.svc:443/resource-validation.timeout=10s.*: EOF., .reason.: .TaskRunResolutionFailed.'
   test_dir: []
+  type: condition
+- caused_by: cluster
+  id: taskrun_sidecar_stop_failed_because_cluster_api_server_did_not_respond_in_time
+  note: ''
+  reason: TaskRun sidecar stop failed because cluster API server did not respond in time
+  regexp: 'error getting Pod [^ ]+ when stopping sidecars: the server was unable to return a response in the time allotted, but may still be processing the request \(get pods [^)]+\)'
+  test_dir:
+  - run-stone-prd-rh01-2026_11_12T09_01_02_704000000_00_00
   type: condition
 - caused_by: pipelines-controller
   id: taskrun_was_cancelled_as_its_pipelinerun_timeouted
