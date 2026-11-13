@@ -6,7 +6,7 @@ require (
 	github.com/konflux-ci/e2e-tests v0.0.0-20261026131115-100538aff5db
 	github.com/konflux-ci/release-service v0.0.0-20260130155849-48535a3e5ace
 	github.com/spf13/cobra v1.10.2
-	github.com/tektoncd/pipeline v1.9.2
+	github.com/tektoncd/pipeline v1.9.3
 	k8s.io/apimachinery v0.37.2
 	k8s.io/klog/v2 v2.140.0
 	sigs.k8s.io/controller-runtime v0.25.2
