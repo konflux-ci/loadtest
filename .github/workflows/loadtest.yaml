@@ -13,6 +13,9 @@ on:
       #   type: string
       #   description: Number of sequential user journey repetitions
 
+permissions:
+  contents: read
+
 jobs:
   load_test:
     runs-on: ubuntu-latest

@@ -1,6 +1,11 @@
 name: Validate PR
 on:
   pull_request:
+
+permissions:
+  contents: read
+  security-events: write # upload-sarif
+
 jobs:
   static_checks:
     name: lint
