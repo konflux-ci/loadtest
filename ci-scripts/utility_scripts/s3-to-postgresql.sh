@@ -17,9 +17,9 @@
 # dispatch order; workers may finish out of order). Each worker uses its own staging dir
 # under the run tmpdir and tags its log lines with its own PID.
 #
-# After a successful ingest (or a permanent skip), the S3 object is deleted so we do not
-# rely on a local done-file on Jenkins (workspaces get cleaned). Failed ingests leave the
-# object in place for the next hourly run. Bucket lifecycle still expires anything left.
+# KONFLUX-16773: successful ingests keep the S3 object (lifecycle expires ~30d) so canary
+# artifacts remain for ≥7d triage. Progress is MAX(start) in Postgres minus
+# WATERMARK_OVERLAP_HOURS; older keys are skipped. Permanent skips still delete.
 
 # wait -n (worker throttling) needs bash >= 4.3
 if (( BASH_VERSINFO[0] < 4 )) || { (( BASH_VERSINFO[0] == 4 )) && (( BASH_VERSINFO[1] < 3 )); }; then
@@ -32,6 +32,7 @@ S3_BUCKET="konflux-perfscale-artifacts"
 S3_PREFIX="run-probe/"
 HORREUM_TEST_ID=372
 MAX_PARALLEL=16
+WATERMARK_OVERLAP_HOURS="${WATERMARK_OVERLAP_HOURS:-6}"
 # Resolve s3-artifacts.py relative to this script (ci-scripts/), not cwd.
 S3_ARTIFACTS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/s3-artifacts.py"
 
@@ -64,11 +65,64 @@ plog() {
     echo "$( date --utc -Ins ) [pid ${BASHPID}] $*"
 }
 
-# Remove the object from S3 once we are done with it (success or permanent skip).
+# Remove the object from S3 (permanent skips only — successful ingests are retained).
 s3_delete() {
     local key="$1"
     plog "Deleting s3://${S3_BUCKET}/${key}"
     s3_tools delete --bucket "${S3_BUCKET}" --remote "${key}"
+}
+
+# MAX(start) for HORREUM_TEST_ID as UTC ISO, or empty if none / no table.
+postgres_watermark() {
+    POSTGRESQL_HOST="${POSTGRESQL_HOST}" POSTGRESQL_PORT="${POSTGRESQL_PORT}" \
+    POSTGRESQL_USER="${POSTGRESQL_USER}" POSTGRESQL_PASS="${POSTGRESQL_PASS}" \
+    POSTGRESQL_DB="${POSTGRESQL_DB}" HORREUM_TEST_ID="${HORREUM_TEST_ID}" \
+    python3 - <<'PY'
+import os, sys
+import psycopg2
+conn = psycopg2.connect(
+    dbname=os.environ["POSTGRESQL_DB"], user=os.environ["POSTGRESQL_USER"],
+    password=os.environ["POSTGRESQL_PASS"], host=os.environ["POSTGRESQL_HOST"],
+    port=int(os.environ["POSTGRESQL_PORT"]),
+)
+try:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname='public' AND tablename='data')"
+        )
+        if not cur.fetchone()[0]:
+            sys.exit(0)
+        cur.execute(
+            "SELECT MAX(start) FROM data WHERE horreum_testid = %s",
+            (int(os.environ["HORREUM_TEST_ID"]),),
+        )
+        row = cur.fetchone()
+finally:
+    conn.close()
+if not row or row[0] is None:
+    sys.exit(0)
+print(row[0].strftime("%Y-%m-%dT%H:%M:%SZ"))
+PY
+}
+
+# Epoch from Kanary key (...-YYYYMMDDTHHMMSSZ.tar.gz) or older underscore form; else fail.
+key_epoch() {
+    local key="$1" base ts
+    base="${key##*/}"
+    base="${base%.tar.gz}"
+    if [[ "${base}" =~ ([0-9]{8}T[0-9]{6}Z)$ ]]; then
+        ts="${BASH_REMATCH[1]}"
+        date -u -d "${ts:0:4}-${ts:4:2}-${ts:6:2} ${ts:9:2}:${ts:11:2}:${ts:13:2}" +%s
+        return 0
+    fi
+    if [[ "${base}" =~ ([0-9]{4}_[0-9]{2}_[0-9]{2}T[0-9]{2}_[0-9]{2}_[0-9]{2}) ]]; then
+        ts="${BASH_REMATCH[1]}"
+        # shellcheck disable=SC2001
+        ts=$(echo "${ts}" | sed 's/\([0-9]\{4\}\)_\([0-9]\{2\}\)_\([0-9]\{2\}\)T\([0-9]\{2\}\)_\([0-9]\{2\}\)_\([0-9]\{2\}\)/\1-\2-\3 \4:\5:\6/')
+        date -u -d "${ts}" +%s
+        return 0
+    fi
+    return 1
 }
 
 # Temp folder for this run; delete it when the script exits
@@ -77,7 +131,7 @@ s3_delete() {
 tmpdir=$(mktemp -d)
 trap 'rm -rf "${tmpdir}"' EXIT
 
-# Ingest one S3 tarball: download -> extract -> enrich -> labels -> PostgreSQL -> delete.
+# Ingest one S3 tarball: download -> extract -> enrich -> labels -> PostgreSQL (retain in S3).
 # Runs as a background worker; per-job state lives in its own mktemp dir under
 # ${tmpdir} (reaped by the EXIT trap). Returns non-zero on failure — the failed S3
 # object is deliberately left in place for the next run.
@@ -179,7 +233,7 @@ process_key() {
         --schema "${SCHEMA_FILE}") >"${labels_file}"
 
     # Insert those labels into PostgreSQL. If the row is already there ("already exists"),
-    # treat that as OK and still delete the S3 object.
+    # treat that as OK; retain the S3 object either way (KONFLUX-16773).
     plog "Inserting labels ${rest} start=${start_ts}"
     local out
     if ! out=$(labels-to-postgresql.py \
@@ -195,7 +249,7 @@ process_key() {
         --postgresql-db "${POSTGRESQL_DB}" \
         --debug 2>&1); then
         if echo "${out}" | grep -qi 'already exists'; then
-            plog "WARNING: already in PostgreSQL, deleting S3 object"
+            plog "WARNING: already in PostgreSQL, retaining S3 object"
         else
             plog "ERROR: labels-to-postgresql.py failed:"
             echo "${out}"
@@ -203,9 +257,7 @@ process_key() {
         fi
     fi
 
-    # Ingest succeeded (or already in DB) — remove from S3 so the next run won't see it.
-    s3_delete "${key}"
-    plog "Done with ${rest}"
+    plog "Done with ${rest} (S3 object retained)"
 }
 
 # Prioritize newest uploads across all clusters/scenarios; preserve S3 helper order.
@@ -224,10 +276,41 @@ fi
 
 echo "$( date --utc -Ins ) Found ${#KEYS[@]} tarball(s)"
 
+# Skip keys at/before MAX(start) - overlap so retained objects are not re-downloaded.
+echo "$( date --utc -Ins ) Querying Postgres watermark for horreum_testid=${HORREUM_TEST_ID}"
+watermark="$(postgres_watermark || true)"
+cutoff_epoch=0
+if [[ -n "${watermark}" ]]; then
+    cutoff_epoch=$(date -u -d "${watermark} - ${WATERMARK_OVERLAP_HOURS} hours" +%s)
+    echo "$( date --utc -Ins ) Watermark MAX(start)=${watermark}; cutoff=${WATERMARK_OVERLAP_HOURS}h earlier"
+else
+    echo "$( date --utc -Ins ) No rows for test ${HORREUM_TEST_ID} yet; ingesting all listed keys"
+fi
+
+KEYS_TO_PROCESS=()
+skipped=0
+for key in "${KEYS[@]}"; do
+    if epoch=$(key_epoch "${key}"); then
+        if (( epoch <= cutoff_epoch )); then
+            echo "$( date --utc -Ins ) SKIP (at/before watermark): ${key}"
+            skipped=$((skipped + 1))
+            continue
+        fi
+    else
+        echo "$( date --utc -Ins ) WARNING: no timestamp in key, will process: ${key}"
+    fi
+    KEYS_TO_PROCESS+=("${key}")
+done
+echo "$( date --utc -Ins ) ${#KEYS_TO_PROCESS[@]} to ingest, ${skipped} skipped by watermark"
+if [[ ${#KEYS_TO_PROCESS[@]} -eq 0 ]]; then
+    echo "$( date --utc -Ins ) Nothing newer than watermark"
+    exit 0
+fi
+
 # Dispatch workers, at most MAX_PARALLEL running at once. A failing worker returns
 # non-zero and leaves its S3 object in place for the next run; the rest still process.
 fail=0
-for key in "${KEYS[@]}"; do
+for key in "${KEYS_TO_PROCESS[@]}"; do
     process_key "${key}" &
     # Throttle: when MAX_PARALLEL workers are running, wait for any one to finish.
     while [[ $(jobs -rp | wc -l) -ge ${MAX_PARALLEL} ]]; do
