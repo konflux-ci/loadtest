@@ -3,6 +3,7 @@
 set -euo pipefail
 
 UPDATE_PROMETHEUS=false
+UPDATE_OOMCRASH=false
 UPDATE_MANAGED=false
 UPDATE_LOADTEST=false
 UPDATE_STAGING=false
@@ -32,6 +33,17 @@ update_tokens() {
             log="$(mktemp)"
             echo "Patch failed, creating secret for prometheus on $cluster (log: $log)"
             vault kv put -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "prometheus_token=$p" &>"$log"
+        fi
+    fi
+
+    if [ "$UPDATE_OOMCRASH" = true ]; then
+        log="$(mktemp)"
+        echo "Updating oom_crash_detector_token for $cluster in $base_vault_path (log: $log)"
+        o="$(oc -n perf-team-prometheus-reader create token perf-team-prometheus-reader-oomcrash-sa --duration "$((24*365))h")"
+        if ! vault kv patch -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "oom_crash_detector_token=$o" &>"$log"; then
+            log="$(mktemp)"
+            echo "Patch failed, creating secret for oomcrash SA on $cluster (log: $log)"
+            vault kv put -mount stonesoup "/$base_vault_path/perfscale/shared/$cluster" "oom_crash_detector_token=$o" &>"$log"
         fi
     fi
 
@@ -65,12 +77,22 @@ if [ "$UPDATE_STAGING" = true ]; then
     update_tokens "staging" "stone-stage-p01"
     update_tokens "staging" "lightwell-dev"
     update_tokens "staging" "kflux-stg-p02"
+    update_tokens "staging" "kflux-c-stg-e01"
+    update_tokens "staging" "kflux-c-stg-i01"
 fi
 
 if [ "$UPDATE_PRODUCTION" = true ]; then
-    for c in stone-prd-rh01 stone-prod-p01 stone-prod-p02 kflux-ocp-p01 kflux-osp-p01 kflux-prd-rh02 kflux-prd-rh03 kflux-rhel-p01 kflux-lw-p01; do
-        update_tokens "production" "$c"
-    done
+    update_tokens "production" "stone-prd-rh01"
+    update_tokens "production" "stone-prod-p01"
+    update_tokens "production" "stone-prod-p02"
+    update_tokens "production" "kflux-ocp-p01"
+    update_tokens "production" "kflux-osp-p01"
+    update_tokens "production" "kflux-prd-rh02"
+    update_tokens "production" "kflux-prd-rh03"
+    update_tokens "production" "kflux-rhel-p01"
+    update_tokens "production" "kflux-lw-p01"
+    update_tokens "production" "kflux-c-prd-i01"
+    update_tokens "production" "kflux-c-prd-e01"
 fi
 
 if [ "$UPDATE_FEDORA" = true ]; then

@@ -48,6 +48,7 @@ script manages.
   - `serviceaccount-loadtest` in `konflux-perfscale-{1,2,3,4}-tenant`
   - `managed-konflux-perfscale-sa` in `managed-konflux-perfscale-tenant` (if `UPDATE_MANAGED`)
   - `perf-team-prometheus-reader-cluster-sa` in `perf-team-prometheus-reader` (if `UPDATE_PROMETHEUS`)
+  - `perf-team-prometheus-reader-oomcrash-sa` in `perf-team-prometheus-reader` (if `UPDATE_OOMCRASH`)
 
 If `serviceaccount-loadtest` is missing, install it from the
 `perf-team-prometheus-reader` component in
@@ -84,6 +85,7 @@ re-run the script with `UPDATE_PROMETHEUS=true`.
 4. **Edit the flags** at the top of the script for this run (keep them `false` in git):
    ```bash
    UPDATE_PROMETHEUS=true   # cluster prometheus_token (Collect results)
+   UPDATE_OOMCRASH=true     # cluster oom_crash_detector_token (perf-team-prometheus-reader-oomcrash-sa)
    UPDATE_MANAGED=true      # cluster managed_sa_token
    UPDATE_LOADTEST=true     # per-tenant token (required for oc login)
    UPDATE_STAGING=true      # or UPDATE_PRODUCTION / UPDATE_FEDORA
