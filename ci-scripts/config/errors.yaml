@@ -1051,12 +1051,19 @@
   - run-kfluxfedorap01-2025_12_19T22_56_19_949000000_00_00
   type: logs
 - caused_by: artifact-registry-proxy
+  id: dependency_prefetch_failed_because_artifact_registry_proxy_downloads_of_npm_packages_were_rejected_with_http_401
+  note: Tracked in KFLUXINFRA-5245. Old rule ..._hostname_could_not_be_resolved mislabeled this error; hermeto log has no DNS detail, nginx access logs show 401 from upstream.
+  reason: Dependency prefetch failed because artifact-registry-proxy downloads of npm packages were rejected with HTTP 401
+  regexp: 'FetchError: Could not download https://artifact-registry-proxy\.artifact-registry-proxy\.svc\.cluster\.local/repository/npm-proxy/[^ ]+'
+  test_dir:
+  - run-kflux-fedora-01-2026_11_01T10_19_02_958000000_00_00
+  type: logs
+- caused_by: artifact-registry-proxy
   id: dependency_prefetch_failed_because_artifact_registry_proxy_hostname_could_not_be_resolved
   note: ''
   reason: Dependency prefetch failed because artifact-registry-proxy hostname could not be resolved
   regexp: 'FetchError: Could not download https://artifact-registry-proxy\.artifact-registry-proxy\.svc\.cluster\.local/[^ ]+'
-  test_dir:
-  - run-kflux-fedora-01-2026_11_01T10_19_02_958000000_00_00
+  test_dir: []
   type: logs
 - caused_by: koji.fedoraproject.org
   id: dnf_failed_to_download_package_from_koji
