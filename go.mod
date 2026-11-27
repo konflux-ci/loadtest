@@ -218,7 +218,7 @@ require (
 
 replace github.com/cyphar/filepath-securejoin => github.com/cyphar/filepath-securejoin v0.7.0
 
-replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.17.8
+replace github.com/expr-lang/expr => github.com/expr-lang/expr v1.18.1
 
 replace github.com/go-chi/chi/v5 => github.com/go-chi/chi/v5 v5.5.0
 
