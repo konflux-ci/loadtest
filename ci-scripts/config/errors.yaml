@@ -251,6 +251,14 @@
   - run-kflux-rhel-p01-2026_01_25T15_58_55_139000000_00_00
   type: logs
 - caused_by: MPC
+  id: build_images_step_build_exited_with_code_255_because_ssh_connection_to_mpc_build_vm_failed
+  note: 'MPC attribution: exit code 255 is the ssh client exit code and the test case pod log shows a remote MPC build (Build via ssh) that died silently, so no SSH/MPC/VM string exists in the condition message itself. StepFailed reason distinguishes this from cases where the pod log holds the actual SSH error (e.g. kex_exchange_identification connection reset) which have their own rules'
+  reason: Build images step-build exited with code 255 because SSH connection to MPC build VM failed
+  regexp: '.message.: ...step-build.. exited with code 255: Error., .reason.: .StepFailed.'
+  test_dir:
+  - run-kflux-rhel-p01-2026_11_16T13_45_02_636000000_00_00
+  type: condition
+- caused_by: MPC
   id: build_images_task_failed_because_docker_is_not_installed_on_windows_remote_mpc_build_host
   note: ''
   reason: Build images task failed because docker is not installed on remote MPC build host
@@ -503,6 +511,14 @@
   regexp: 'Error: initializing source docker://quay.io/[^ ]+@sha256:[0-9a-f]+: unexpected end of JSON input'
   test_dir:
   - run-kflux-prd-rh03-2026_03_08T16_45_21_155000000_00_00
+  type: logs
+- caused_by: cluster
+  id: build_task_failed_because_unshare_syscall_is_not_implemented_in_the_container_runtime
+  note: ''
+  reason: Build task failed because unshare syscall is not implemented in the container runtime
+  regexp: 'unshare: unshare failed: Function not implemented'
+  test_dir:
+  - run-probe-kflux-lw-p01-container-multi-arch-20261124T212027Z
   type: logs
 - caused_by: task
   id: build_task_failed_to_pre_pull_base_image_because_buildah_could_not_unpack_layer_fallback_to_chroot_operation_not_permitted
@@ -789,6 +805,7 @@
   regexp: 'pulling policy: failed to perform .Fetch. on source: GET .*data-acceptable-bundles.*: mismatch Content-Length'
   test_dir:
   - run-stone-stg-rh01-2026_02_06T20_51_43_915000000_00_00
+  - run-kflux-prd-rh02-2026_02_04T14_11_21_457000000_00_00
   type: logs
 - caused_by: quay.io
   id: conforma_validation_failed_to_fetch_policy_because_quay_io_mismatch_content_length
@@ -968,13 +985,6 @@
   regexp: 'Reason:CouldntGetTask Message:.*Couldn''t retrieve Task .resolver type git.*https://gitlab.cee.redhat.com/.* error requesting remote resource: error getting .Git. .*: git fetch error: error: RPC failed; HTTP 429 curl 22 The requested URL returned error: 429'
   test_dir:
   - run-stone-prod-p02-2026_01_07T14_23_41_190000000_00_00
-  type: loadtest
-- caused_by: gitlab.cee.redhat.com
-  id: couldnt_get_task_via_git_resolver_from_gitlab_cee_due_to_429_0
-  note: ''
-  reason: Couldnt get task via git resolver from gitlab.cee due to 429
-  regexp: 'Reason:CouldntGetTask Message:.*Couldn''t retrieve Task .resolver type git.*https://gitlab.cee.redhat.com/.* error requesting remote resource: error getting .Git. .*: git fetch error: error: RPC failed; HTTP 429 curl 22 The requested URL returned error: 429 fatal: expected ''acknowledgments'': exit status 128'
-  test_dir: []
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
   id: couldnt_get_task_via_git_resolver_from_gitlab_cee_due_to_429_1
@@ -1968,14 +1978,6 @@
   - run-stone-prd-rh01-2026_03_21T18_01_22_262000000_00_00
   type: logs
 - caused_by: quay.io
-  id: image_pull_failed_because_content_length_mismatch
-  note: ''
-  reason: Conforma validation failed to fetch data-acceptable-bundles from quay.io
-  regexp: 'Error: pulling policy: failed to perform .Fetch. on source: GET .https://quay.io/v2/konflux-ci/konflux-vanguard/data-acceptable-bundles/blobs/[^ ]+.: mismatch Content-Length'
-  test_dir:
-  - run-kflux-prd-rh02-2026_02_04T14_11_21_457000000_00_00
-  type: logs
-- caused_by: quay.io
   id: image_pull_failed_because_content_length_mismatch_0
   note: ''
   reason: Preflight failed to fetch container from quay.io due to Content-Length header mismatch
@@ -2318,10 +2320,11 @@
   type: logs
 - caused_by: MPC
   id: no_podman_installed_on_a_mpc_vm
-  note: ''
+  note: Matches both the "remote_cmd podman unshare setfacl" (rpm builds) and "Build via ssh" (container builds) log variants
   reason: No podman installed on a MPC VM
-  regexp: 'remote_cmd podman unshare setfacl .* \+ ssh -o StrictHostKeyChecking=no [^ ]+ podman unshare setfacl .* bash: line 1: podman: command not found'
-  test_dir: []
+  regexp: 'bash: line 1: podman: command not found'
+  test_dir:
+  - run-stone-prod-p02-2026_11_26T15_40_02_398000000_00_00
   type: logs
 - caused_by: cluster
   id: not_enough_nodes_to_schedule_pod
@@ -3168,6 +3171,14 @@
   test_dir:
   - run-kflux-prd-rh03-2026_02_20T16_01_34_794000000_00_00
   type: loadtest
+- caused_by: cluster
+  id: repo_forking_failed_because_dns_resolution_failed_server_misbehaving
+  note: ''
+  reason: Repo forking failed because DNS resolution failed (server misbehaving)
+  regexp: 'Repo forking failed: error (getting project|checking repository) [^ ]+: Get .https://[^ ]+.: dial tcp: lookup [^ ]+ on [0-9.]+:53: server misbehaving'
+  test_dir:
+  - run-kflux-rhel-p01-2026_11_24T02_45_02_597000000_00_00
+  type: loadtest
 - caused_by: github.com
   id: repo_forking_failed_because_github_com_i_o_timeout
   note: ''
@@ -3479,6 +3490,14 @@
   - run-stone-stage-p01-2026_09_02T21_33_03_546000000_00_00
   type: loadtest
 - caused_by: gitlab.cee.redhat.com
+  id: repo_templating_failed_to_update_pac_file_because_gitlab_cee_connection_timed_out
+  note: ''
+  reason: Repo templating failed to update PaC file because GitLab CEE connection timed out
+  regexp: 'Repo-templating workflow component cleanup failed: error templating PaC files: failed to update file [^ ]+ in repo [^ ]+ revision [^ ]+: failed to update/create file: Put .https://gitlab\.cee\.redhat\.com/api/[^ ]+.: read tcp [^ ]+: read: connection timed out'
+  test_dir:
+  - run-probe-kflux-ocp-p01-container-single-arch-20261126T124725Z
+  type: loadtest
+- caused_by: gitlab.cee.redhat.com
   id: repo_templating_failed_to_update_pac_files_because_gitlab_cee_does_not_allow_pushing_code
   note: ''
   reason: Repo templating failed to update PaC files because GitLab CEE does not allow pushing code
@@ -3601,6 +3620,22 @@
   regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^ ]+: PUT https://api.github.com/repos/[^ ]+/merge: 401 Requires authentication'
   test_dir:
   - run-kflux-prd-rh03-2026_06_10T15_48_19_970000000_00_00
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_pr_merging_failed_because_github_returned_404_not_found
+  note: ''
+  reason: Repo templating PR merging failed because GitHub returned 404 Not Found
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: 404 Not Found'
+  test_dir:
+  - run-probe-stone-prod-p02-container-multi-arch-20261123T140211Z
+  type: loadtest
+- caused_by: github.com
+  id: repo_templating_pr_merging_failed_because_github_returned_500_internal_server_error
+  note: ''
+  reason: Repo templating PR merging failed because GitHub returned 500 Internal Server Error
+  regexp: 'Repo-templating workflow component cleanup failed: merging [0-9]+ failed: error when merging pull request number [0-9]+ for the repo [^ ]+: PUT https://api\.github\.com/repos/[^ ]+/pulls/[0-9]+/merge: 500.*'
+  test_dir:
+  - run-kflux-prd-rh03-2026_11_25T15_48_02_159000000_00_00
   type: loadtest
 - caused_by: github.com
   id: repo_templating_workflow_component_cleanup_failed_because_github_pr_merge_405_base_branch_was_modified
@@ -3901,6 +3936,14 @@
   test_dir: []
   type: logs
 - caused_by: registry.access.redhat.com
+  id: script_mock_hermetic_repo_failed_because_reading_manifest_from_registry_access_redhat_com_was_unauthorized
+  note: ''
+  reason: Script mock-hermetic-repo failed because reading manifest from registry.access.redhat.com was unauthorized
+  regexp: 'Error copying ref .docker://registry\.access\.redhat\.com/[^ ]+.: initializing source docker://registry\.access\.redhat\.com/[^ ]+: reading manifest [^ ]+ in registry\.access\.redhat\.com/[^ ]+: unauthorized: Access to the requested resource is not authorized'
+  test_dir:
+  - run-kflux-rhel-p01-2026_11_24T19_39_01_941000000_00_00
+  type: logs
+- caused_by: registry.access.redhat.com
   id: script_mock_hermetic_repo_failed_because_skopeo_sync_could_not_read_container_signature_from_access_redhat_com_sigstore_due_to_500_internal_server_error
   note: ''
   reason: Script mock-hermetic-repo failed because skopeo sync could not read container signature from access.redhat.com sigstore due to 500 Internal Server Error
@@ -4009,13 +4052,6 @@
   test_dir: []
   type: loadtest
 - caused_by: SKIP
-  id: skip_11
-  note: ''
-  reason: SKIP
-  regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: Get .[^ ]+.: read tcp [0-9.:]+->[0-9.:]+: read: connection timed out'
-  test_dir: []
-  type: loadtest
-- caused_by: SKIP
   id: skip_12
   note: Another special error to avoid printing 'Unknown error:' message
   reason: SKIP
@@ -4043,6 +4079,13 @@
   regexp: 'Failed to collect pod logs: failed to list pods in namespace [^ :]+ for application [^ :]+: storage is \(re\)initializing'
   test_dir: []
   type: loadtest
+- caused_by: SKIP
+  id: skip_16
+  note: Another special error to avoid printing 'Unknown error' message
+  reason: SKIP
+  regexp: '"message": ?\"..[a-zA-Z0-9-]+.. exited with code 127(: Error)?\"'
+  test_dir: []
+  type: condition
 - caused_by: SKIP
   id: skip_2
   note: Another special error to avoid printing 'Unknown error:' message
@@ -4163,6 +4206,14 @@
   test_dir:
   - run-stone-prod-p02-2026_05_12T14_46_52_220000000_00_00
   type: condition
+- caused_by: gitlab.cee.redhat.com
+  id: task_failed_to_clone_lightwell_build_configs_repository_because_gitlab_cee_rejected_credentials
+  note: ''
+  reason: Task failed to clone lightwell build-configs repository because GitLab CEE rejected credentials
+  regexp: 'Cloning into ./var/workdir/build-configs.... remote: HTTP Basic: Access denied\..*fatal: Authentication failed for .https://gitlab\.cee\.redhat\.com/redhat-performance/lightwell/[^ ]+.'
+  test_dir:
+  - run-kflux-stg-p02-2026_11_25T21_33_01_955000000_00_00
+  type: logs
 - caused_by: task
   id: task_step_failed_because_it_was_oomkilled
   note: ''
@@ -4179,6 +4230,14 @@
   test_dir:
   - run-kfluxfedorap01-2026_01_08T17_56_17_965000000_00_00
   type: logs
+- caused_by: pipelines-controller
+  id: taskrun_failed_to_resolve_step_ref_for_create_trusted_artifact_because_of_missing_required_cluster_resolver_params
+  note: ''
+  reason: TaskRun failed to resolve step ref for create-trusted-artifact because of missing required cluster resolver params
+  regexp: 'failed to resolve step ref for step ..create-trusted-artifact.. \(index [0-9]+\): error requesting remote resource: invalid resource request .[^ ]+.: missing required cluster resolver params: name, namespace'
+  test_dir:
+  - run-probe-stone-prod-p02-container-multi-arch-20261125T123216Z
+  type: condition
 - caused_by: cluster
   id: taskrun_pod_exceeded_available_resources
   note: ''
